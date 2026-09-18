@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WHA SOL — Solar Knowledge for Every System</title>
+  <meta name="description" content="Solar technology knowledge and troubleshooting platform — inverter error codes, battery problems, panel performance, wiring and maintenance guides." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-page="home">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="WHA SOL home">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="WHA-LOGO.PNG.png" alt="WHA SOL logo" class="brand-img" />
+        </span>
+        <span class="brand-name">WHA SOL</span>
+      </a>
+
+      <nav class="nav" id="desktop-nav" aria-label="Primary">
+        <a href="index.html" class="nav-link" data-nav="home">Home</a>
+        <a href="troubleshooting.html" class="nav-link" data-nav="troubleshooting">Troubleshooting</a>
+        <a href="error-codes.html" class="nav-link" data-nav="error-codes">Error Codes</a>
+        <a href="brands-models.html" class="nav-link" data-nav="brands-models">Brands &amp; Models</a>
+        <a href="blog.html" class="nav-link" data-nav="blog">Blog</a>
+        <a href="about.html" class="nav-link" data-nav="about">About Us</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="contact.html" class="btn btn-outline btn-contact">Contact</a>
+        <a href="contact.html" class="btn-arrow-circle" aria-label="Contact">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile drawer -->
+  <div class="mobile-nav" id="mobile-nav" aria-hidden="true">
+    <div class="mobile-nav-head">
+      <span class="brand-name">WHA SOL</span>
+      <button class="nav-close" id="nav-close" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <nav class="mobile-nav-links" aria-label="Mobile">
+      <a href="index.html" class="mobile-link" data-nav="home">Home</a>
+      <a href="troubleshooting.html" class="mobile-link" data-nav="troubleshooting">Troubleshooting</a>
+      <a href="error-codes.html" class="mobile-link" data-nav="error-codes">Error Codes</a>
+      <a href="brands-models.html" class="mobile-link" data-nav="brands-models">Brands &amp; Models</a>
+      <a href="blog.html" class="mobile-link" data-nav="blog">Blog</a>
+      <a href="about.html" class="mobile-link" data-nav="about">About Us</a>
+      <a href="contact.html" class="mobile-link" data-nav="contact">Contact</a>
+    </nav>
+    <a href="contact.html" class="btn btn-solid mobile-cta">Contact Us</a>
+  </div>
+  <div class="nav-overlay" id="nav-overlay"></div>
+
+  <main>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero container">
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 3c5 4.2 8 7.6 8 11.4A8 8 0 0 1 12 22a8 8 0 0 1-8-7.6C4 10.6 7 7.2 12 3Z" fill="currentColor" opacity=".14"/>
+          <path d="M12 3c5 4.2 8 7.6 8 11.4A8 8 0 0 1 12 22a8 8 0 0 1-8-7.6C4 10.6 7 7.2 12 3Z" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M12 7v6m-2.2-1.8 4.4 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        Empowering Smarter Solar Solutions
+      </span>
+
+      <h1 class="hero-title">
+        Solar Knowledge for Every System<br />
+        <span>Clear Answers for a Reliable Future</span>
+      </h1>
+
+      <p class="hero-sub">
+        Empowering homeowners, technicians, and solar professionals with clear knowledge,
+        practical troubleshooting guides, and reliable insights to better understand and
+        maintain their solar energy systems.
+      </p>
+
+      <a href="#renewable" class="btn btn-solid btn-explore">
+        Explore More
+        <span class="btn-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+
+      <div class="hero-media hero-carousel">
+        <div class="hero-carousel-slide is-active">
+          <img src="assets/panel-closeup.jpg" alt="Close-up of solar panels" fetchpriority="high" />
+        </div>
+        <div class="hero-carousel-slide">
+          <img src="assets/inverter.jpg" alt="Technician installing a solar inverter" loading="lazy" />
+        </div>
+        <div class="hero-carousel-slide">
+          <img src="assets/battery.jpg" alt="Residential solar battery storage" loading="lazy" />
+        </div>
+        <div class="hero-carousel-slide">
+          <img src="assets/wiring.jpg" alt="Electrical wiring and connections at a control panel" loading="lazy" />
+        </div>
+        <div class="hero-carousel-slide">
+          <img src="assets/inverter-error.jpg" alt="Solar inverter unit showing a fault" loading="lazy" />
+        </div>
+        <div class="carousel-dots" id="carousel-dots" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <!-- ===================== RENEWABLE / DIAGNOSTICS ===================== -->
+    <section class="section" id="renewable">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="section-tag">Troubleshooting</span>
+          <h2 class="section-title">What Problem Are You Facing?</h2>
+          <p class="section-sub">Describe your issue briefly so we can help you find the right solution.</p>
+        </div>
+
+        <div class="cards">
+          <article class="card reveal">
+            <div class="card-media">
+              <img src="assets/panel-closeup.jpg" alt="Close-up of solar panels with clear cells" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <span class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="3" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="13" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="13" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
+              </span>
+              <h3>Solar Panel Problems</h3>
+              <p>Hotspots, micro-cracks, soiling, low output and inverter mismatch — identified and resolved with thermal and electrical testing.</p>
+              <a href="troubleshooting.html?category=solar-panels" class="card-link">Diagnose panels <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+
+          <article class="card reveal" style="--d:0.08s">
+            <div class="card-media">
+              <img src="assets/battery.jpg" alt="Home solar battery storage" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <span class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="2.5" width="14" height="19" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M9 10.5 11.5 14 13.5 12 15.5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 4v2h10V4" stroke="currentColor" stroke-width="1.8"/></svg>
+              </span>
+              <h3>Battery Problems</h3>
+              <p>Capacity fade, deep discharge, low voltage, BMS faults and thermal runaway risk — balanced, cycled and brought back to spec.</p>
+              <a href="troubleshooting.html?category=battery" class="card-link">Check battery <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+
+          <article class="card reveal" style="--d:0.16s">
+            <div class="card-media">
+              <img src="assets/inverter.jpg" alt="Technician installing a solar inverter" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <span class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a6 6 0 1 1 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.8"/><path d="M12 6l2 8-5-3 3-5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </span>
+              <h3>Error Code Fix</h3>
+              <p>Inverter and system fault codes decoded. From grid faults to ground alarms — we explain the code and deploy the right fix.</p>
+              <a href="error-codes.html" class="card-link">Decode errors <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+
+          <article class="card reveal" style="--d:0.24s">
+            <div class="card-media">
+              <img src="assets/wiring.jpg" alt="Technician working on electrical control panel wiring" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <span class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="12" r="3.5" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="12" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M10.5 12h3" stroke="currentColor" stroke-width="1.8"/></svg>
+              </span>
+              <h3>Wiring Connections</h3>
+              <p>Loose MC4 terminals, undersized cables, bad earthing and reverse polarity — inspected, torqued and re-terminated safely.</p>
+              <a href="troubleshooting.html?category=wiring" class="card-link">Inspect wiring <span aria-hidden="true">→</span></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== STRATEGIES ===================== -->
+    <section class="section section-alt" id="strategies">
+      <div class="container">
+        <div class="split">
+          <div class="split-copy reveal">
+            <span class="section-tag">WHA SOL Proactive Strategies</span>
+            <h2 class="section-title">A Maintenance Plan That Pays for Itself</h2>
+            <p class="section-sub">Routine strategy keeps production high and downtime near zero. Follow a simple, seasonal approach that any keeper can run.</p>
+            <ol class="steps">
+              <li><span class="step-num">01</span><div><h4>Inspect Monthly</h4><p>Check output, visible damage and error history in your monitoring app.</p></div></li>
+              <li><span class="step-num">02</span><div><h4>Clean Quarterly</h4><p>Wash panels in the early morning to remove dust, pollen and bird residue.</p></div></li>
+              <li><span class="step-num">03</span><div><h4>Terminate Annually</h4><p>Torque-check all connections and test earthing with a certified electrician.</p></div></li>
+              <li><span class="step-num">04</span><div><h4>Record &amp; React</h4><p>Log every reading so drops in performance are caught before they cost you.</p></div></li>
+            </ol>
+          </div>
+          <div class="split-media reveal">
+            <img src="assets/solarfield.jpg" alt="Solar installation being maintained" loading="lazy" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== WIND SYSTEM ===================== -->
+    <!-- ===================== ABOUT US ===================== -->
+    <section class="section section-alt" id="about">
+      <div class="container">
+        <div class="split">
+          <div class="split-copy reveal">
+            <span class="section-tag">About Us</span>
+            <h2 class="section-title">Making Solar Technology Easier to Understand</h2>
+            <p class="section-sub">
+              WHA SOL is a solar technology knowledge and troubleshooting platform created to make
+              solar energy systems easier to understand, maintain, and troubleshoot. We provide clear,
+              practical guidance on inverters, batteries, solar panels, wiring and more — all in one
+              organized place.
+            </p>
+            <a href="about.html" class="btn btn-solid btn-about">
+              Learn More About Us
+              <span class="btn-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </a>
+          </div>
+          <div class="split-media reveal">
+            <img src="assets/hero-array.jpg" alt="Solar panels in a green field" loading="lazy" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONTACT / CTA ===================== -->
+    <section class="section" id="contact">
+      <div class="container">
+        <div class="cta">
+          <h2 class="cta-title">Ready to Solve It? Let's talk.</h2>
+          <p class="cta-sub">Tell us what your solar system is doing — we'll help you find the right solution.</p>
+          <a href="contact.html" class="btn btn-solid btn-cta">
+            Get in Touch
+            <span class="btn-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="WHA-LOGO.PNG.png" alt="WHA SOL logo" class="brand-img" />
+        </span>
+        <span class="brand-name">WHA SOL</span>
+      </a>
+      <p class="footer-note">Clean energy, kept working.</p>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+        <li><a href="error-codes.html">Error Codes</a></li>
+        <li><a href="brands-models.html">Brands &amp; Models</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="container footer-bottom">
+      <span>© <span id="year">2026</span> WHA SOL Energy</span>
+      <span>moizakhtar.info@gmail.com</span>
+    </div>
+  </footer>
+
+  <!-- ===================== DIAGNOSTIC MODAL ===================== -->
+  <div class="modal" id="diagnostic-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-backdrop" data-modal-close></div>
+    <div class="modal-panel">
+      <button class="modal-close" data-modal-close aria-label="Close dialog">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Us — WHA SOL</title>
+  <meta name="description" content="WHA SOL is a solar technology knowledge and troubleshooting platform created to make solar energy systems easier to understand, maintain, and troubleshoot." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-page="about">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="WHA SOL home">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="WHA-LOGO.PNG.png" alt="WHA SOL logo" class="brand-img" />
+        </span>
+        <span class="brand-name">WHA SOL</span>
+      </a>
+
+      <nav class="nav" id="desktop-nav" aria-label="Primary">
+        <a href="index.html" class="nav-link" data-nav="home">Home</a>
+        <a href="troubleshooting.html" class="nav-link" data-nav="troubleshooting">Troubleshooting</a>
+        <a href="error-codes.html" class="nav-link" data-nav="error-codes">Error Codes</a>
+        <a href="brands-models.html" class="nav-link" data-nav="brands-models">Brands &amp; Models</a>
+        <a href="blog.html" class="nav-link" data-nav="blog">Blog</a>
+        <a href="about.html" class="nav-link" data-nav="about">About Us</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="contact.html" class="btn btn-outline btn-contact">Contact</a>
+        <a href="contact.html" class="btn-arrow-circle" aria-label="Contact">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile drawer -->
+  <div class="mobile-nav" id="mobile-nav" aria-hidden="true">
+    <div class="mobile-nav-head">
+      <span class="brand-name">WHA SOL</span>
+      <button class="nav-close" id="nav-close" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <nav class="mobile-nav-links" aria-label="Mobile">
+      <a href="index.html" class="mobile-link" data-nav="home">Home</a>
+      <a href="troubleshooting.html" class="mobile-link" data-nav="troubleshooting">Troubleshooting</a>
+      <a href="error-codes.html" class="mobile-link" data-nav="error-codes">Error Codes</a>
+      <a href="brands-models.html" class="mobile-link" data-nav="brands-models">Brands &amp; Models</a>
+      <a href="blog.html" class="mobile-link" data-nav="blog">Blog</a>
+      <a href="about.html" class="mobile-link" data-nav="about">About Us</a>
+      <a href="contact.html" class="mobile-link" data-nav="contact">Contact</a>
+    </nav>
+    <a href="contact.html" class="btn btn-solid mobile-cta">Contact Us</a>
+  </div>
+  <div class="nav-overlay" id="nav-overlay"></div>
+
+  <main>
+    <!-- ===================== ABOUT HERO ===================== -->
+    <section class="hero container about-hero">
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14Z" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M5 19c2-5 6-9 11-11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+        About WHA SOL
+      </span>
+
+      <div class="about-hero-copy">
+        <h1 class="hero-title">
+          Making Solar Technology
+          <span>Easier to Understand</span>
+        </h1>
+        <p class="hero-sub">
+          WHA SOL is a solar technology knowledge and troubleshooting platform created
+          to make solar energy systems easier to understand, maintain, and troubleshoot.
+        </p>
+      </div>
+
+      <div class="about-hero-media">
+        <img src="assets/hero.jpg" alt="Solar panels and wind turbines on a green landscape" fetchpriority="high" />
+      </div>
+    </section>
+
+    <!-- ===================== OUR STORY ===================== -->
+    <section class="section" id="story">
+      <div class="container">
+        <div class="split">
+          <div class="split-media reveal">
+            <img src="assets/solarfield.jpg" alt="Aerial view of a large solar panel array" loading="lazy" />
+          </div>
+          <div class="split-copy reveal" style="--d:0.12s">
+            <span class="section-tag">Who We Are</span>
+            <h2 class="section-title">Solar Technology Knowledge, Made Simple</h2>
+            <p class="section-sub">
+              As solar energy becomes an increasingly important part of modern homes,
+              businesses, and communities, understanding how solar systems work — and what
+              to do when something goes wrong — is more important than ever.
+            </p>
+            <p class="section-sub">
+              WHA SOL was created to bridge that gap. Our platform provides clear, practical,
+              and accessible information about solar energy systems, helping homeowners,
+              technicians, installers, electricians, and solar enthusiasts find useful
+              guidance in one place.
+            </p>
+            <a href="troubleshooting.html" class="card-link story-link">
+              Explore troubleshooting <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== OUR PURPOSE ===================== -->
+    <section class="section section-alt" id="purpose">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="section-tag">Our Purpose</span>
+          <h2 class="section-title">Simple by Design</h2>
+        </div>
+
+        <div class="purpose-copy reveal" style="--d:0.1s">
+          <p>Our purpose is simple: to make solar troubleshooting and technical knowledge easier for everyone.</p>
+          <p>We believe that understanding a solar system should not require complicated language or searching through scattered information. Whether someone is trying to understand an inverter error code, identify a battery problem, learn about a solar equipment brand, or understand proper system maintenance, WHA SOL aims to provide organized and reliable resources that make the process easier.</p>
+          <p>Through practical articles, troubleshooting guides, error-code explanations, and equipment information, we help users develop a better understanding of their solar systems.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== WHAT WE DO ===================== -->
+    <section class="section" id="what-we-do">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="section-tag">What We Do</span>
+          <h2 class="section-title">Knowledge Across Every Part of Your System</h2>
+          <p class="section-sub">WHA SOL focuses on sharing knowledge across different areas of solar technology, including:</p>
+        </div>
+
+        <div class="info-block reveal">
+          <ul class="checklist two-col-list">
+            <li>Solar inverter troubleshooting and error codes</li>
+            <li>Solar battery problems and maintenance</li>
+            <li>Solar panel and system performance issues</li>
+            <li>Wiring and electrical connections</li>
+            <li>Voltage and frequency-related problems</li>
+            <li>Solar equipment brands and models</li>
+            <li>System shutdown and restart procedures</li>
+            <li>General solar maintenance and technical guidance</li>
+          </ul>
+        </div>
+
+        <p class="info-note reveal" style="--d:0.1s">
+          Our content is designed to be informative, straightforward, and useful for both
+          beginners and experienced solar professionals.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===================== VISION & COMMITMENT ===================== -->
+    <section class="section section-alt" id="vision-commitment">
+      <div class="container">
+        <div class="duo">
+          <div class="duo-item reveal">
+            <span class="duo-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12s4-6.5 9.5-6.5S21.5 12 21.5 12s-4 6.5-9.5 6.5S2.5 12 2.5 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
+            </span>
+            <h3>Our Vision</h3>
+            <p>Our vision is to become a trusted and accessible knowledge platform for solar technology users around the world.</p>
+            <p>As renewable energy continues to grow, we believe better knowledge leads to better decisions, safer maintenance, and more reliable solar systems. WHA SOL aims to contribute to that future by making technical solar information easier to access and understand.</p>
+          </div>
+          <div class="duo-item reveal" style="--d:0.12s">
+            <span class="duo-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 3v5c0 5.2-3 8.8-7 10-4-1.2-7-4.8-7-10V6l7-3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12.2l2 2 4-4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <h3>Our Commitment</h3>
+            <p>At WHA SOL, we are committed to providing practical and responsible information that helps users learn more about their solar systems.</p>
+            <p>We continuously work toward building a growing knowledge resource covering real-world solar challenges, emerging technologies, and commonly encountered system issues. Our goal is not simply to provide answers, but to help people understand the technology behind their energy systems.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SUSTAINABILITY BANNER ===================== -->
+    <section class="sustain" id="sustainability">
+      <div class="sustain-media reveal">
+        <img src="assets/wind.jpg" alt="Wind turbines on a green field" loading="lazy" />
+        <div class="sustain-overlay">
+          <div class="sustain-inner">
+            <h2 class="sustain-title">Together, We Can Build a More Sustainable Tomorrow</h2>
+            <p class="sustain-sub">Clean energy solutions that respect people and the planet — engineered for a better future.</p>
+            <a href="index.html#renewable" class="btn btn-solid btn-cta">
+              Explore Our Solutions
+              <span class="btn-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== CONTACT CTA ===================== -->
+    <section class="section" id="about-contact">
+      <div class="container">
+        <div class="cta reveal">
+          <h2 class="cta-title">Ready to Shape a Cleaner Future?</h2>
+          <p class="cta-sub">Discover how renewable energy solutions can help create a more sustainable and resilient tomorrow.</p>
+          <a href="contact.html" class="btn btn-solid btn-cta">
+            Get in Touch
+            <span class="btn-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="WHA-LOGO.PNG.png" alt="WHA SOL logo" class="brand-img" />
+        </span>
+        <span class="brand-name">WHA SOL</span>
+      </a>
+      <p class="footer-note">Clean energy, kept working.</p>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+        <li><a href="error-codes.html">Error Codes</a></li>
+        <li><a href="brands-models.html">Brands &amp; Models</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="container footer-bottom">
+      <span>© <span id="year">2026</span> WHA SOL Energy</span>
+      <span>moizakhtar.info@gmail.com</span>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

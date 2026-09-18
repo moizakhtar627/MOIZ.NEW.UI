@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Troubleshooting — WHA SOL</title>
+  <meta name="description" content="Explore practical troubleshooting guides for common solar panel, battery, inverter, wiring, and electrical issues." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-page="troubleshooting">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="WHA SOL home">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="WHA-LOGO.PNG.png" alt="WHA SOL logo" class="brand-img" />
+        </span>
+        <span class="brand-name">WHA SOL</span>
+      </a>
+
+      <nav class="nav" id="desktop-nav" aria-label="Primary">
+        <a href="index.html" class="nav-link" data-nav="home">Home</a>
+        <a href="troubleshooting.html" class="nav-link" data-nav="troubleshooting">Troubleshooting</a>
+        <a href="error-codes.html" class="nav-link" data-nav="error-codes">Error Codes</a>
+        <a href="brands-models.html" class="nav-link" data-nav="brands-models">Brands &amp; Models</a>
+        <a href="blog.html" class="nav-link" data-nav="blog">Blog</a>
+        <a href="about.html" class="nav-link" data-nav="about">About Us</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="contact.html" class="btn btn-outline btn-contact">Contact</a>
+        <a href="contact.html" class="btn-arrow-circle" aria-label="Contact">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile drawer -->
+  <div class="mobile-nav" id="mobile-nav" aria-hidden="true">
+    <div class="mobile-nav-head">
+      <span class="brand-name">WHA SOL</span>
+      <button class="nav-close" id="nav-close" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <nav class="mobile-nav-links" aria-label="Mobile">
+      <a href="index.html" class="mobile-link" data-nav="home">Home</a>
+      <a href="troubleshooting.html" class="mobile-link" data-nav="troubleshooting">Troubleshooting</a>
+      <a href="error-codes.html" class="mobile-link" data-nav="error-codes">Error Codes</a>
+      <a href="brands-models.html" class="mobile-link" data-nav="brands-models">Brands &amp; Models</a>
+      <a href="blog.html" class="mobile-link" data-nav="blog">Blog</a>
+      <a href="about.html" class="mobile-link" data-nav="about">About Us</a>
+      <a href="contact.html" class="mobile-link" data-nav="contact">Contact</a>
+    </nav>
+    <a href="contact.html" class="btn btn-solid mobile-cta">Contact Us</a>
+  </div>
+  <div class="nav-overlay" id="nav-overlay"></div>
+
+  <main>
+    <!-- ===================== PAGE HEADER ===================== -->
+    <section class="page-lead">
+      <div class="container page-lead-inner">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 6h11M9 12h11M9 18h11M4 6l-1 1 2 2M4 12l-1 1 2 2M4 18l-1 1 2 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Troubleshooting
+        </span>
+        <h1 class="page-title">Find Clear Solutions for Solar System Problems</h1>
+        <p class="page-sub">Explore practical troubleshooting guides for common solar panel, battery, inverter, wiring, and electrical issues.</p>
+      </div>
+    </section>
+
+    <!-- ===================== LIBRARY ===================== -->
+    <section class="section section-top" id="library">
+      <div class="container">
+        <div class="search-bar reveal">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.9"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+          <input type="search" id="search-input" placeholder="Search guides, categories, brands, models, keywords..." aria-label="Search troubleshooting guides" autocomplete="off" />
+        </div>
+
+        <div class="filter-bar" id="filter-bar" role="group" aria-label="Filter categories"></div>
+
+        <div class="list-head">
+          <span class="results-count" id="results-count">0 results</span>
+          <button type="button" class="clear-btn" id="clear-filters">Clear filters</button>
+        </div>
+
+        <div class="list-grid" id="data-grid" hidden></div>
+
+        <div class="empty-state" id="state-empty" hidden>
+          <span class="empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="14" height="17" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M7 4V3h11a2 2 0 0 1 2 2v13M7 8.5h6M7 12h6M7 15.5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </span>
+          <h3 data-state-heading>No Troubleshooting Guides Found</h3>
+          <p data-state-text>We are continuously adding practical solar troubleshooting resources. Check back soon for new guides and solutions.</p>
+          <a href="troubleshooting.html" class="btn btn-outline">Explore All Guides</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="WHA-LOGO.PNG.png" alt="WHA SOL logo" class="brand-img" />
+        </span>
+        <span class="brand-name">WHA SOL</span>
+      </a>
+      <p class="footer-note">Clean energy, kept working.</p>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+        <li><a href="error-codes.html">Error Codes</a></li>
+        <li><a href="brands-models.html">Brands &amp; Models</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="container footer-bottom">
+      <span>© <span id="year">2026</span> WHA SOL Energy</span>
+      <span>moizakhtar.info@gmail.com</span>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/listing.js"></script>
+</body>
+</html>
