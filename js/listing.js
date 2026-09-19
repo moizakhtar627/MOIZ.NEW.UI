@@ -273,9 +273,6 @@
       "<h3>" +
       escapeHtml(item.name) +
       "</h3>" +
-      "<p>" +
-      escapeHtml(item.description) +
-      "</p>" +
       guide +
       "</div></article>"
     );
