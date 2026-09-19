@@ -276,9 +276,6 @@
       "<p>" +
       escapeHtml(item.description) +
       "</p>" +
-      '<a href="brands-models.html?brand=' +
-      encodeURIComponent(item.slug || item.id) +
-      '" class="card-link">View Brand <span aria-hidden="true">→</span></a>' +
       guide +
       "</div></article>"
     );
