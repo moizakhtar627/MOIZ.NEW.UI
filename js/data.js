@@ -77,6 +77,17 @@ WHASOL.troubleshootingArticles = [];
 --------------------------------------------------------------------------- */
 WHASOL.errorCodes = [];
 
+WHASOL.errorCodes.push({
+  code: "102",
+  title: "Consistent Fault",
+  brand: "Growatt",
+  model: "All Models",
+  explanation:
+    "A mismatch between the data reported by the inverter's master and slave processors. The system halts operation and the red fault indicator lights up. Usually requires professional repair or inverter replacement.",
+  image: "assets/inverter-error.jpg",
+  link: "growatt-error-102.html",
+});
+
 /* --------------------------------------------------------------------------
    Brands & models
    slug is used for URLs like brands-models.html?brand=growatt
@@ -116,6 +127,21 @@ WHASOL.blogPosts.push({
   link: "growatt-inverter-restart.html",
 });
 
+WHASOL.blogPosts.push({
+  title: "How to Fix Growatt Error 102 on Your Inverter",
+  metaTitle: "How to Fix Growatt Error 102 on Your Inverter | WHA Sol",
+  metaDescription:
+    "How to Fix Growatt Error 102 with clear steps for fault checks and inverter reset tips. Find the cause and get your system running safely again.",
+  description:
+    "Growatt Error 102 is a Consistent Fault indicating a mismatch between the inverter's master and slave processors. Learn what causes it, how to attempt a power cycle, and when to call a technician.",
+  brand: "Growatt",
+  category: "Inverter",
+  keywords: ["growatt error 102", "consistent fault", "inverter error", "processor mismatch", "fault fix", "growatt pakistan"],
+  image: "assets/inverter-error.jpg",
+  date: "2026-09-19",
+  link: "growatt-error-102.html",
+});
+
 /* --------------------------------------------------------------------------
    Growatt troubleshooting article (linked to the same full article)
 --------------------------------------------------------------------------- */
@@ -129,4 +155,16 @@ WHASOL.troubleshootingArticles.push({
   keywords: ["restart", "shutdown", "DC isolator", "AC isolator", "reboot", "power cycle"],
   image: "assets/growatt-inverter.png",
   link: "growatt-inverter-restart.html",
+});
+
+WHASOL.troubleshootingArticles.push({
+  title: "How to Fix Growatt Error 102 on Your Inverter",
+  description:
+    "How to Fix Growatt Error 102 with clear steps for fault checks and inverter reset tips. Find the cause and get your system running safely again.",
+  category: "inverter",
+  brand: "Growatt",
+  models: ["MIN 2500-6000TL-X", "SPH 3000-6000TL BL-UP", "MID 15-25K TL3-X"],
+  keywords: ["growatt error 102", "consistent fault", "inverter error", "processor mismatch", "fault fix"],
+  image: "assets/inverter-error.jpg",
+  link: "growatt-error-102.html",
 });
