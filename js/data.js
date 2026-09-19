@@ -105,6 +105,10 @@ WHASOL.brands.push({
   articleDescription: "Follow the correct AC and DC switch order to safely shut down and restart your Growatt inverter.",
   articleImage: "assets/growatt-inverter.png",
   articleLink: "growatt-inverter-restart.html",
+  articleTitle2: "How to Fix Growatt Error 102 on Your Inverter",
+  articleDescription2: "How to Fix Growatt Error 102 with clear steps for fault checks and inverter reset tips.",
+  articleImage2: "assets/inverter-error.jpg",
+  articleLink2: "growatt-error-102.html",
 });
 
 /* --------------------------------------------------------------------------

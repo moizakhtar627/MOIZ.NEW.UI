@@ -241,6 +241,27 @@
         '" class="card-link">Read Guide <span aria-hidden="true">→</span></a>' +
         "</div></div>";
     }
+    if (item.articleTitle2 && item.articleLink2) {
+      guide +=
+        '<div class="card-guide">' +
+        '<div class="card-guide-media"><img src="' +
+        imagePath(item.articleImage2) +
+        '" alt="' +
+        escapeHtml(item.articleTitle2) +
+        '" loading="lazy" /></div>' +
+        '<div class="card-guide-body">' +
+        '<span class="card-guide-label">Featured Guide</span>' +
+        "<h4>" +
+        escapeHtml(item.articleTitle2) +
+        "</h4>" +
+        "<p>" +
+        escapeHtml(item.articleDescription2 || "") +
+        "</p>" +
+        '<a href="' +
+        escapeHtml(item.articleLink2) +
+        '" class="card-link">Read Guide <span aria-hidden="true">→</span></a>' +
+        "</div></div>";
+    }
     return (
       '<article class="card list-card brand-card reveal">' +
       '<div class="card-media"><img src="' +
