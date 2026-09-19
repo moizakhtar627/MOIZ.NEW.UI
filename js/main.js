@@ -346,6 +346,11 @@
     window.addEventListener("resize", heroTiltReset);
   }
 
+  /* ---------- EmailJS init ---------- */
+  if (window.emailjs) {
+    emailjs.init("cT7Qw3j_nlgcMit9t");
+  }
+
   /* ---------- Contact form ---------- */
   var contactForm = document.getElementById("contact-form");
 
@@ -380,9 +385,51 @@
 
       if (!valid) return;
 
-      if (contactForm.hidden === false) {
-        contactForm.hidden = true;
-        if (formSuccess) formSuccess.hidden = false;
+      var submitBtn = document.getElementById("contact-submit");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        var origHTML = submitBtn.innerHTML;
+        submitBtn.innerHTML = "Sending...";
+      }
+
+      if (window.emailjs) {
+        emailjs
+          .send("service_dwio7tw", "template_pimfqxo", {
+            name: (contactForm.name && contactForm.name.value) || "",
+            email: (contactForm.email && contactForm.email.value) || "",
+            equipment: (contactForm.equipment && contactForm.equipment.value) || "",
+            message: (contactForm.message && contactForm.message.value) || "",
+            reply_to: (contactForm.email && contactForm.email.value) || "",
+          })
+          .then(function () {
+            if (contactForm.hidden === false) {
+              contactForm.hidden = true;
+              if (formSuccess) formSuccess.hidden = false;
+            }
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = origHTML;
+            }
+            contactForm.reset();
+          })
+          .catch(function (error) {
+            console.error("EmailJS error:", error);
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = origHTML;
+            }
+            alert("Sorry, something went wrong. Please try again.");
+          });
+      } else {
+        if (contactForm.hidden === false) {
+          contactForm.hidden = true;
+          if (formSuccess) formSuccess.hidden = false;
+        }
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = origHTML;
+        }
+        contactForm.reset();
       }
     });
 
