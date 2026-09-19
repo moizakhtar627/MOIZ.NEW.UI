@@ -108,7 +108,22 @@
     query: "",
     filter: readParam("category") ? (cfg.paramMap && cfg.paramMap[readParam("category")]) || readParam("category") : "all",
     brand: readParam("brand"),
+    fromUrl: !!(readParam("category") || readParam("brand")),
   };
+
+  /* ------------------------------------------------------------------------
+     If a URL filter/brand matches nothing, fall back to showing all content
+     so visitors always see the articles without having to clear filters.
+  ------------------------------------------------------------------------- */
+  function normalizeInitialView() {
+    if (!state.fromUrl) return;
+    var items = cfg.data.filter(matches);
+    if (items.length === 0) {
+      state.filter = "all";
+      state.brand = "";
+    }
+    state.fromUrl = false;
+  }
 
   /* ------------------------------------------------------------------------
      Card renderers
@@ -204,6 +219,28 @@
   }
 
   function brandCard(item) {
+    var guide = "";
+    if (item.articleTitle && item.articleLink) {
+      guide =
+        '<div class="card-guide">' +
+        '<div class="card-guide-media"><img src="' +
+        imagePath(item.articleImage) +
+        '" alt="' +
+        escapeHtml(item.articleTitle) +
+        '" loading="lazy" /></div>' +
+        '<div class="card-guide-body">' +
+        '<span class="card-guide-label">Featured Guide</span>' +
+        "<h4>" +
+        escapeHtml(item.articleTitle) +
+        "</h4>" +
+        "<p>" +
+        escapeHtml(item.articleDescription || "") +
+        "</p>" +
+        '<a href="' +
+        escapeHtml(item.articleLink) +
+        '" class="card-link">Read Guide <span aria-hidden="true">→</span></a>' +
+        "</div></div>";
+    }
     return (
       '<article class="card list-card brand-card reveal">' +
       '<div class="card-media"><img src="' +
@@ -221,6 +258,7 @@
       '<a href="brands-models.html?brand=' +
       encodeURIComponent(item.slug || item.id) +
       '" class="card-link">View Brand <span aria-hidden="true">→</span></a>' +
+      guide +
       "</div></article>"
     );
   }
@@ -416,9 +454,6 @@
     });
   }
 
-  buildFilters();
-  apply();
-
   /* Re-trigger reveal for rendered cards */
   window.addEventListener("whasol:rendered", function () {
     var els = $all(".reveal:not(.in)");
@@ -426,4 +461,8 @@
       els.forEach(window.whasolReveal);
     }
   });
+
+  normalizeInitialView();
+  buildFilters();
+  apply();
 })();
