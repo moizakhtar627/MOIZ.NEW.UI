@@ -248,6 +248,45 @@
 
   revealEls.forEach(window.whasolReveal);
 
+  /* ---------- Hero text reveal on scroll ---------- */
+  var hero = document.querySelector(".hero");
+  var heroAnimEls = null;
+  var heroAnimated = false;
+
+  function heroAnimReset() {
+    if (!heroAnimEls) return;
+    heroAnimEls.forEach(function (el) {
+      el.classList.remove("in");
+    });
+    heroAnimated = false;
+  }
+
+  function heroAnimTrigger() {
+    if (heroAnimated || !heroAnimEls) return;
+    heroAnimated = true;
+    heroAnimEls.forEach(function (el, i) {
+      el.style.transitionDelay = (i * 90) + "ms";
+      requestAnimationFrame(function () {
+        el.classList.add("in");
+      });
+    });
+  }
+
+  if (hero) {
+    heroAnimEls = hero.querySelectorAll(".hero .badge, .hero .hero-title, .hero .hero-title span, .hero .hero-sub, .hero .btn-explore, .hero .hero-media");
+    heroAnimEls.forEach(function (el) {
+      el.classList.add("reveal");
+    });
+    window.addEventListener("scroll", function () {
+      if (window.scrollY > 60) {
+        heroAnimTrigger();
+      } else {
+        heroAnimReset();
+      }
+    }, { passive: true });
+    heroAnimTrigger();
+  }
+
   /* ---------- Hero carousel ---------- */
   var carousel = document.querySelector(".hero-carousel");
 

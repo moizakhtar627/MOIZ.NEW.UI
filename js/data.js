@@ -66,6 +66,16 @@ WHASOL.brands.push({
 window.WHASOL = window.WHASOL || {};
 
 /* --------------------------------------------------------------------------
+   Supabase configuration
+   The ANON_KEY is the public publishable key — safe for browser use.
+   NEVER place a service-role / secret key here.
+--------------------------------------------------------------------------- */
+WHASOL.SUPABASE_CONFIG = {
+  URL: "https://dqkdmyvlhtdsivywngtz.supabase.co",
+  ANON_KEY: "sb_publishable_0xAV3LUtJqi9O-ol9-_dbA_TxpLV6aB",
+};
+
+/* --------------------------------------------------------------------------
    Troubleshooting articles
    category: "solar-panel" | "battery" | "inverter" | "wiring" | "voltage"
 --------------------------------------------------------------------------- */

@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+
+    <title>Articles | WHA SOL Admin</title>
+
+    <!-- Existing WHA SOL stylesheet -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <!-- Existing WHA SOL Data & Auth -->
+    <script src="../js/data.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+
+    <style>
+        /* =========================================================
+           WHA SOL ADMIN ARTICLES
+        ========================================================= */
+
+        :root {
+            --admin-bg: #071018;
+            --admin-sidebar: #09131d;
+            --admin-panel: #0d1924;
+            --admin-panel-hover: #111f2d;
+            --admin-border: rgba(255, 255, 255, 0.08);
+            --admin-border-light: rgba(255, 255, 255, 0.12);
+            --admin-text: #f4f7fa;
+            --admin-muted: #8997a6;
+            --admin-muted-2: #647383;
+            --admin-accent: #8fd3ff;
+            --admin-accent-soft: rgba(143, 211, 255, 0.10);
+            --admin-success: #72d6a1;
+            --admin-warning: #e7bd75;
+            --admin-danger: #e47f87;
+            --admin-radius: 14px;
+            --admin-sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--admin-bg);
+            color: var(--admin-text);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body.admin-page {
+            overflow-x: hidden;
+        }
+
+        button,
+        a {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* =========================================================
+           APP
+        ========================================================= */
+
+        .admin-app {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* =========================================================
+           SIDEBAR
+        ========================================================= */
+
+        .admin-sidebar {
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--admin-sidebar-width);
+            display: flex;
+            flex-direction: column;
+            background: var(--admin-sidebar);
+            border-right: 1px solid var(--admin-border);
+            padding: 22px 14px 16px;
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 4px 9px 24px;
+        }
+
+        .sidebar-logo {
+            width: 112px;
+            height: auto;
+            max-height: 44px;
+            object-fit: contain;
+            object-position: left center;
+        }
+
+        .sidebar-brand-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-brand-text strong {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.13em;
+            color: var(--admin-muted);
+            white-space: nowrap;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: var(--admin-border);
+            margin: 0 8px 17px;
+        }
+
+        .sidebar-label {
+            padding: 0 10px 9px;
+            color: var(--admin-muted-2);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 43px;
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            color: var(--admin-muted);
+            font-size: 13px;
+            font-weight: 500;
+            transition:
+                background 0.2s ease,
+                color 0.2s ease,
+                border-color 0.2s ease;
+        }
+
+        .sidebar-link:hover {
+            color: var(--admin-text);
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .sidebar-link.active {
+            color: var(--admin-text);
+            background: var(--admin-accent-soft);
+            border-color: rgba(143, 211, 255, 0.12);
+        }
+
+        .sidebar-link.active::before {
+            content: "";
+            position: absolute;
+            left: -14px;
+            width: 2px;
+            height: 20px;
+            border-radius: 0 3px 3px 0;
+            background: var(--admin-accent);
+        }
+
+        .nav-icon {
+            width: 18px;
+            min-width: 18px;
+            height: 18px;
+            display: grid;
+            place-items: center;
+            color: currentColor;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+        .admin-account {
+            padding: 13px;
+            margin: 0 4px 9px;
+            border: 1px solid var(--admin-border);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.018);
+        }
+
+        .account-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .account-avatar {
+            width: 31px;
+            height: 31px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 31px;
+            border-radius: 50%;
+            background: var(--admin-accent-soft);
+            border: 1px solid rgba(143, 211, 255, 0.18);
+            color: var(--admin-accent);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .account-info {
+            min-width: 0;
+        }
+
+        .account-name {
+            display: block;
+            color: var(--admin-text);
+            font-size: 12px;
+            font-weight: 600;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .account-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 3px;
+            color: var(--admin-muted-2);
+            font-size: 10px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--admin-success);
+        }
+
+        .logout-button {
+            width: 100%;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            background: transparent;
+            color: var(--admin-muted);
+            text-align: left;
+            transition: 0.2s ease;
+        }
+
+        .logout-button:hover {
+            color: var(--admin-danger);
+            background: rgba(228, 127, 135, 0.06);
+        }
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        .admin-main {
+            width: calc(100% - var(--admin-sidebar-width));
+            min-height: 100vh;
+            margin-left: var(--admin-sidebar-width);
+        }
+
+        /* =========================================================
+           TOP BAR
+        ========================================================= */
+
+        .admin-topbar {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 34px;
+            border-bottom: 1px solid var(--admin-border);
+            background: rgba(7, 16, 24, 0.88);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-title {
+            color: var(--admin-text);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .topbar-separator {
+            color: var(--admin-muted-2);
+        }
+
+        .topbar-section {
+            color: var(--admin-muted);
+            font-size: 12px;
+        }
+
+        .topbar-admin {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--admin-muted);
+            font-size: 12px;
+        }
+
+        .topbar-online {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--admin-success);
+        }
+
+        /* =========================================================
+           MOBILE HEADER
+        ========================================================= */
+
+        .mobile-header {
+            display: none;
+        }
+
+        .mobile-menu-button {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+            border: 1px solid var(--admin-border);
+            border-radius: 9px;
+            background: transparent;
+            color: var(--admin-text);
+        }
+
+        .hamburger {
+            width: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .hamburger span {
+            display: block;
+            height: 1.5px;
+            width: 100%;
+            border-radius: 2px;
+            background: currentColor;
+            transition: 0.2s ease;
+        }
+
+        /* =========================================================
+           CONTENT
+        ========================================================= */
+
+        .dashboard-content {
+            width: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 36px 34px 60px;
+        }
+
+        .page-heading {
+            margin-bottom: 28px;
+        }
+
+        .page-heading h1 {
+            margin: 0;
+            color: var(--admin-text);
+            font-size: clamp(25px, 3vw, 34px);
+            line-height: 1.15;
+            letter-spacing: -0.025em;
+            font-weight: 650;
+        }
+
+        .page-heading p {
+            max-width: 670px;
+            margin: 9px 0 0;
+            color: var(--admin-muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        /* =========================================================
+           TABLE CONTROLS
+        ========================================================= */
+
+        .table-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box input {
+            width: 280px;
+            height: 42px;
+            padding: 0 15px 0 40px;
+            background: var(--admin-panel);
+            border: 1px solid var(--admin-border);
+            border-radius: 10px;
+            color: var(--admin-text);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--admin-accent);
+            background: #151b24;
+        }
+
+        .search-box input::placeholder {
+            color: var(--admin-muted-2);
+        }
+
+        .search-box .icon {
+            position: absolute;
+            left: 12px;
+            color: var(--admin-muted-2);
+            font-size: 13px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-group label {
+            color: var(--admin-muted-2);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-group select {
+            width: 160px;
+            height: 42px;
+            padding: 0 12px;
+            background: var(--admin-panel);
+            border: 1px solid var(--admin-border);
+            border-radius: 10px;
+            color: var(--admin-text);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .filter-group select:focus {
+            border-color: var(--admin-accent);
+            background: #151b24;
+        }
+
+        .btn-primary {
+            height: 42px;
+            padding: 0 20px;
+            border: 1px solid var(--admin-accent);
+            border-radius: 10px;
+            background: var(--admin-accent-soft);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: rgba(143, 211, 255, 0.2);
+            border-color: rgba(143, 211, 255, 0.4);
+        }
+
+        .btn-outline {
+            height: 42px;
+            padding: 0 20px;
+            border: 1px solid var(--admin-border);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--admin-text);
+            font-size: 13px;
+            font-weight: 600;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--admin-border-light);
+            background: var(--admin-panel-hover);
+        }
+
+        /* =========================================================
+           ARTICLE TABLE
+        ========================================================= */
+
+        .table-card {
+            border: 1px solid var(--admin-border);
+            border-radius: var(--admin-radius);
+            background: var(--admin-panel);
+            overflow: hidden;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .articles-table {
+            width: 100%;
+            min-width: 700px;
+            border-collapse: collapse;
+        }
+
+        .articles-table th,
+        .articles-table td {
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--admin-border);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .articles-table th {
+            color: var(--admin-muted-2);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .articles-table td {
+            color: var(--admin-muted);
+            font-size: 11px;
+        }
+
+        .articles-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .article-title {
+            max-width: 280px;
+            overflow: hidden;
+            color: var(--admin-text);
+            font-weight: 550;
+            text-overflow: ellipsis;
+        }
+
+        .brand-text {
+            color: var(--admin-muted);
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 9px;
+            font-weight: 650;
+        }
+
+        .status.published {
+            color: var(--admin-success);
+            background: rgba(114, 214, 161, 0.08);
+        }
+
+        .status.draft {
+            color: var(--admin-warning);
+            background: rgba(231, 189, 117, 0.08);
+        }
+
+        .table-action {
+            color: var(--admin-accent);
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-btn {
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--admin-border);
+            border-radius: 7px;
+            background: var(--admin-panel);
+            color: var(--admin-muted);
+            font-size: 11px;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--admin-panel-hover);
+            color: var(--admin-text);
+        }
+
+        .action-edit:hover {
+            border-color: var(--admin-accent);
+            color: var(--admin-accent);
+        }
+
+        .action-delete:hover {
+            border-color: rgba(228, 127, 135, 0.4);
+            color: var(--admin-danger);
+        }
+
+        /* Empty state */
+        .empty-state {
+            padding: 60px 30px;
+            text-align: center;
+            display: none;
+        }
+
+        .empty-state.visible {
+            display: block;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 18px;
+            opacity: 0.4;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 8px;
+            color: var(--admin-text);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            margin: 0 0 20px;
+            color: var(--admin-muted);
+            font-size: 12px;
+        }
+
+        /* =========================================================
+           MOBILE OVERLAY
+        ========================================================= */
+
+        .sidebar-overlay {
+            position: fixed;
+            z-index: 900;
+            inset: 0;
+            display: none;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(2px);
+        }
+
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
+
+        @media (max-width: 1050px) {
+            :root {
+                --admin-sidebar-width: 225px;
+            }
+
+            .admin-topbar,
+            .dashboard-content {
+                padding-left: 25px;
+                padding-right: 25px;
+            }
+
+            .search-box input {
+                width: 220px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                box-shadow: 18px 0 40px rgba(0, 0, 0, 0.35);
+            }
+
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .admin-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .admin-topbar {
+                display: none;
+            }
+
+            .mobile-header {
+                position: sticky;
+                top: 0;
+                z-index: 800;
+                height: 62px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 15px;
+                border-bottom: 1px solid var(--admin-border);
+                background: rgba(7, 16, 24, 0.94);
+                backdrop-filter: blur(14px);
+            }
+
+            .mobile-brand {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .mobile-logo {
+                width: 92px;
+                height: auto;
+                max-height: 32px;
+                object-fit: contain;
+            }
+
+            .mobile-admin {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                color: var(--admin-muted);
+                font-size: 10px;
+            }
+
+            .dashboard-content {
+                padding: 27px 15px 45px;
+            }
+
+            .page-heading {
+                margin-bottom: 22px;
+            }
+
+            .page-heading h1 {
+                font-size: 26px;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .table-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .controls-left {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .mobile-admin {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body class="admin-page">
+
+    <div class="admin-app">
+
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar" id="adminSidebar">
+
+            <div class="sidebar-brand">
+                <img
+                    src="../WHA-LOGO.PNG.png"
+                    alt="WHA SOL"
+                    class="sidebar-logo"
+                >
+
+                <div class="sidebar-brand-text">
+                    <strong>ADMIN PANEL</strong>
+                </div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-label">Workspace</div>
+
+            <nav class="sidebar-nav">
+
+                <a
+                    href="./dashboard.html"
+                    class="sidebar-link"
+                    aria-current="page"
+                >
+                    <span class="nav-icon">&#935;</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="./articles.html" class="sidebar-link active">
+                    <span class="nav-icon">&#9633;</span>
+                    <span>Articles</span>
+                </a>
+
+                <a href="./article-editor.html" class="sidebar-link">
+                    <span class="nav-icon">&#65371;</span>
+                    <span>Create Article</span>
+                </a>
+
+                <a href="./error-codes.html" class="sidebar-link">
+                    <span class="nav-icon">&#9673;</span>
+                    <span>Error Codes</span>
+                </a>
+
+                <a href="./brands.html" class="sidebar-link">
+                    <span class="nav-icon">&#9632;</span>
+                    <span>Brands & Models</span>
+                </a>
+
+                <a href="./media.html" class="sidebar-link">
+                    <span class="nav-icon">&#9637;</span>
+                    <span>Media Library</span>
+                </a>
+
+                <a href="./settings.html" class="sidebar-link">
+                    <span class="nav-icon">&#9881;</span>
+                    <span>Settings</span>
+                </a>
+
+                <a href="./blogs.html" class="sidebar-link">
+                    <span class="nav-icon">&#9637;</span>
+                    <span>Blogs</span>
+                </a>
+
+            </nav>
+
+            <div class="sidebar-bottom">
+
+                <div class="admin-account">
+                    <div class="account-row">
+
+                        <div class="account-avatar" id="accountAvatar">
+                            AD
+                        </div>
+
+                        <div class="account-info">
+                            <span class="account-name" id="accountName">
+                                Admin
+                            </span>
+
+                            <span class="account-status">
+                                <span class="status-dot"></span>
+                                Online
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="logout-button"
+                    id="logoutButton"
+                >
+                    <span class="nav-icon">&#8617;</span>
+                    <span>Logout</span>
+                </button>
+
+            </div>
+
+        </aside>
+
+        <div
+            class="sidebar-overlay"
+            id="sidebarOverlay"
+            aria-hidden="true"
+        ></div>
+
+        <!-- MAIN -->
+        <main class="admin-main">
+
+            <!-- Desktop top bar -->
+            <header class="admin-topbar">
+
+                <div class="topbar-left">
+                    <span class="topbar-title">WHA SOL</span>
+                    <span class="topbar-separator">/</span>
+                    <span class="topbar-section">Articles</span>
+                </div>
+
+                <div class="topbar-admin">
+                    <span class="topbar-online"></span>
+                    <span id="desktopAdminName">Admin</span>
+                </div>
+
+            </header>
+
+            <!-- Mobile header -->
+            <header class="mobile-header">
+
+                <button
+                    type="button"
+                    class="mobile-menu-button"
+                    id="mobileMenuButton"
+                    aria-label="Open navigation"
+                    aria-expanded="false"
+                >
+                    <span class="hamburger" id="hamburgerIcon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </button>
+
+                <div class="mobile-brand">
+                    <img
+                        src="../WHA-LOGO.PNG.png"
+                        alt="WHA SOL"
+                        class="mobile-logo"
+                    >
+                </div>
+
+                <div class="mobile-admin">
+                    <span class="topbar-online"></span>
+                    <span>Admin</span>
+                </div>
+
+            </header>
+
+            <!-- CONTENT -->
+            <section class="dashboard-content">
+
+                <div class="page-heading">
+                    <h1>Articles</h1>
+
+                    <p>
+                        Manage your WHA SOL troubleshooting articles, solar guides, and knowledge-base content.
+                    </p>
+                </div>
+
+                <!-- Table Controls -->
+                <div class="table-controls">
+
+                    <div class="controls-left">
+
+                        <div class="search-box">
+                            <span class="icon">&#128269;</span>
+                            <input
+                                type="search"
+                                id="searchInput"
+                                placeholder="Search articles..."
+                            >
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="statusFilter">Status</label>
+                            <select id="statusFilter">
+                                <option value="all">All Status</option>
+                                <option value="published">Published</option>
+                                <option value="draft">Draft</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label for="categoryFilter">Category</label>
+                            <select id="categoryFilter">
+                                <option value="all">All Categories</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <a href="./article-editor.html" class="btn-primary">
+                        + Create Article
+                    </a>
+
+                </div>
+
+                <!-- Articles Table -->
+                <div class="table-card">
+
+                    <div class="table-wrap">
+
+                        <table class="articles-table">
+
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Brand</th>
+                                    <th>Model</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="articlesBody">
+
+                                <tr>
+                                    <td colspan="7">
+                                        <div style="text-align:center;color:var(--admin-muted-2);padding:28px 16px;">
+                                            Loading articles...
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState">
+
+                    <div class="empty-icon">&#9733;</div>
+
+                    <h3>No articles found</h3>
+
+                    <p>
+                        No articles match your current search or filter criteria.
+                    </p>
+
+                    <a href="./article-editor.html" class="btn-primary">
+                        Create Article
+                    </a>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+        /* =========================================================
+           ARTICLES JAVASCRIPT
+        ========================================================= */
+
+        (function () {
+            "use strict";
+
+            var sidebar = document.getElementById("adminSidebar");
+            var overlay = document.getElementById("sidebarOverlay");
+            var menuButton = document.getElementById("mobileMenuButton");
+            var hamburger = document.getElementById("hamburgerIcon");
+            var logoutButton = document.getElementById("logoutButton");
+
+            /* Sidebar toggle */
+            function openSidebar() {
+                if (!sidebar) return;
+                sidebar.classList.add("open");
+                if (overlay) {
+                    overlay.classList.add("open");
+                    overlay.setAttribute("aria-hidden", "false");
+                }
+                if (menuButton) {
+                    menuButton.setAttribute("aria-expanded", "true");
+                    menuButton.setAttribute("aria-label", "Close navigation");
+                }
+                if (hamburger) {
+                    hamburger.innerHTML = "<span></span><span></span><span></span>";
+                    var spans = hamburger.querySelectorAll("span");
+                    if (spans.length === 3) {
+                        spans[0].style.transform = "translateY(5.5px) rotate(45deg)";
+                        spans[1].style.opacity = "0";
+                        spans[2].style.transform = "translateY(-5.5px) rotate(-45deg)";
+                    }
+                }
+            }
+
+            function closeSidebar() {
+                if (!sidebar) return;
+                sidebar.classList.remove("open");
+                if (overlay) {
+                    overlay.classList.remove("open");
+                    overlay.setAttribute("aria-hidden", "true");
+                }
+                if (menuButton) {
+                    menuButton.setAttribute("aria-expanded", "false");
+                    menuButton.setAttribute("aria-label", "Open navigation");
+                }
+                if (hamburger) {
+                    hamburger.innerHTML = "<span></span><span></span><span></span>";
+                }
+            }
+
+            if (menuButton) {
+                menuButton.addEventListener("click", function () {
+                    if (sidebar.classList.contains("open")) {
+                        closeSidebar();
+                    } else {
+                        openSidebar();
+                    }
+                });
+            }
+
+            if (overlay) {
+                overlay.addEventListener("click", closeSidebar);
+            }
+
+            document.querySelectorAll(".sidebar-link").forEach(function (link) {
+                link.addEventListener("click", function () {
+                    if (window.innerWidth <= 760) {
+                        closeSidebar();
+                    }
+                });
+            });
+
+            window.addEventListener("resize", function () {
+                if (window.innerWidth > 760) {
+                    closeSidebar();
+                }
+            });
+
+            /* =====================================================
+               DATA
+            ===================================================== */
+
+            function getWhaSolData() {
+                if (window.WHASOL) {
+                    return window.WHASOL;
+                }
+                return {};
+            }
+
+            function getAllArticles(data) {
+                var articles = [];
+
+                if (Array.isArray(data.troubleshootingArticles)) {
+                    articles = articles.concat(data.troubleshootingArticles);
+                }
+
+                if (Array.isArray(data.blogPosts)) {
+                    data.blogPosts.forEach(function (item) {
+                        var exists = articles.some(function (article) {
+                            return article.id && item.id && article.id === item.id;
+                        });
+                        if (!exists) {
+                            articles.push(item);
+                        }
+                    });
+                }
+
+                return articles;
+            }
+
+            function getCategories(articles) {
+                var cats = [];
+                articles.forEach(function (article) {
+                    var cat = article.category || "";
+                    if (cat && cats.indexOf(cat) === -1) {
+                        cats.push(cat);
+                    }
+                });
+                return cats;
+            }
+
+            function escapeHtml(value) {
+                return String(value)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            function formatDate(iso) {
+                if (!iso) return "—";
+                var d = new Date(iso);
+                if (isNaN(d.getTime())) return "—";
+                var y = d.getFullYear();
+                var m = String(d.getMonth() + 1).padStart(2, "0");
+                var day = String(d.getDate()).padStart(2, "0");
+                return y + "-" + m + "-" + day;
+            }
+
+            function renderArticles() {
+                var data = getWhaSolData();
+                var articles = getAllArticles(data);
+                var categories = getCategories(articles);
+
+                /* Populate category filter */
+                var catFilter = document.getElementById("categoryFilter");
+                if (catFilter) {
+                    catFilter.innerHTML = '<option value="all">All Categories</option>';
+                    categories.forEach(function (cat) {
+                        var opt = document.createElement("option");
+                        opt.value = cat.toLowerCase();
+                        opt.textContent = cat;
+                        catFilter.appendChild(opt);
+                    });
+                }
+
+                var searchInput = document.getElementById("searchInput");
+                var statusFilter = document.getElementById("statusFilter");
+                var catFilterEl = document.getElementById("categoryFilter");
+                var tbody = document.getElementById("articlesBody");
+                var emptyState = document.getElementById("emptyState");
+                var tableCard = tbody ? tbody.closest(".table-card") : null;
+
+                if (!tbody) return;
+
+                var search = searchInput ? searchInput.value.trim().toLowerCase() : "";
+                var status = statusFilter ? statusFilter.value : "all";
+                var category = catFilterEl ? catFilterEl.value : "all";
+
+                var filtered = articles.filter(function (article) {
+                    if (!article) return false;
+
+                    var searchable = [
+                        article.title || "",
+                        article.brand || "",
+                        (article.models ? article.models.join(" ") : ""),
+                        article.category || "",
+                        (article.keywords ? article.keywords.join(" ") : "")
+                    ].join(" ").toLowerCase();
+
+                    var matchesSearch = !search || searchable.indexOf(search) !== -1;
+                    var matchesStatus = status === "all" || (article.status || "").toLowerCase() === status;
+                    var matchesCategory = category === "all" || (article.category || "").toLowerCase() === category;
+
+                    return matchesSearch && matchesStatus && matchesCategory;
+                });
+
+                if (!filtered.length) {
+                    if (tableCard) tableCard.style.display = "none";
+                    if (emptyState) emptyState.classList.add("visible");
+                    return;
+                }
+
+                if (tableCard) tableCard.style.display = "";
+                if (emptyState) emptyState.classList.remove("visible");
+
+                tbody.innerHTML = filtered.map(function (article) {
+                    var title = escapeHtml(article.title || article.name || "Untitled Article");
+                    var brand = escapeHtml(article.brand || article.manufacturer || "—");
+                    var model = escapeHtml(Array.isArray(article.models) ? article.models.join(", ") : (article.model || "—"));
+                    var categoryEl = escapeHtml(article.category || "—");
+                    var isDraft = (article.status || "").toLowerCase() === "draft";
+                    var statusClass = isDraft ? "draft" : "published";
+                    var statusText = isDraft ? "Draft" : "Published";
+                    var date = escapeHtml(formatDate(article.date || article.createdAt));
+
+                    return '<tr>' +
+                        '<td><div class="article-title">' + title + '</div></td>' +
+                        '<td><span class="brand-text">' + brand + '</span></td>' +
+                        '<td><span class="brand-text">' + model + '</span></td>' +
+                        '<td>' + categoryEl + '</td>' +
+                        '<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
+                        '<td>' + date + '</td>' +
+                        '<td><div class="action-buttons">' +
+                        '<a href="./article-editor.html" class="action-btn action-edit" title="Edit">&#9998;</a>' +
+                        '<button type="button" class="action-btn" title="View" onclick="alert(\'Preview not available in admin.\')">↗</button>' +
+                        '<button type="button" class="action-btn action-delete" title="Delete" onclick="alert(\'Delete functionality coming soon.\')">×</button>' +
+                        '</div></td>' +
+                        '</tr>';
+                }).join("");
+            }
+
+            /* Search and filter */
+            var searchInput = document.getElementById("searchInput");
+            var statusFilter = document.getElementById("statusFilter");
+            var catFilter = document.getElementById("categoryFilter");
+
+            if (searchInput) searchInput.addEventListener("input", renderArticles);
+            if (statusFilter) statusFilter.addEventListener("change", renderArticles);
+            if (catFilter) catFilter.addEventListener("change", renderArticles);
+
+            /* =====================================================
+               AUTHENTICATION
+            ===================================================== */
+
+            async function protectPage() {
+                try {
+                    if (window.WHASOL && window.WHASOL.auth && typeof window.WHASOL.auth.requireAuth === "function") {
+                        await window.WHASOL.auth.requireAuth("./login.html");
+                    }
+                } catch (error) {
+                    console.error("WHA SOL articles authentication error:", error);
+                    window.location.href = "./login.html";
+                }
+            }
+
+            function updateAdminInfo(user) {
+                if (!user) return;
+
+                var email = user.email || "Admin";
+                var name = user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name);
+                name = name || email;
+
+                var accountName = document.getElementById("accountName");
+                var desktopAdminName = document.getElementById("desktopAdminName");
+                var accountAvatar = document.getElementById("accountAvatar");
+
+                if (accountName) accountName.textContent = name;
+                if (desktopAdminName) desktopAdminName.textContent = email;
+                if (accountAvatar) accountAvatar.textContent = String(name).trim().slice(0, 2).toUpperCase();
+            }
+
+            async function initAuth() {
+                try {
+                    var auth = window.WHASOL && window.WHASOL.auth;
+                    var supabase = window.WHASOL && window.WHASOL.supabase;
+
+                    if (auth && typeof auth.getCurrentUser === "function") {
+                        var user = await auth.getCurrentUser();
+                        if (!user) {
+                            window.location.replace("./login.html");
+                            return;
+                        }
+                        updateAdminInfo(user);
+                    } else if (supabase && supabase.auth && typeof supabase.auth.getSession === "function") {
+                        var result = await supabase.auth.getSession();
+                        var session = result && result.data && result.data.session;
+                        if (!session || !session.user) {
+                            window.location.replace("./login.html");
+                            return;
+                        }
+                        updateAdminInfo(session.user);
+                    } else {
+                        setTimeout(initAuth, 500);
+                    }
+                } catch (error) {
+                    console.error("WHA SOL authentication error:", error);
+                    window.location.replace("./login.html");
+                }
+            }
+
+            /* Logout */
+            if (logoutButton) {
+                logoutButton.addEventListener("click", async function () {
+                    logoutButton.disabled = true;
+                    try {
+                        var auth = window.WHASOL && window.WHASOL.auth;
+                        var supabase = window.WHASOL && window.WHASOL.supabase;
+
+                        if (auth && typeof auth.signOut === "function") {
+                            await auth.signOut();
+                        } else if (supabase && supabase.auth) {
+                            await supabase.auth.signOut();
+                        }
+                    } catch (error) {
+                        console.error("WHA SOL logout error:", error);
+                    }
+                    window.location.replace("./login.html");
+                });
+            }
+
+            /* =====================================================
+               START
+            ===================================================== */
+
+            protectPage();
+            initAuth();
+
+            if (window.WHASOL && window.WHASOL.supabase) {
+                renderArticles();
+            } else {
+                setTimeout(renderArticles, 300);
+            }
+
+        })();
+    </script>
+
+</body>
+</html>

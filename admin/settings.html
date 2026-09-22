@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+
+    <title>Settings | WHA SOL Admin</title>
+
+    <!-- Existing WHA SOL stylesheet -->
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <!-- Existing WHA SOL Data & Auth -->
+    <script src="../js/data.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+
+    <style>
+        /* =========================================================
+           WHA SOL ADMIN SETTINGS
+        ========================================================= */
+
+        :root {
+            --admin-bg: #071018;
+            --admin-sidebar: #09131d;
+            --admin-panel: #0d1924;
+            --admin-panel-hover: #111f2d;
+            --admin-border: rgba(255, 255, 255, 0.08);
+            --admin-border-light: rgba(255, 255, 255, 0.12);
+            --admin-text: #f4f7fa;
+            --admin-muted: #8997a6;
+            --admin-muted-2: #647383;
+            --admin-accent: #8fd3ff;
+            --admin-accent-soft: rgba(143, 211, 255, 0.10);
+            --admin-success: #72d6a1;
+            --admin-warning: #e7bd75;
+            --admin-danger: #e47f87;
+            --admin-radius: 14px;
+            --admin-sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            min-height: 100%;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--admin-bg);
+            color: var(--admin-text);
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+                Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body.admin-page {
+            overflow-x: hidden;
+        }
+
+        button,
+        a {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* =========================================================
+           APP
+        ========================================================= */
+
+        .admin-app {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* =========================================================
+           SIDEBAR (same as dashboard)
+        ========================================================= */
+
+        .admin-sidebar {
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--admin-sidebar-width);
+            display: flex;
+            flex-direction: column;
+            background: var(--admin-sidebar);
+            border-right: 1px solid var(--admin-border);
+            padding: 22px 14px 16px;
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 4px 9px 24px;
+        }
+
+        .sidebar-logo {
+            width: 112px;
+            height: auto;
+            max-height: 44px;
+            object-fit: contain;
+            object-position: left center;
+        }
+
+        .sidebar-brand-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-brand-text strong {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.13em;
+            color: var(--admin-muted);
+            white-space: nowrap;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: var(--admin-border);
+            margin: 0 8px 17px;
+        }
+
+        .sidebar-label {
+            padding: 0 10px 9px;
+            color: var(--admin-muted-2);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 43px;
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            color: var(--admin-muted);
+            font-size: 13px;
+            font-weight: 500;
+            transition:
+                background 0.2s ease,
+                color 0.2s ease,
+                border-color 0.2s ease;
+        }
+
+        .sidebar-link:hover {
+            color: var(--admin-text);
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .sidebar-link.active {
+            color: var(--admin-text);
+            background: var(--admin-accent-soft);
+            border-color: rgba(143, 211, 255, 0.12);
+        }
+
+        .sidebar-link.active::before {
+            content: "";
+            position: absolute;
+            left: -14px;
+            width: 2px;
+            height: 20px;
+            border-radius: 0 3px 3px 0;
+            background: var(--admin-accent);
+        }
+
+        .nav-icon {
+            width: 18px;
+            min-width: 18px;
+            height: 18px;
+            display: grid;
+            place-items: center;
+            color: currentColor;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+        .admin-account {
+            padding: 13px;
+            margin: 0 4px 9px;
+            border: 1px solid var(--admin-border);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.018);
+        }
+
+        .account-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .account-avatar {
+            width: 31px;
+            height: 31px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 31px;
+            border-radius: 50%;
+            background: var(--admin-accent-soft);
+            border: 1px solid rgba(143, 211, 255, 0.18);
+            color: var(--admin-accent);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .account-info {
+            min-width: 0;
+        }
+
+        .account-name {
+            display: block;
+            color: var(--admin-text);
+            font-size: 12px;
+            font-weight: 600;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .account-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 3px;
+            color: var(--admin-muted-2);
+            font-size: 10px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--admin-success);
+        }
+
+        .logout-button {
+            width: 100%;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            background: transparent;
+            color: var(--admin-muted);
+            text-align: left;
+            transition: 0.2s ease;
+        }
+
+        .logout-button:hover {
+            color: var(--admin-danger);
+            background: rgba(228, 127, 135, 0.06);
+        }
+
+        /* =========================================================
+           MAIN
+        ========================================================= */
+
+        .admin-main {
+            width: calc(100% - var(--admin-sidebar-width));
+            min-height: 100vh;
+            margin-left: var(--admin-sidebar-width);
+        }
+
+        /* =========================================================
+           TOP BAR
+        ========================================================= */
+
+        .admin-topbar {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 34px;
+            border-bottom: 1px solid var(--admin-border);
+            background: rgba(7, 16, 24, 0.88);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-title {
+            color: var(--admin-text);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .topbar-separator {
+            color: var(--admin-muted-2);
+        }
+
+        .topbar-section {
+            color: var(--admin-muted);
+            font-size: 12px;
+        }
+
+        .topbar-admin {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--admin-muted);
+            font-size: 12px;
+        }
+
+        .topbar-online {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--admin-success);
+        }
+
+        /* =========================================================
+           MOBILE HEADER
+        ========================================================= */
+
+        .mobile-header {
+            display: none;
+        }
+
+        .mobile-menu-button {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+            border: 1px solid var(--admin-border);
+            border-radius: 9px;
+            background: transparent;
+            color: var(--admin-text);
+        }
+
+        .hamburger {
+            width: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .hamburger span {
+            display: block;
+            height: 1.5px;
+            width: 100%;
+            border-radius: 2px;
+            background: currentColor;
+            transition: 0.2s ease;
+        }
+
+        /* =========================================================
+           CONTENT
+        ========================================================= */
+
+        .dashboard-content {
+            width: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 36px 34px 60px;
+        }
+
+        .page-heading {
+            margin-bottom: 28px;
+        }
+
+        .page-heading h1 {
+            margin: 0;
+            color: var(--admin-text);
+            font-size: clamp(25px, 3vw, 34px);
+            line-height: 1.15;
+            letter-spacing: -0.025em;
+            font-weight: 650;
+        }
+
+        .page-heading p {
+            max-width: 670px;
+            margin: 9px 0 0;
+            color: var(--admin-muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        /* Settings Sections */
+        .settings-section {
+            border: 1px solid var(--admin-border);
+            border-radius: var(--admin-radius);
+            background: var(--admin-panel);
+            overflow: hidden;
+            margin-bottom: 22px;
+        }
+
+        .settings-section-header {
+            min-height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 17px;
+            border-bottom: 1px solid var(--admin-border);
+        }
+
+        .settings-section-header h2 {
+            margin: 0;
+            color: var(--admin-text);
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .settings-section-header span {
+            color: var(--admin-muted-2);
+            font-size: 10px;
+        }
+
+        .settings-section-body {
+            padding: 22px;
+        }
+
+        /* Settings rows */
+        .settings-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--admin-border);
+        }
+
+        .settings-row:last-child {
+            border-bottom: 0;
+        }
+
+        .setting-label {
+            color: var(--admin-muted-2);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .setting-value {
+            color: var(--admin-text);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .setting-description {
+            color: var(--admin-muted);
+            font-size: 12px;
+            line-height: 1.5;
+            margin-top: 2px;
+        }
+
+        .setting-field {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .setting-field input {
+            width: 100%;
+            height: 42px;
+            padding: 0 14px;
+            background: var(--admin-panel-hover);
+            border: 1px solid var(--admin-border);
+            border-radius: 10px;
+            color: var(--admin-text);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .setting-field input:focus {
+            border-color: var(--admin-accent);
+            background: #151b24;
+        }
+
+        .setting-field input::placeholder {
+            color: var(--admin-muted-2);
+        }
+
+        /* Admin Account Info */
+        .admin-account-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .admin-avatar-large {
+            width: 56px;
+            height: 56px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: var(--admin-accent-soft);
+            border: 1px solid rgba(143, 211, 255, 0.18);
+            color: var(--admin-accent);
+            font-size: 20px;
+            font-weight: 700;
+            flex: 0 0 56px;
+        }
+
+        .admin-details {
+            min-width: 0;
+        }
+
+        .admin-name {
+            color: var(--admin-text);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .admin-email {
+            color: var(--admin-muted);
+            font-size: 12px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            height: 42px;
+            padding: 0 20px;
+            border: 1px solid var(--admin-accent);
+            border-radius: 10px;
+            background: var(--admin-accent-soft);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: rgba(143, 211, 255, 0.2);
+            border-color: rgba(143, 211, 255, 0.4);
+        }
+
+        .btn-outline {
+            height: 42px;
+            padding: 0 20px;
+            border: 1px solid var(--admin-border);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--admin-text);
+            font-size: 13px;
+            font-weight: 600;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--admin-border-light);
+            background: var(--admin-panel-hover);
+        }
+
+        .btn-danger {
+            height: 42px;
+            padding: 0 20px;
+            border: 1px solid var(--admin-danger);
+            border-radius: 10px;
+            background: rgba(228, 127, 135, 0.06);
+            color: var(--admin-danger);
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .btn-danger:hover {
+            background: rgba(228, 127, 135, 0.12);
+        }
+
+        .actions-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* MOBILE OVERLAY */
+        .sidebar-overlay {
+            position: fixed;
+            z-index: 900;
+            inset: 0;
+            display: none;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(2px);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1050px) {
+            :root {
+                --admin-sidebar-width: 225px;
+            }
+
+            .admin-topbar,
+            .dashboard-content {
+                padding-left: 25px;
+                padding-right: 25px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                box-shadow: 18px 0 40px rgba(0, 0, 0, 0.35);
+            }
+
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .admin-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .admin-topbar {
+                display: none;
+            }
+
+            .mobile-header {
+                position: sticky;
+                top: 0;
+                z-index: 800;
+                height: 62px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 15px;
+                border-bottom: 1px solid var(--admin-border);
+                background: rgba(7, 16, 24, 0.94);
+                backdrop-filter: blur(14px);
+            }
+
+            .mobile-brand {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .mobile-logo {
+                width: 92px;
+                height: auto;
+                max-height: 32px;
+                object-fit: contain;
+            }
+
+            .mobile-admin {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                color: var(--admin-muted);
+                font-size: 10px;
+            }
+
+            .dashboard-content {
+                padding: 27px 15px 45px;
+            }
+
+            .page-heading {
+                margin-bottom: 22px;
+            }
+
+            .page-heading h1 {
+                font-size: 26px;
+            }
+
+            .settings-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .setting-field {
+                min-width: 0;
+            }
+
+            .actions-right {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-primary,
+            .btn-outline,
+            .btn-danger {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .mobile-admin {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body class="admin-page">
+
+    <div class="admin-app">
+
+        <!-- SIDEBAR -->
+        <aside class="admin-sidebar" id="adminSidebar">
+
+            <div class="sidebar-brand">
+                <img
+                    src="../WHA-LOGO.PNG.png"
+                    alt="WHA SOL"
+                    class="sidebar-logo"
+                >
+
+                <div class="sidebar-brand-text">
+                    <strong>ADMIN PANEL</strong>
+                </div>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="sidebar-label">Workspace</div>
+
+            <nav class="sidebar-nav">
+
+                <a
+                    href="./dashboard.html"
+                    class="sidebar-link"
+                    aria-current="page"
+                >
+                    <span class="nav-icon">&#935;</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="./articles.html" class="sidebar-link">
+                    <span class="nav-icon">&#9633;</span>
+                    <span>Articles</span>
+                </a>
+
+                <a href="./article-editor.html" class="sidebar-link">
+                    <span class="nav-icon">&#65371;</span>
+                    <span>Create Article</span>
+                </a>
+
+                <a href="./error-codes.html" class="sidebar-link">
+                    <span class="nav-icon">&#9673;</span>
+                    <span>Error Codes</span>
+                </a>
+
+                <a href="./brands.html" class="sidebar-link">
+                    <span class="nav-icon">&#9632;</span>
+                    <span>Brands &amp; Models</span>
+                </a>
+
+                <a href="./media.html" class="sidebar-link">
+                    <span class="nav-icon">&#9637;</span>
+                    <span>Media Library</span>
+                </a>
+
+                <a href="./settings.html" class="sidebar-link active">
+                    <span class="nav-icon">&#9881;</span>
+                    <span>Settings</span>
+                </a>
+
+                <a href="./blogs.html" class="sidebar-link">
+                    <span class="nav-icon">&#9637;</span>
+                    <span>Blogs</span>
+                </a>
+
+            </nav>
+
+            <div class="sidebar-bottom">
+
+                <div class="admin-account">
+                    <div class="account-row">
+
+                        <div class="account-avatar" id="accountAvatar">
+                            AD
+                        </div>
+
+                        <div class="account-info">
+                            <span class="account-name" id="accountName">
+                                Admin
+                            </span>
+
+                            <span class="account-status">
+                                <span class="status-dot"></span>
+                                Online
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <button
+                    type="button"
+                    class="logout-button"
+                    id="logoutButton"
+                >
+                    <span class="nav-icon">&#8617;</span>
+                    <span>Logout</span>
+                </button>
+
+            </div>
+
+        </aside>
+
+        <div
+            class="sidebar-overlay"
+            id="sidebarOverlay"
+            aria-hidden="true"
+        ></div>
+
+        <!-- MAIN -->
+        <main class="admin-main">
+
+            <!-- Desktop top bar -->
+            <header class="admin-topbar">
+
+                <div class="topbar-left">
+                    <span class="topbar-title">WHA SOL</span>
+                    <span class="topbar-separator">/</span>
+                    <span class="topbar-section">Settings</span>
+                </div>
+
+                <div class="topbar-admin">
+                    <span class="topbar-online"></span>
+                    <span id="desktopAdminName">Admin</span>
+                </div>
+
+            </header>
+
+            <!-- Mobile header -->
+            <header class="mobile-header">
+
+                <button
+                    type="button"
+                    class="mobile-menu-button"
+                    id="mobileMenuButton"
+                    aria-label="Open navigation"
+                    aria-expanded="false"
+                >
+                    <span class="hamburger" id="hamburgerIcon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </button>
+
+                <div class="mobile-brand">
+                    <img
+                        src="../WHA-LOGO.PNG.png"
+                        alt="WHA SOL"
+                        class="mobile-logo"
+                    >
+                </div>
+
+                <div class="mobile-admin">
+                    <span class="topbar-online"></span>
+                    <span>Admin</span>
+                </div>
+
+            </header>
+
+            <!-- CONTENT -->
+            <section class="dashboard-content">
+
+                <div class="page-heading">
+                    <h1>Settings</h1>
+
+                    <p>
+                        Manage your WHA SOL admin account and site configuration.
+                    </p>
+                </div>
+
+                <!-- Admin Account -->
+                <div class="settings-section">
+
+                    <div class="settings-section-header">
+                        <h2>Admin Account</h2>
+                        <span id="userRole">Role: admin</span>
+                    </div>
+
+                    <div class="settings-section-body">
+
+                        <div class="admin-account-info">
+
+                            <div class="admin-avatar-large" id="settingsAvatar">
+                                AD
+                            </div>
+
+                            <div class="admin-details">
+                                <div class="admin-name" id="adminName">
+                                    Loading...
+                                </div>
+                                <div class="admin-email" id="adminEmail">
+                                    Loading...
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="settings-row">
+
+                            <div>
+                                <div class="setting-label">
+                                    Email Address
+                                </div>
+                                <div class="setting-value" id="adminEmailValue">
+                                    —
+                                </div>
+                            </div>
+
+                            <div class="actions-right">
+                                <a href="./login.html" class="btn-outline">
+                                    Change Password
+                                </a>
+                            </div>
+
+                        </div>
+
+                        <div class="settings-row">
+
+                            <div>
+                                <div class="setting-label">
+                                    Role
+                                </div>
+                                <div class="setting-value" id="adminRoleValue">
+                                    admin
+                                </div>
+                                <div class="setting-description">
+                                    Your access level in the WHA SOL admin panel.
+                                </div>
+                            </div>
+
+                            <div class="actions-right">
+                                <button type="button" class="btn-danger" id="logoutBtn">
+                                    Logout
+                                </button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Site Information -->
+                <div class="settings-section">
+
+                    <div class="settings-section-header">
+                        <h2>Site Information</h2>
+                        <span>WHA SOL</span>
+                    </div>
+
+                    <div class="settings-section-body">
+
+                        <div class="settings-row">
+
+                            <div>
+                                <div class="setting-label">
+                                    Site Name
+                                </div>
+                                <div class="setting-value">
+                                    WHA SOL
+                                </div>
+                            </div>
+
+                            <div class="setting-field">
+                                <input
+                                    type="text"
+                                    id="siteName"
+                                    placeholder="WHA SOL"
+                                    value="WHA SOL"
+                                >
+                            </div>
+
+                        </div>
+
+                        <div class="settings-row">
+
+                            <div>
+                                <div class="setting-label">
+                                    Site URL
+                                </div>
+                                <div class="setting-value" id="siteUrlValue">
+                                    —
+                                </div>
+                            </div>
+
+                            <div class="setting-field">
+                                <input
+                                    type="url"
+                                    id="siteUrl"
+                                    placeholder="https://your-domain.com"
+                                >
+                            </div>
+
+                        </div>
+
+                        <div class="settings-row">
+
+                            <div>
+                                <div class="setting-label">
+                                    Site Description
+                                </div>
+                                <div class="setting-value">
+                                    Solar troubleshooting and knowledge platform
+                                </div>
+                            </div>
+
+                            <div class="setting-field">
+                                <input
+                                    type="text"
+                                    id="siteDescription"
+                                    placeholder="Solar troubleshooting and knowledge platform"
+                                    value="Solar troubleshooting and knowledge platform"
+                                >
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Navigation -->
+                <div class="settings-section">
+
+                    <div class="settings-section-header">
+                        <h2>Navigation</h2>
+                        <span>Quick links</span>
+                    </div>
+
+                    <div class="settings-section-body">
+
+                        <div class="settings-row">
+
+                            <div>
+                                <div class="setting-label">
+                                    Dashboard
+                                </div>
+                                <div class="setting-description">
+                                    Return to the WHA SOL admin dashboard.
+                                </div>
+                            </div>
+
+                            <div class="actions-right">
+                                <a href="./dashboard.html" class="btn-outline">
+                                    Back to Dashboard
+                                </a>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <script>
+        /* =========================================================
+           SETTINGS JAVASCRIPT
+        ========================================================= */
+
+        (function () {
+            "use strict";
+
+            var sidebar = document.getElementById("adminSidebar");
+            var overlay = document.getElementById("sidebarOverlay");
+            var menuButton = document.getElementById("mobileMenuButton");
+            var hamburger = document.getElementById("hamburgerIcon");
+            var logoutButton = document.getElementById("logoutButton");
+
+            /* Sidebar toggle */
+            function openSidebar() {
+                if (!sidebar) return;
+                sidebar.classList.add("open");
+                if (overlay) {
+                    overlay.classList.add("open");
+                    overlay.setAttribute("aria-hidden", "false");
+                }
+                if (menuButton) {
+                    menuButton.setAttribute("aria-expanded", "true");
+                    menuButton.setAttribute("aria-label", "Close navigation");
+                }
+                if (hamburger) {
+                    hamburger.innerHTML = "<span></span><span></span><span></span>";
+                    var spans = hamburger.querySelectorAll("span");
+                    if (spans.length === 3) {
+                        spans[0].style.transform = "translateY(5.5px) rotate(45deg)";
+                        spans[1].style.opacity = "0";
+                        spans[2].style.transform = "translateY(-5.5px) rotate(-45deg)";
+                    }
+                }
+            }
+
+            function closeSidebar() {
+                if (!sidebar) return;
+                sidebar.classList.remove("open");
+                if (overlay) {
+                    overlay.classList.remove("open");
+                    overlay.setAttribute("aria-hidden", "true");
+                }
+                if (menuButton) {
+                    menuButton.setAttribute("aria-expanded", "false");
+                    menuButton.setAttribute("aria-label", "Open navigation");
+                }
+                if (hamburger) {
+                    hamburger.innerHTML = "<span></span><span></span><span></span>";
+                }
+            }
+
+            if (menuButton) {
+                menuButton.addEventListener("click", function () {
+                    if (sidebar.classList.contains("open")) {
+                        closeSidebar();
+                    } else {
+                        openSidebar();
+                    }
+                });
+            }
+
+            if (overlay) {
+                overlay.addEventListener("click", closeSidebar);
+            }
+
+            document.querySelectorAll(".sidebar-link").forEach(function (link) {
+                link.addEventListener("click", function () {
+                    if (window.innerWidth <= 760) {
+                        closeSidebar();
+                    }
+                });
+            });
+
+            window.addEventListener("resize", function () {
+                if (window.innerWidth > 760) {
+                    closeSidebar();
+                }
+            });
+
+            /* =====================================================
+               AUTHENTICATION
+            ===================================================== */
+
+            function updateAdminInfo(user) {
+                if (!user) return;
+
+                var email = user.email || "admin@whasol.com";
+                var name = user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name);
+                name = name || email;
+
+                var accountName = document.getElementById("accountName");
+                var desktopAdminName = document.getElementById("desktopAdminName");
+                var accountAvatar = document.getElementById("accountAvatar");
+                var settingsAvatar = document.getElementById("settingsAvatar");
+                var adminNameEl = document.getElementById("adminName");
+                var adminEmailEl = document.getElementById("adminEmail");
+                var adminEmailValue = document.getElementById("adminEmailValue");
+                var adminRoleValue = document.getElementById("adminRoleValue");
+                var userRoleEl = document.getElementById("userRole");
+
+                if (accountName) accountName.textContent = name;
+                if (desktopAdminName) desktopAdminName.textContent = email;
+                if (accountAvatar) accountAvatar.textContent = String(name).trim().slice(0, 2).toUpperCase();
+                if (settingsAvatar) settingsAvatar.textContent = String(name).trim().slice(0, 2).toUpperCase();
+                if (adminNameEl) adminNameEl.textContent = name;
+                if (adminEmailEl) adminEmailEl.textContent = email;
+                if (adminEmailValue) adminEmailValue.textContent = email;
+
+                /* Show current origin as site URL */
+                var siteUrlValue = document.getElementById("siteUrlValue");
+                if (siteUrlValue) {
+                    siteUrlValue.textContent = window.location.origin;
+                }
+            }
+
+            function updateSiteUrl() {
+                var siteUrlValue = document.getElementById("siteUrlValue");
+                if (siteUrlValue) {
+                    siteUrlValue.textContent = window.location.origin;
+                }
+            }
+
+            async function initAuth() {
+                try {
+                    var auth = window.WHASOL && window.WHASOL.auth;
+                    var supabase = window.WHASOL && window.WHASOL.supabase;
+
+                    if (auth && typeof auth.getCurrentUser === "function") {
+                        var user = await auth.getCurrentUser();
+                        if (!user) {
+                            window.location.replace("./login.html");
+                            return;
+                        }
+                        updateAdminInfo(user);
+                    } else if (supabase && supabase.auth && typeof supabase.auth.getSession === "function") {
+                        var result = await supabase.auth.getSession();
+                        var session = result && result.data && result.data.session;
+                        if (!session || !session.user) {
+                            window.location.replace("./login.html");
+                            return;
+                        }
+                        updateAdminInfo(session.user);
+                    } else {
+                        setTimeout(initAuth, 500);
+                        return;
+                    }
+                } catch (error) {
+                    console.error("WHA SOL authentication error:", error);
+                    window.location.replace("./login.html");
+                }
+
+                updateSiteUrl();
+            }
+
+            async function protectPage() {
+                try {
+                    if (window.WHASOL && window.WHASOL.auth && typeof window.WHASOL.auth.requireAuth === "function") {
+                        await window.WHASOL.auth.requireAuth("./login.html");
+                    }
+                } catch (error) {
+                    console.error("WHA SOL settings authentication error:", error);
+                    window.location.href = "./login.html";
+                }
+            }
+
+            /* Logout */
+            var logoutBtn = document.getElementById("logoutBtn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", async function () {
+                    logoutBtn.disabled = true;
+                    try {
+                        var auth = window.WHASOL && window.WHASOL.auth;
+                        var supabase = window.WHASOL && window.WHASOL.supabase;
+
+                        if (auth && typeof auth.signOut === "function") {
+                            await auth.signOut();
+                        } else if (supabase && supabase.auth) {
+                            await supabase.auth.signOut();
+                        }
+                    } catch (error) {
+                        console.error("WHA SOL logout error:", error);
+                    }
+                    window.location.replace("./login.html");
+                });
+            }
+
+            if (logoutButton) {
+                logoutButton.addEventListener("click", async function () {
+                    logoutButton.disabled = true;
+                    try {
+                        var auth = window.WHASOL && window.WHASOL.auth;
+                        var supabase = window.WHASOL && window.WHASOL.supabase;
+
+                        if (auth && typeof auth.signOut === "function") {
+                            await auth.signOut();
+                        } else if (supabase && supabase.auth) {
+                            await supabase.auth.signOut();
+                        }
+                    } catch (error) {
+                        console.error("WHA SOL logout error:", error);
+                    }
+                    window.location.replace("./login.html");
+                });
+            }
+
+            /* =====================================================
+               START
+            ===================================================== */
+
+            protectPage();
+            initAuth();
+            updateSiteUrl();
+
+        })();
+    </script>
+
+</body>
+</html>

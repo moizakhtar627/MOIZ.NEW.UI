@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Article Editor | WHA SOL Admin</title>
+
+    <link rel="stylesheet" href="../css/styles.css">
+
+    <style>
+        :root {
+            --editor-bg: #080a0d;
+            --editor-card: #101318;
+            --editor-card-2: #14181e;
+            --editor-border: rgba(255,255,255,.09);
+            --editor-text: #f5f7fa;
+            --editor-muted: #8d96a3;
+            --editor-accent: #d8ff3e;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--editor-bg);
+            color: var(--editor-text);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .editor-shell {
+            min-height: 100vh;
+        }
+
+        /* TOP BAR */
+
+        .topbar {
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            border-bottom: 1px solid var(--editor-border);
+            background: rgba(8,10,13,.96);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand img {
+            width: 130px;
+            max-height: 42px;
+            object-fit: contain;
+        }
+
+        .page-title {
+            color: var(--editor-muted);
+            font-size: 14px;
+            border-left: 1px solid var(--editor-border);
+            padding-left: 16px;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            border: 1px solid var(--editor-border);
+            background: #151920;
+            color: white;
+            padding: 11px 18px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: #1c2129;
+        }
+
+        .btn-primary {
+            background: var(--editor-accent);
+            color: #070900;
+            border-color: var(--editor-accent);
+        }
+
+        .btn-primary:hover {
+            background: #e4ff6d;
+        }
+
+        /* MAIN */
+
+        .editor-container {
+            max-width: 1450px;
+            margin: 0 auto;
+            padding: 35px 30px 70px;
+        }
+
+        .page-heading {
+            margin-bottom: 30px;
+        }
+
+        .page-heading h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+            letter-spacing: -.5px;
+        }
+
+        .page-heading p {
+            margin: 0;
+            color: var(--editor-muted);
+            font-size: 14px;
+        }
+
+        .editor-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 25px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--editor-card);
+            border: 1px solid var(--editor-border);
+            border-radius: 15px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        /* FORM */
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        .field:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #dce1e7;
+        }
+
+        .required {
+            color: var(--editor-accent);
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--editor-border);
+            background: #0c0f13;
+            color: white;
+            border-radius: 9px;
+            padding: 13px 14px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: rgba(216,255,62,.55);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .help-text {
+            margin-top: 7px;
+            color: var(--editor-muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* EDITOR */
+
+        .editor-wrapper {
+            border: 1px solid var(--editor-border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: #0c0f13;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 10px;
+            background: #151920;
+            border-bottom: 1px solid var(--editor-border);
+        }
+
+        .tool-btn {
+            min-width: 35px;
+            height: 34px;
+            padding: 0 9px;
+            border: 1px solid var(--editor-border);
+            background: #101318;
+            color: #e8ebef;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .tool-btn:hover {
+            background: #20252d;
+        }
+
+        .tool-separator {
+            width: 1px;
+            background: var(--editor-border);
+            margin: 0 5px;
+        }
+
+        #articleContent {
+            min-height: 620px;
+            padding: 28px;
+            outline: none;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        #articleContent:empty:before {
+            content: "Start writing your article here...";
+            color: #59616c;
+            pointer-events: none;
+        }
+
+        #articleContent h1 {
+            font-size: 34px;
+            line-height: 1.2;
+            margin: 25px 0 15px;
+        }
+
+        #articleContent h2 {
+            font-size: 27px;
+            line-height: 1.3;
+            margin: 30px 0 12px;
+        }
+
+        #articleContent h3 {
+            font-size: 22px;
+            line-height: 1.4;
+            margin: 25px 0 10px;
+        }
+
+        #articleContent h4 {
+            font-size: 18px;
+            margin: 20px 0 8px;
+        }
+
+        #articleContent p {
+            margin: 0 0 18px;
+        }
+
+        #articleContent img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: block;
+            margin: 20px auto;
+        }
+
+        #articleContent blockquote {
+            border-left: 3px solid var(--editor-accent);
+            margin: 22px 0;
+            padding: 12px 20px;
+            color: #c7cdd5;
+            background: #151920;
+            border-radius: 0 8px 8px 0;
+        }
+
+        #articleContent a {
+            color: var(--editor-accent);
+            text-decoration: underline;
+        }
+
+        #articleContent ul,
+        #articleContent ol {
+            padding-left: 28px;
+            margin-bottom: 20px;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar-card {
+            position: sticky;
+            top: 97px;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .status-badge {
+            padding: 6px 10px;
+            border-radius: 20px;
+            background: rgba(255,255,255,.06);
+            color: #c9d0d8;
+            font-size: 12px;
+        }
+
+        .sidebar-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .sidebar-buttons .btn {
+            flex: 1;
+        }
+
+        .slug-preview {
+            color: var(--editor-muted);
+            font-size: 12px;
+            word-break: break-all;
+            margin-top: 7px;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 170px;
+            border-radius: 10px;
+            border: 1px dashed var(--editor-border);
+            object-fit: cover;
+            display: none;
+            margin-top: 12px;
+        }
+
+        .preview-placeholder {
+            height: 170px;
+            border: 1px dashed var(--editor-border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #606975;
+            font-size: 13px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .notice {
+            padding: 13px;
+            border-radius: 9px;
+            background: rgba(216,255,62,.06);
+            border: 1px solid rgba(216,255,62,.15);
+            color: #cdd4b5;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 950px) {
+            .editor-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar-card {
+                position: static;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .topbar {
+                height: auto;
+                min-height: 65px;
+                padding: 12px 16px;
+                gap: 10px;
+            }
+
+            .brand img {
+                width: 105px;
+            }
+
+            .page-title {
+                display: none;
+            }
+
+            .top-actions .btn {
+                padding: 9px 12px;
+                font-size: 12px;
+            }
+
+            .editor-container {
+                padding: 22px 15px 50px;
+            }
+
+            .page-heading h1 {
+                font-size: 25px;
+            }
+
+            .card {
+                padding: 17px;
+                border-radius: 12px;
+            }
+
+            .two-columns {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            #articleContent {
+                min-height: 500px;
+                padding: 20px;
+                font-size: 15px;
+            }
+
+            #articleContent h1 {
+                font-size: 28px;
+            }
+
+            #articleContent h2 {
+                font-size: 23px;
+            }
+
+            #articleContent h3 {
+                font-size: 19px;
+            }
+        }
+
+        /* =========================================================
+           SIDEBAR OVERLAY (for editor page)
+        ========================================================= */
+
+        :root {
+            --admin-bg: #071018;
+            --admin-sidebar: #09131d;
+            --admin-panel: #0d1924;
+            --admin-border: rgba(255, 255, 255, 0.08);
+            --admin-border-light: rgba(255, 255, 255, 0.12);
+            --admin-text: #f4f7fa;
+            --admin-muted: #8997a6;
+            --admin-muted-2: #647383;
+            --admin-accent: #8fd3ff;
+            --admin-accent-soft: rgba(143, 211, 255, 0.10);
+            --admin-success: #72d6a1;
+            --admin-warning: #e7bd75;
+            --admin-danger: #e47f87;
+            --admin-sidebar-width: 250px;
+        }
+
+        .admin-app {
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .admin-sidebar {
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--admin-sidebar-width);
+            display: flex;
+            flex-direction: column;
+            background: var(--admin-sidebar);
+            border-right: 1px solid var(--admin-border);
+            padding: 22px 14px 16px;
+            transition: transform 0.25s ease;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 4px 9px 24px;
+        }
+
+        .sidebar-logo {
+            width: 112px;
+            height: auto;
+            max-height: 44px;
+            object-fit: contain;
+            object-position: left center;
+        }
+
+        .sidebar-brand-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-brand-text strong {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.13em;
+            color: var(--admin-muted);
+            white-space: nowrap;
+        }
+
+        .sidebar-divider-ed {
+            height: 1px;
+            background: var(--admin-border);
+            margin: 0 8px 17px;
+        }
+
+        .sidebar-label-ed {
+            padding: 0 10px 9px;
+            color: var(--admin-muted-2);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav-ed {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-link-ed {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 43px;
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            color: var(--admin-muted);
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .sidebar-link-ed:hover {
+            color: var(--admin-text);
+            background: rgba(255, 255, 255, 0.035);
+        }
+
+        .sidebar-link-ed.active {
+            color: var(--admin-text);
+            background: var(--admin-accent-soft);
+            border-color: rgba(143, 211, 255, 0.12);
+        }
+
+        .sidebar-link-ed.active::before {
+            content: "";
+            position: absolute;
+            left: -14px;
+            width: 2px;
+            height: 20px;
+            border-radius: 0 3px 3px 0;
+            background: var(--admin-accent);
+        }
+
+        .nav-icon-ed {
+            width: 18px;
+            min-width: 18px;
+            height: 18px;
+            display: grid;
+            place-items: center;
+            color: currentColor;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .sidebar-bottom-ed {
+            margin-top: auto;
+        }
+
+        .admin-account-ed {
+            padding: 13px;
+            margin: 0 4px 9px;
+            border: 1px solid var(--admin-border);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.018);
+        }
+
+        .account-row-ed {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .account-avatar-ed {
+            width: 31px;
+            height: 31px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 31px;
+            border-radius: 50%;
+            background: var(--admin-accent-soft);
+            border: 1px solid rgba(143, 211, 255, 0.18);
+            color: var(--admin-accent);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .account-info-ed {
+            min-width: 0;
+        }
+
+        .account-name-ed {
+            display: block;
+            color: var(--admin-text);
+            font-size: 12px;
+            font-weight: 600;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .account-status-ed {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 3px;
+            color: var(--admin-muted-2);
+            font-size: 10px;
+        }
+
+        .status-dot-ed {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--admin-success);
+        }
+
+        .logout-button-ed {
+            width: 100%;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 0 12px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            background: transparent;
+            color: var(--admin-muted);
+            text-align: left;
+            transition: 0.2s ease;
+        }
+
+        .logout-button-ed:hover {
+            color: var(--admin-danger);
+            background: rgba(228, 127, 135, 0.06);
+        }
+
+        .sidebar-overlay-ed {
+            position: fixed;
+            z-index: 900;
+            inset: 0;
+            display: none;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(2px);
+        }
+
+        .admin-main {
+            width: calc(100% - var(--admin-sidebar-width));
+            min-height: 100vh;
+            margin-left: var(--admin-sidebar-width);
+        }
+
+        .mobile-header-ed {
+            display: none;
+        }
+
+        .mobile-menu-btn-ed {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+            border: 1px solid var(--admin-border);
+            border-radius: 9px;
+            background: transparent;
+            color: var(--admin-text);
+        }
+
+        .hamburger-ed {
+            width: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .hamburger-ed span {
+            display: block;
+            height: 1.5px;
+            width: 100%;
+            border-radius: 2px;
+            background: currentColor;
+            transition: 0.2s ease;
+        }
+
+        @media (max-width: 760px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                box-shadow: 18px 0 40px rgba(0, 0, 0, 0.35);
+            }
+
+            .admin-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay-ed.open {
+                display: block;
+            }
+
+            .admin-main {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .mobile-header-ed {
+                position: sticky;
+                top: 0;
+                z-index: 800;
+                height: 62px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 15px;
+                border-bottom: 1px solid var(--admin-border);
+                background: rgba(7, 16, 24, 0.94);
+                backdrop-filter: blur(14px);
+            }
+
+            .mobile-brand-ed {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .mobile-logo-ed {
+                width: 92px;
+                height: auto;
+                max-height: 32px;
+                object-fit: contain;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="admin-app">
+
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar" id="adminSidebar">
+
+        <div class="sidebar-brand">
+            <img
+                src="../WHA-LOGO.PNG.png"
+                alt="WHA SOL"
+                class="sidebar-logo"
+            >
+
+            <div class="sidebar-brand-text">
+                <strong>ADMIN PANEL</strong>
+            </div>
+        </div>
+
+        <div class="sidebar-divider-ed"></div>
+
+        <div class="sidebar-label-ed">Workspace</div>
+
+        <nav class="sidebar-nav-ed">
+
+            <a
+                href="./dashboard.html"
+                class="sidebar-link-ed"
+            >
+                <span class="nav-icon-ed">&#935;</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="./articles.html" class="sidebar-link-ed">
+                <span class="nav-icon-ed">&#9633;</span>
+                <span>Articles</span>
+            </a>
+
+            <a href="./article-editor.html" class="sidebar-link-ed active">
+                <span class="nav-icon-ed">&#65371;</span>
+                <span>Create Article</span>
+            </a>
+
+            <a href="./error-codes.html" class="sidebar-link-ed">
+                <span class="nav-icon-ed">&#9673;</span>
+                <span>Error Codes</span>
+            </a>
+
+            <a href="./brands.html" class="sidebar-link-ed">
+                <span class="nav-icon-ed">&#9632;</span>
+                <span>Brands &amp; Models</span>
+            </a>
+
+            <a href="./media.html" class="sidebar-link-ed">
+                <span class="nav-icon-ed">&#9637;</span>
+                <span>Media Library</span>
+            </a>
+
+            <a href="./settings.html" class="sidebar-link-ed">
+                <span class="nav-icon-ed">&#9881;</span>
+                <span>Settings</span>
+            </a>
+
+            <a href="./blogs.html" class="sidebar-link-ed">
+                <span class="nav-icon-ed">&#9637;</span>
+                <span>Blogs</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom-ed">
+
+            <div class="admin-account-ed">
+                <div class="account-row-ed">
+
+                    <div class="account-avatar-ed" id="accountAvatar">
+                        AD
+                    </div>
+
+                    <div class="account-info-ed">
+                        <span class="account-name-ed" id="accountName">
+                            Admin
+                        </span>
+
+                        <span class="account-status-ed">
+                            <span class="status-dot-ed"></span>
+                            Online
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+            <button
+                type="button"
+                class="logout-button-ed"
+                id="logoutButton"
+            >
+                <span class="nav-icon-ed">&#8617;</span>
+                <span>Logout</span>
+            </button>
+
+        </div>
+
+    </aside>
+
+    <div
+        class="sidebar-overlay-ed"
+        id="sidebarOverlay"
+        aria-hidden="true"
+    ></div>
+
+    <!-- MAIN -->
+    <main class="admin-main">
+
+        <header class="topbar">
+
+            <div class="brand">
+                <button
+                    type="button"
+                    class="mobile-menu-btn-ed"
+                    id="mobileMenuButton"
+                    aria-label="Open navigation"
+                    aria-expanded="false"
+                >
+                    <span class="hamburger-ed" id="hamburgerIcon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </button>
+
+                <a href="./dashboard.html">
+                    <img src="../WHA-LOGO.PNG.png" alt="WHA SOL">
+                </a>
+
+                <span class="page-title">Article Editor</span>
+            </div>
+
+            <div class="top-actions">
+                <a href="./articles.html" class="btn">
+                    ← Articles
+                </a>
+
+                <a href="./dashboard.html" class="btn">
+                    ← Dashboard
+                </a>
+
+                <button type="button" class="btn btn-primary" id="publishTopBtn">
+                    Publish
+                </button>
+            </div>
+
+        </header>
+
+
+        <!-- EDITOR CONTAINER -->
+        <div class="editor-container">
+
+        <div class="page-heading">
+            <h1>Create Article</h1>
+            <p>Create a troubleshooting guide, solar article, or knowledge-base article for WHA SOL.</p>
+        </div>
+
+
+        <form id="articleForm">
+
+            <div class="editor-layout">
+
+                <!-- LEFT SIDE -->
+                <div>
+
+                    <!-- BASIC INFORMATION -->
+                    <section class="card">
+
+                        <div class="card-title">
+                            Article Information
+                        </div>
+
+                        <div class="field">
+
+                            <label for="title">
+                                Article Title <span class="required">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                placeholder="Example: How to Shut Down and Restart Your Solar Inverter"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="two-columns">
+
+                            <div class="field">
+
+                                <label for="brand">
+                                    Brand
+                                </label>
+
+                                <select id="brand" name="brand">
+                                    <option value="">
+                                        Select Brand
+                                    </option>
+                                </select>
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label for="model">
+                                    Model
+                                </label>
+
+                                <select id="model" name="model">
+                                    <option value="">
+                                        Select Model
+                                    </option>
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="two-columns">
+
+                            <div class="field">
+
+                                <label for="category">
+                                    Category <span class="required">*</span>
+                                </label>
+
+                                <select id="category" name="category" required>
+
+                                    <option value="">
+                                        Select Category
+                                    </option>
+
+                                    <option value="Inverter">
+                                        Inverter
+                                    </option>
+
+                                    <option value="Battery">
+                                        Battery
+                                    </option>
+
+                                    <option value="Solar Panel">
+                                        Solar Panel
+                                    </option>
+
+                                    <option value="Wiring & Electrical">
+                                        Wiring & Electrical
+                                    </option>
+
+                                    <option value="Voltage & Frequency">
+                                        Voltage & Frequency
+                                    </option>
+
+                                    <option value="Troubleshooting">
+                                        Troubleshooting
+                                    </option>
+
+                                    <option value="Solar Battery Guide">
+                                        Solar Battery Guide
+                                    </option>
+
+                                    <option value="General">
+                                        General
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label for="status">
+                                    Status
+                                </label>
+
+                                <select id="status" name="status">
+
+                                    <option value="draft">
+                                        Draft
+                                    </option>
+
+                                    <option value="published">
+                                        Published
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- SEO -->
+                    <section class="card">
+
+                        <div class="card-title">
+                            SEO Settings
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="metaTitle">
+                                Meta Title
+                            </label>
+
+                            <input
+                                type="text"
+                                id="metaTitle"
+                                name="metaTitle"
+                                placeholder="SEO title for Google"
+                            >
+
+                            <div class="help-text">
+                                Recommended: approximately 50–60 characters.
+                            </div>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="metaDescription">
+                                Meta Description
+                            </label>
+
+                            <textarea
+                                id="metaDescription"
+                                name="metaDescription"
+                                placeholder="Describe this article for search engines..."
+                            ></textarea>
+
+                            <div class="help-text">
+                                Recommended: approximately 140–160 characters.
+                            </div>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label for="slug">
+                                SEO URL / Slug
+                            </label>
+
+                            <input
+                                type="text"
+                                id="slug"
+                                name="slug"
+                                placeholder="solar-inverter-shutdown-restart"
+                            >
+
+                            <div class="slug-preview" id="slugPreview">
+                                URL: /article/
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                    <!-- ARTICLE CONTENT -->
+                    <section class="card">
+
+                        <div class="card-title">
+                            Article Content
+                        </div>
+
+                        <div class="editor-wrapper">
+
+                            <div class="toolbar">
+
+                                <button type="button" class="tool-btn" onclick="format('bold')" title="Bold">
+                                    <strong>B</strong>
+                                </button>
+
+                                <button type="button" class="tool-btn" onclick="format('italic')" title="Italic">
+                                    <em>I</em>
+                                </button>
+
+                                <button type="button" class="tool-btn" onclick="format('underline')" title="Underline">
+                                    <u>U</u>
+                                </button>
+
+                                <span class="tool-separator"></span>
+
+                                <button type="button" class="tool-btn" onclick="formatBlock('p')">
+                                    P
+                                </button>
+
+                                <button type="button" class="tool-btn" onclick="formatBlock('h1')">
+                                    H1
+                                </button>
+
+                                <button type="button" class="tool-btn" onclick="formatBlock('h2')">
+                                    H2
+                                </button>
+
+                                <button type="button" class="tool-btn" onclick="formatBlock('h3')">
+                                    H3
+                                </button>
+
+                                <button type="button" class="tool-btn" onclick="formatBlock('h4')">
+                                    H4
+                                </button>
+
+                                <span class="tool-separator"></span>
+
+                                <button type="button" class="tool-btn" onclick="format('insertUnorderedList')">
+                                    • List
+                                </button>
+
+                                <button type="button" class="tool-btn" onclick="format('insertOrderedList')">
+                                    1. List
+                                </button>
+
+                                <button type="button" class="tool-btn" onclick="formatBlock('blockquote')">
+                                    Quote
+                                </button>
+
+                                <span class="tool-separator"></span>
+
+                                <button type="button" class="tool-btn" onclick="insertLink()">
+                                    Link
+                                </button>
+
+                                <button type="button" class="tool-btn" onclick="insertImage()">
+                                    Image
+                                </button>
+
+                                <button type="button" class="tool-btn" onclick="format('insertHorizontalRule')">
+                                    HR
+                                </button>
+
+                                <span class="tool-separator"></span>
+
+                                <button type="button" class="tool-btn" onclick="format('undo')">
+                                    ↶
+                                </button>
+
+                                <button type="button" class="tool-btn" onclick="format('redo')">
+                                    ↷
+                                </button>
+
+                            </div>
+
+
+                            <div
+                                id="articleContent"
+                                contenteditable="true"
+                                spellcheck="true"
+                            ></div>
+
+                        </div>
+
+                        <div class="help-text">
+                            Use H2 for major sections and H3 for subsections. Images can be inserted directly inside the article.
+                        </div>
+
+                    </section>
+
+                </div>
+
+
+                <!-- RIGHT SIDEBAR -->
+                <aside>
+
+                    <div class="card sidebar-card">
+
+                        <div class="card-title">
+                            Publish
+                        </div>
+
+                        <div class="status-row">
+
+                            <span>
+                                Current status
+                            </span>
+
+                            <span class="status-badge" id="statusBadge">
+                                Draft
+                            </span>
+
+                        </div>
+
+
+                        <div class="sidebar-buttons">
+
+                            <button
+                                type="button"
+                                class="btn"
+                                id="draftBtn"
+                            >
+                                Save Draft
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                id="publishBtn"
+                            >
+                                Publish
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- FEATURED IMAGE -->
+                    <div class="card">
+
+                        <div class="card-title">
+                            Featured Image
+                        </div>
+
+                        <div class="field">
+
+                            <label for="featuredImage">
+                                Image URL
+                            </label>
+
+                            <input
+                                type="url"
+                                id="featuredImage"
+                                name="featuredImage"
+                                placeholder="https://..."
+                            >
+
+                            <div class="help-text">
+                                Add the image URL that should appear as the article's featured image.
+                            </div>
+
+                        </div>
+
+
+                        <div class="preview-placeholder" id="imagePlaceholder">
+                            Featured image preview
+                        </div>
+
+                        <img
+                            id="imagePreview"
+                            class="preview-image"
+                            alt="Featured image preview"
+                        >
+
+                    </div>
+
+
+                    <!-- ARTICLE INFO -->
+                    <div class="card">
+
+                        <div class="card-title">
+                            Publishing Notes
+                        </div>
+
+                        <div class="notice">
+
+                            Published articles should contain accurate troubleshooting information and clear safety instructions where electrical work is involved.
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- DANGER -->
+                    <div class="card">
+
+                        <div class="card-title">
+                            Editor Actions
+                        </div>
+
+                        <button
+                            type="button"
+                            class="btn"
+                            style="width:100%;"
+                            id="clearBtn"
+                        >
+                            Clear Article
+                        </button>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </form>
+
+        </div>
+
+        </main>
+
+    </div>
+
+
+    <script>
+
+    /* =========================================================
+       WHA SOL ARTICLE EDITOR
+       ========================================================= */
+
+    const STORAGE_KEY = "whasol_admin_articles";
+
+    const contentEditor = document.getElementById("articleContent");
+    const titleInput = document.getElementById("title");
+    const slugInput = document.getElementById("slug");
+    const statusInput = document.getElementById("status");
+    const statusBadge = document.getElementById("statusBadge");
+    const featuredImageInput = document.getElementById("featuredImage");
+    const imagePreview = document.getElementById("imagePreview");
+    const imagePlaceholder = document.getElementById("imagePlaceholder");
+
+
+    /* ---------------------------------------------------------
+       AUTH CHECK
+       --------------------------------------------------------- */
+
+    async function checkAdminAccess() {
+
+        try {
+
+            if (
+                window.WHASOL &&
+                window.WHASOL.auth &&
+                typeof window.WHASOL.auth.requireAuth === "function"
+            ) {
+
+                await window.WHASOL.auth.requireAuth("./login.html");
+
+            }
+
+        } catch (error) {
+
+            console.error("Authentication check failed:", error);
+
+            window.location.href = "./login.html";
+
+        }
+
+    }
+
+
+    /* ---------------------------------------------------------
+       TEXT EDITOR
+       --------------------------------------------------------- */
+
+    function format(command, value = null) {
+
+        contentEditor.focus();
+
+        document.execCommand(command, false, value);
+
+    }
+
+
+    function formatBlock(tag) {
+
+        contentEditor.focus();
+
+        document.execCommand(
+            "formatBlock",
+            false,
+            tag
+        );
+
+    }
+
+
+    /* ---------------------------------------------------------
+       LINK
+       --------------------------------------------------------- */
+
+    function insertLink() {
+
+        contentEditor.focus();
+
+        const url = prompt(
+            "Enter the URL:",
+            "https://"
+        );
+
+        if (!url) return;
+
+        document.execCommand(
+            "createLink",
+            false,
+            url
+        );
+
+    }
+
+
+    /* ---------------------------------------------------------
+       IMAGE
+       --------------------------------------------------------- */
+
+    function insertImage() {
+
+        contentEditor.focus();
+
+        const input = document.createElement("input");
+
+        input.type = "file";
+        input.accept = "image/*";
+
+        input.onchange = function () {
+
+            const file = input.files[0];
+
+            if (!file) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function (event) {
+
+                document.execCommand(
+                    "insertImage",
+                    false,
+                    event.target.result
+                );
+
+            };
+
+            reader.readAsDataURL(file);
+
+        };
+
+        input.click();
+
+    }
+
+
+    /* ---------------------------------------------------------
+       AUTO SLUG
+       --------------------------------------------------------- */
+
+    function createSlug(text) {
+
+        return text
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9\s-]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-");
+
+    }
+
+
+    titleInput.addEventListener(
+        "input",
+        function () {
+
+            if (!slugInput.value.trim()) {
+
+                slugInput.value = createSlug(
+                    titleInput.value
+                );
+
+                updateSlugPreview();
+
+            }
+
+        }
+    );
+
+
+    slugInput.addEventListener(
+        "input",
+        updateSlugPreview
+    );
+
+
+    function updateSlugPreview() {
+
+        const slug = slugInput.value.trim();
+
+        document.getElementById("slugPreview").textContent =
+            "URL: /" + (slug || "article");
+
+    }
+
+
+    /* ---------------------------------------------------------
+       STATUS
+       --------------------------------------------------------- */
+
+    statusInput.addEventListener(
+        "change",
+        function () {
+
+            statusBadge.textContent =
+                statusInput.value === "published"
+                    ? "Published"
+                    : "Draft";
+
+        }
+    );
+
+
+    /* ---------------------------------------------------------
+       FEATURED IMAGE PREVIEW
+       --------------------------------------------------------- */
+
+    featuredImageInput.addEventListener(
+        "input",
+        function () {
+
+            const url =
+                featuredImageInput.value.trim();
+
+            if (!url) {
+
+                imagePreview.style.display = "none";
+                imagePlaceholder.style.display = "flex";
+
+                return;
+
+            }
+
+            imagePreview.src = url;
+
+            imagePreview.style.display = "block";
+            imagePlaceholder.style.display = "none";
+
+        }
+    );
+
+
+    /* ---------------------------------------------------------
+       SAVE ARTICLE
+       --------------------------------------------------------- */
+
+    function getArticleData(statusOverride = null) {
+
+        const title =
+            titleInput.value.trim();
+
+        if (!title) {
+
+            alert("Please enter an article title.");
+
+            titleInput.focus();
+
+            return null;
+
+        }
+
+
+        const category =
+            document.getElementById("category").value;
+
+        if (!category) {
+
+            alert("Please select a category.");
+
+            return null;
+
+        }
+
+
+        const article = {
+
+            id:
+                "article-" +
+                Date.now(),
+
+            title: title,
+
+            brand:
+                document.getElementById("brand").value.trim(),
+
+            model:
+                document.getElementById("model").value.trim(),
+
+            category: category,
+
+            metaTitle:
+                document.getElementById("metaTitle").value.trim(),
+
+            metaDescription:
+                document.getElementById("metaDescription").value.trim(),
+
+            slug:
+                slugInput.value.trim() ||
+                createSlug(title),
+
+            featuredImage:
+                featuredImageInput.value.trim(),
+
+            content:
+                contentEditor.innerHTML,
+
+            status:
+                statusOverride ||
+                statusInput.value,
+
+            createdAt:
+                new Date().toISOString(),
+
+            updatedAt:
+                new Date().toISOString()
+
+        };
+
+
+        return article;
+
+    }
+
+
+    function saveArticle(statusOverride = null) {
+
+        const article =
+            getArticleData(statusOverride);
+
+        if (!article) return;
+
+
+        let articles = [];
+
+        try {
+
+            articles =
+                JSON.parse(
+                    localStorage.getItem(STORAGE_KEY)
+                ) || [];
+
+        } catch (error) {
+
+            articles = [];
+
+        }
+
+
+        articles.unshift(article);
+
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(articles)
+        );
+
+
+        statusInput.value =
+            article.status;
+
+        statusBadge.textContent =
+            article.status === "published"
+                ? "Published"
+                : "Draft";
+
+
+        alert(
+            article.status === "published"
+                ? "Article published successfully."
+                : "Article saved as draft."
+        );
+
+    }
+
+
+    /* ---------------------------------------------------------
+       BUTTONS
+       --------------------------------------------------------- */
+
+    document.getElementById("draftBtn")
+        .addEventListener(
+            "click",
+            function () {
+
+                saveArticle("draft");
+
+            }
+        );
+
+
+    document.getElementById("publishBtn")
+        .addEventListener(
+            "click",
+            function () {
+
+                saveArticle("published");
+
+            }
+        );
+
+
+    document.getElementById("publishTopBtn")
+        .addEventListener(
+            "click",
+            function () {
+
+                saveArticle("published");
+
+            }
+        );
+
+
+    /* ---------------------------------------------------------
+       CLEAR
+       --------------------------------------------------------- */
+
+    document.getElementById("clearBtn")
+        .addEventListener(
+            "click",
+            function () {
+
+                const confirmed =
+                    confirm(
+                        "Are you sure you want to clear this article?"
+                    );
+
+                if (!confirmed) return;
+
+                document.getElementById(
+                    "articleForm"
+                ).reset();
+
+                contentEditor.innerHTML = "";
+
+                statusInput.value = "draft";
+
+                statusBadge.textContent = "Draft";
+
+                imagePreview.style.display = "none";
+
+                imagePlaceholder.style.display = "flex";
+
+                updateSlugPreview();
+
+            }
+        );
+
+
+    </script>
+
+
+    <script src="../js/data.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+
+
+    <script>
+
+    /* ---------------------------------------------------------
+       BRAND / MODEL DROPDOWNS
+       --------------------------------------------------------- */
+
+    const brandSelect = document.getElementById("brand");
+    const modelSelect = document.getElementById("model");
+
+
+    function populateBrandDropdown() {
+
+        brandSelect.innerHTML =
+            '<option value="">Select Brand</option>';
+
+        if (
+            !window.WHASOL ||
+            !Array.isArray(window.WHASOL.brands)
+        ) {
+
+            return;
+
+        }
+
+        window.WHASOL.brands.forEach(function (brand) {
+
+            const option = document.createElement("option");
+
+            option.value = brand.name || "";
+            option.textContent = brand.name || "";
+
+            brandSelect.appendChild(option);
+
+        });
+
+    }
+
+
+    function populateModelDropdown(brandName) {
+
+        modelSelect.innerHTML =
+            '<option value="">Select Model</option>';
+
+        if (!brandName) {
+
+            modelSelect.disabled = true;
+
+            return;
+
+        }
+
+        if (
+            !window.WHASOL ||
+            !Array.isArray(window.WHASOL.brands)
+        ) {
+
+            return;
+
+        }
+
+        modelSelect.disabled = false;
+
+        const brand = window.WHASOL.brands.find(function (b) {
+            return (b.name || "").toLowerCase() === brandName.toLowerCase();
+        });
+
+        if (brand && Array.isArray(brand.models)) {
+
+            brand.models.forEach(function (model) {
+
+                const option = document.createElement("option");
+
+                option.value = model || "";
+                option.textContent = model || "";
+
+                modelSelect.appendChild(option);
+
+            });
+
+        }
+
+    }
+
+
+    brandSelect.addEventListener("change", function () {
+        populateModelDropdown(brandSelect.value);
+    });
+
+
+    /* ---------------------------------------------------------
+       SIDEBAR TOGGLE + ADMIN UI
+       --------------------------------------------------------- */
+
+    const adminSidebar = document.getElementById("adminSidebar");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
+    const mobileMenuButton = document.getElementById("mobileMenuButton");
+    const hamburgerIcon = document.getElementById("hamburgerIcon");
+    const logoutButton = document.getElementById("logoutButton");
+
+
+    function openSidebar() {
+
+        if (!adminSidebar) return;
+
+        adminSidebar.classList.add("open");
+
+        if (sidebarOverlay) {
+            sidebarOverlay.classList.add("open");
+            sidebarOverlay.setAttribute("aria-hidden", "false");
+        }
+
+        if (mobileMenuButton) {
+            mobileMenuButton.setAttribute("aria-expanded", "true");
+            mobileMenuButton.setAttribute("aria-label", "Close navigation");
+        }
+
+        if (hamburgerIcon) {
+            const spans = hamburgerIcon.querySelectorAll("span");
+
+            if (spans.length === 3) {
+                spans[0].style.transform = "translateY(5.5px) rotate(45deg)";
+                spans[1].style.opacity = "0";
+                spans[2].style.transform = "translateY(-5.5px) rotate(-45deg)";
+            }
+        }
+
+    }
+
+
+    function closeSidebar() {
+
+        if (!adminSidebar) return;
+
+        adminSidebar.classList.remove("open");
+
+        if (sidebarOverlay) {
+            sidebarOverlay.classList.remove("open");
+            sidebarOverlay.setAttribute("aria-hidden", "true");
+        }
+
+        if (mobileMenuButton) {
+            mobileMenuButton.setAttribute("aria-expanded", "false");
+            mobileMenuButton.setAttribute("aria-label", "Open navigation");
+        }
+
+        if (hamburgerIcon) {
+            const spans = hamburgerIcon.querySelectorAll("span");
+
+            if (spans.length === 3) {
+                spans[0].style.transform = "none";
+                spans[1].style.opacity = "1";
+                spans[2].style.transform = "none";
+            }
+        }
+
+    }
+
+
+    if (mobileMenuButton) {
+
+        mobileMenuButton.addEventListener("click", function () {
+
+            if (adminSidebar.classList.contains("open")) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+
+        });
+
+    }
+
+
+    if (sidebarOverlay) {
+
+        sidebarOverlay.addEventListener("click", closeSidebar);
+
+    }
+
+
+    document.querySelectorAll(".sidebar-link-ed").forEach(function (link) {
+
+        link.addEventListener("click", function () {
+
+            if (window.innerWidth <= 760) {
+                closeSidebar();
+            }
+
+        });
+
+    });
+
+
+    window.addEventListener("resize", function () {
+
+        if (window.innerWidth > 760) {
+            closeSidebar();
+        }
+
+    });
+
+
+    /* ---------------------------------------------------------
+       ADMIN INFO + LOGOUT
+       --------------------------------------------------------- */
+
+    function updateAdminInfo(user) {
+
+        if (!user) return;
+
+        const email = user.email || "Admin";
+
+        let name = "";
+
+        if (user.user_metadata) {
+            name = user.user_metadata.full_name ||
+                   user.user_metadata.name || "";
+        }
+
+        name = name || email;
+
+        const accountName = document.getElementById("accountName");
+        const accountAvatar = document.getElementById("accountAvatar");
+
+        if (accountName) accountName.textContent = name;
+        if (accountAvatar) {
+            accountAvatar.textContent = String(name).trim().slice(0, 2).toUpperCase();
+        }
+
+    }
+
+
+    async function initAdminAuth() {
+
+        try {
+
+            const auth = window.WHASOL && window.WHASOL.auth;
+            const supabase = window.WHASOL && window.WHASOL.supabase;
+
+            if (auth && typeof auth.getCurrentUser === "function") {
+
+                const user = await auth.getCurrentUser();
+
+                if (!user) {
+                    window.location.replace("./login.html");
+                    return;
+                }
+
+                updateAdminInfo(user);
+
+            } else if (supabase && supabase.auth) {
+
+                const result = await supabase.auth.getSession();
+                const session = result && result.data && result.data.session;
+
+                if (!session || !session.user) {
+                    window.location.replace("./login.html");
+                    return;
+                }
+
+                updateAdminInfo(session.user);
+
+            } else {
+
+                setTimeout(initAdminAuth, 500);
+
+            }
+
+        } catch (error) {
+
+            console.error("WHA SOL authentication error:", error);
+
+            window.location.replace("./login.html");
+
+        }
+
+    }
+
+
+    if (logoutButton) {
+
+        logoutButton.addEventListener("click", async function () {
+
+            logoutButton.disabled = true;
+
+            try {
+
+                const auth = window.WHASOL && window.WHASOL.auth;
+                const supabase = window.WHASOL && window.WHASOL.supabase;
+
+                if (auth && typeof auth.signOut === "function") {
+                    await auth.signOut();
+                } else if (supabase && supabase.auth) {
+                    await supabase.auth.signOut();
+                }
+
+            } catch (error) {
+
+                console.error("WHA SOL logout error:", error);
+
+            }
+
+            window.location.replace("./login.html");
+
+        });
+
+    }
+
+
+    /* ---------------------------------------------------------
+       START
+       --------------------------------------------------------- */
+
+    checkAdminAccess();
+
+    updateSlugPreview();
+
+</script>
+
+</body>
+</html>

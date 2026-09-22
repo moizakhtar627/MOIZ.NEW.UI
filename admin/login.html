@@ -1,0 +1,1403 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="robots"
+    content="noindex, nofollow"
+  >
+
+  <title>WHA SOL Admin — Sign In</title>
+
+  <!-- WHA SOL CSS -->
+  <link rel="stylesheet" href="../css/styles.css">
+
+  <!-- WHA SOL Supabase Configuration -->
+  <script src="../js/data.js"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/auth.js"></script>
+
+  <style>
+    :root {
+      --admin-bg: #080b10;
+      --admin-surface: #0e131a;
+      --admin-surface-2: #121821;
+      --admin-border: rgba(255, 255, 255, 0.09);
+      --admin-border-focus: rgba(255, 255, 255, 0.22);
+      --admin-text: #f5f7fa;
+      --admin-muted: #8e98a7;
+      --admin-danger: #ff6b6b;
+      --admin-success: #6ee7a0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(
+          circle at 50% 20%,
+          rgba(255, 255, 255, 0.045),
+          transparent 32%
+        ),
+        var(--admin-bg);
+
+      color: var(--admin-text);
+
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    .admin-background {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.3;
+
+      background-image:
+        linear-gradient(
+          rgba(255, 255, 255, 0.025) 1px,
+          transparent 1px
+        ),
+        linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.025) 1px,
+          transparent 1px
+        );
+
+      background-size: 56px 56px;
+
+      mask-image: linear-gradient(
+        to bottom,
+        black,
+        transparent 85%
+      );
+    }
+
+    /* Main container */
+    .admin-shell {
+      position: relative;
+      width: 100%;
+      max-width: 460px;
+      z-index: 1;
+    }
+
+    /* Logo / Brand */
+    .admin-brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .admin-logo {
+      width: 88px;
+      height: 88px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 18px;
+      border-radius: 18px;
+    }
+
+    .admin-brand-name {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: -0.6px;
+    }
+
+    .admin-brand-subtitle {
+      margin: 8px 0 0;
+      color: var(--admin-muted);
+      font-size: 13px;
+      letter-spacing: 0.2px;
+    }
+
+    /* Login card */
+    .login-card {
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.045),
+          rgba(255, 255, 255, 0.018)
+        ),
+        var(--admin-surface);
+
+      border: 1px solid var(--admin-border);
+      border-radius: 24px;
+      padding: 34px;
+
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.025);
+
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    /* Security badge */
+    .security-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+
+      margin-bottom: 24px;
+      padding: 7px 10px;
+
+      border: 1px solid var(--admin-border);
+      border-radius: 999px;
+
+      color: var(--admin-muted);
+      font-size: 11px;
+      letter-spacing: 0.2px;
+    }
+
+    .security-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+
+      background: var(--admin-success);
+
+      box-shadow:
+        0 0 10px rgba(110, 231, 160, 0.4);
+    }
+
+    /* Heading */
+    .login-heading {
+      margin-bottom: 28px;
+    }
+
+    .login-heading h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 650;
+      letter-spacing: -0.35px;
+    }
+
+    .login-heading p {
+      margin: 8px 0 0;
+      color: var(--admin-muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+
+      color: #dce1e8;
+      font-size: 13px;
+      font-weight: 550;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 50px;
+
+      padding: 0 15px;
+
+      background: var(--admin-surface-2);
+      border: 1px solid var(--admin-border);
+      border-radius: 12px;
+
+      color: var(--admin-text);
+      font-size: 14px;
+
+      outline: none;
+
+      transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .form-input::placeholder {
+      color: #596473;
+    }
+
+    .form-input:hover {
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .form-input:focus {
+      border-color: var(--admin-border-focus);
+      background: #151b24;
+
+      box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.035);
+    }
+
+    /* Password */
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-wrapper .form-input {
+      padding-right: 74px;
+    }
+
+    .password-toggle {
+      position: absolute;
+
+      right: 10px;
+      top: 50%;
+
+      transform: translateY(-50%);
+
+      border: 0;
+      background: transparent;
+
+      color: #7f8997;
+
+      font-size: 12px;
+      font-weight: 600;
+
+      padding: 7px 8px;
+
+      cursor: pointer;
+    }
+
+    .password-toggle:hover {
+      color: #ffffff;
+    }
+
+    /* Forgot password */
+    .forgot-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -7px;
+      margin-bottom: 20px;
+    }
+
+    .forgot-password {
+      border: 0;
+      padding: 0;
+
+      background: transparent;
+      color: #aab3bf;
+
+      font-size: 12px;
+      font-weight: 600;
+
+      cursor: pointer;
+      text-decoration: none;
+
+      transition:
+        color 0.2s ease;
+    }
+
+    .forgot-password:hover {
+      color: #ffffff;
+    }
+
+    /* Back to login */
+    .back-to-login {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+
+      margin-bottom: 22px;
+
+      border: 0;
+      padding: 0;
+
+      background: transparent;
+      color: #8e98a7;
+
+      font-size: 12px;
+      font-weight: 600;
+
+      cursor: pointer;
+    }
+
+    .back-to-login:hover {
+      color: #ffffff;
+    }
+
+    /* Error */
+    .login-error {
+      display: none;
+
+      margin: 0 0 18px;
+      padding: 12px 14px;
+
+      border: 1px solid rgba(255, 107, 107, 0.2);
+      border-radius: 10px;
+
+      background: rgba(255, 107, 107, 0.06);
+      color: #ff9b9b;
+
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .login-error.visible {
+      display: block;
+    }
+
+    /* Success */
+    .login-success {
+      display: none;
+
+      margin: 0 0 18px;
+      padding: 12px 14px;
+
+      border: 1px solid rgba(110, 231, 160, 0.2);
+      border-radius: 10px;
+
+      background: rgba(110, 231, 160, 0.06);
+      color: #8ff0b5;
+
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .login-success.visible {
+      display: block;
+    }
+
+    /* Button */
+    .signin-button {
+      width: 100%;
+      height: 50px;
+
+      border: 0;
+      border-radius: 12px;
+
+      background: #f5f7fa;
+      color: #080b10;
+
+      font-size: 14px;
+      font-weight: 700;
+
+      cursor: pointer;
+
+      transition:
+        transform 0.2s ease,
+        opacity 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .signin-button:hover {
+      transform: translateY(-1px);
+
+      box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    .signin-button:active {
+      transform: translateY(0);
+    }
+
+    .signin-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+
+      transform: none;
+
+      box-shadow: none;
+    }
+
+    .button-loading {
+      display: none;
+    }
+
+    .signin-button.loading .button-text {
+      display: none;
+    }
+
+    .signin-button.loading .button-loading {
+      display: inline;
+    }
+
+    /* Screen states */
+    .login-view,
+    .forgot-view {
+      display: block;
+    }
+
+    .forgot-view {
+      display: none;
+    }
+
+    .login-card.forgot-mode .login-view {
+      display: none;
+    }
+
+    .login-card.forgot-mode .forgot-view {
+      display: block;
+    }
+
+    /* Footer */
+    .admin-footer {
+      margin-top: 22px;
+
+      text-align: center;
+
+      color: #56606e;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* Mobile */
+    @media (max-width: 520px) {
+      body {
+        padding: 16px;
+      }
+
+      .login-card {
+        padding: 25px 20px;
+        border-radius: 20px;
+      }
+
+      .admin-logo {
+        width: 76px;
+        height: 76px;
+      }
+
+      .admin-brand-name {
+        font-size: 22px;
+      }
+
+      .login-heading h1 {
+        font-size: 20px;
+      }
+
+      .form-input,
+      .signin-button {
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      body {
+        padding: 12px;
+      }
+
+      .login-card {
+        padding: 22px 16px;
+      }
+
+      .form-input,
+      .signin-button {
+        height: 48px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="admin-background"></div>
+
+  <main class="admin-shell">
+
+    <!-- BRAND -->
+    <header class="admin-brand">
+
+      <img
+        src="../WHA-LOGO.PNG.png"
+        alt="WHA SOL"
+        class="admin-logo"
+      >
+
+      <h2 class="admin-brand-name">
+        WHA SOL Admin
+      </h2>
+
+      <p class="admin-brand-subtitle">
+        Secure content management
+      </p>
+
+    </header>
+
+
+    <!-- LOGIN CARD -->
+    <section
+      class="login-card"
+      id="loginCard"
+    >
+
+      <div class="security-badge">
+        <span class="security-dot"></span>
+        Protected admin access
+      </div>
+
+
+      <!-- =========================
+           LOGIN VIEW
+      ========================== -->
+      <div class="login-view">
+
+        <div class="login-heading">
+
+          <h1>
+            Sign in to your account
+          </h1>
+
+          <p>
+            Access the WHA SOL content management system.
+          </p>
+
+        </div>
+
+
+        <!-- LOGIN ERROR -->
+        <div
+          id="loginError"
+          class="login-error"
+          role="alert"
+          aria-live="polite"
+        ></div>
+
+
+        <!-- LOGIN SUCCESS -->
+        <div
+          id="loginSuccess"
+          class="login-success"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+
+        <!-- LOGIN FORM -->
+        <form
+          id="loginForm"
+          novalidate
+        >
+
+          <!-- EMAIL -->
+          <div class="form-group">
+
+            <label
+              class="form-label"
+              for="email"
+            >
+              Email address
+            </label>
+
+            <input
+              id="email"
+              name="email"
+              class="form-input"
+              type="email"
+              autocomplete="email"
+              placeholder="Enter your email"
+              required
+            >
+
+          </div>
+
+
+          <!-- PASSWORD -->
+          <div class="form-group">
+
+            <label
+              class="form-label"
+              for="password"
+            >
+              Password
+            </label>
+
+            <div class="password-wrapper">
+
+              <input
+                id="password"
+                name="password"
+                class="form-input"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Enter your password"
+                required
+              >
+
+              <button
+                type="button"
+                id="passwordToggle"
+                class="password-toggle"
+                aria-label="Show password"
+              >
+                Show
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <!-- FORGOT PASSWORD -->
+          <div class="forgot-row">
+
+            <button
+              type="button"
+              id="forgotPasswordButton"
+              class="forgot-password"
+            >
+              Forgot Password?
+            </button>
+
+          </div>
+
+
+          <!-- SIGN IN -->
+          <button
+            type="submit"
+            id="signinButton"
+            class="signin-button"
+          >
+
+            <span class="button-text">
+              Sign In
+            </span>
+
+            <span class="button-loading">
+              Signing in...
+            </span>
+
+          </button>
+
+        </form>
+
+      </div>
+
+
+      <!-- =========================
+           FORGOT PASSWORD VIEW
+      ========================== -->
+      <div class="forgot-view">
+
+        <button
+          type="button"
+          id="backToLoginButton"
+          class="back-to-login"
+        >
+          ← Back to Sign In
+        </button>
+
+
+        <div class="login-heading">
+
+          <h1>
+            Reset your password
+          </h1>
+
+          <p>
+            Enter your admin email and we'll send you a secure password reset link.
+          </p>
+
+        </div>
+
+
+        <!-- FORGOT ERROR -->
+        <div
+          id="forgotError"
+          class="login-error"
+          role="alert"
+          aria-live="polite"
+        ></div>
+
+
+        <!-- FORGOT SUCCESS -->
+        <div
+          id="forgotSuccess"
+          class="login-success"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+
+        <!-- FORGOT PASSWORD FORM -->
+        <form
+          id="forgotForm"
+          novalidate
+        >
+
+          <div class="form-group">
+
+            <label
+              class="form-label"
+              for="forgotEmail"
+            >
+              Email address
+            </label>
+
+            <input
+              id="forgotEmail"
+              name="forgotEmail"
+              class="form-input"
+              type="email"
+              autocomplete="email"
+              placeholder="Enter your admin email"
+              required
+            >
+
+          </div>
+
+
+          <button
+            type="submit"
+            id="resetButton"
+            class="signin-button"
+          >
+
+            <span class="button-text">
+              Send Reset Link
+            </span>
+
+            <span class="button-loading">
+              Sending...
+            </span>
+
+          </button>
+
+        </form>
+
+      </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer class="admin-footer">
+      WHA SOL · Authorized access only
+    </footer>
+
+  </main>
+
+
+  <!-- LOGIN JAVASCRIPT -->
+  <script>
+    (function () {
+
+      "use strict";
+
+
+      /* =========================
+         ELEMENTS
+      ========================== */
+
+      const loginCard =
+        document.getElementById("loginCard");
+
+
+      /* Login */
+      const loginForm =
+        document.getElementById("loginForm");
+
+      const emailInput =
+        document.getElementById("email");
+
+      const passwordInput =
+        document.getElementById("password");
+
+      const signinButton =
+        document.getElementById("signinButton");
+
+      const loginError =
+        document.getElementById("loginError");
+
+      const loginSuccess =
+        document.getElementById("loginSuccess");
+
+      const passwordToggle =
+        document.getElementById("passwordToggle");
+
+
+      /* Forgot password */
+      const forgotPasswordButton =
+        document.getElementById("forgotPasswordButton");
+
+      const backToLoginButton =
+        document.getElementById("backToLoginButton");
+
+      const forgotForm =
+        document.getElementById("forgotForm");
+
+      const forgotEmail =
+        document.getElementById("forgotEmail");
+
+      const resetButton =
+        document.getElementById("resetButton");
+
+      const forgotError =
+        document.getElementById("forgotError");
+
+      const forgotSuccess =
+        document.getElementById("forgotSuccess");
+
+
+      /* =========================
+         ERROR / SUCCESS HELPERS
+      ========================== */
+
+      function showError(element, message) {
+
+        element.textContent = message;
+
+        element.classList.add("visible");
+
+      }
+
+
+      function hideError(element) {
+
+        element.textContent = "";
+
+        element.classList.remove("visible");
+
+      }
+
+
+      function showSuccess(element, message) {
+
+        element.textContent = message;
+
+        element.classList.add("visible");
+
+      }
+
+
+      function hideSuccess(element) {
+
+        element.textContent = "";
+
+        element.classList.remove("visible");
+
+      }
+
+
+      /* =========================
+         LOADING
+      ========================== */
+
+      function setLoginLoading(isLoading) {
+
+        signinButton.disabled = isLoading;
+
+        if (isLoading) {
+
+          signinButton.classList.add("loading");
+
+        } else {
+
+          signinButton.classList.remove("loading");
+
+        }
+
+      }
+
+
+      function setResetLoading(isLoading) {
+
+        resetButton.disabled = isLoading;
+
+        if (isLoading) {
+
+          resetButton.classList.add("loading");
+
+        } else {
+
+          resetButton.classList.remove("loading");
+
+        }
+
+      }
+
+
+      /* =========================
+         SHOW / HIDE PASSWORD
+      ========================== */
+
+      passwordToggle.addEventListener(
+        "click",
+        function () {
+
+          const isPassword =
+            passwordInput.type === "password";
+
+
+          passwordInput.type =
+            isPassword
+              ? "text"
+              : "password";
+
+
+          passwordToggle.textContent =
+            isPassword
+              ? "Hide"
+              : "Show";
+
+
+          passwordToggle.setAttribute(
+            "aria-label",
+            isPassword
+              ? "Hide password"
+              : "Show password"
+          );
+
+        }
+      );
+
+
+      /* =========================
+         OPEN FORGOT PASSWORD
+      ========================== */
+
+      forgotPasswordButton.addEventListener(
+        "click",
+        function () {
+
+          hideError(loginError);
+          hideSuccess(loginSuccess);
+
+          hideError(forgotError);
+          hideSuccess(forgotSuccess);
+
+          loginCard.classList.add("forgot-mode");
+
+          forgotEmail.value =
+            emailInput.value.trim();
+
+          setTimeout(function () {
+
+            forgotEmail.focus();
+
+          }, 100);
+
+        }
+      );
+
+
+      /* =========================
+         BACK TO LOGIN
+      ========================== */
+
+      backToLoginButton.addEventListener(
+        "click",
+        function () {
+
+          hideError(forgotError);
+          hideSuccess(forgotSuccess);
+
+          loginCard.classList.remove("forgot-mode");
+
+          setTimeout(function () {
+
+            emailInput.focus();
+
+          }, 100);
+
+        }
+      );
+
+
+      /* =========================
+         CHECK EXISTING LOGIN
+      ========================== */
+
+      async function checkExistingSession() {
+
+        try {
+
+          if (
+            !window.WHASOL ||
+            !window.WHASOL.auth
+          ) {
+
+            return;
+
+          }
+
+
+          const user =
+            await window.WHASOL.auth
+              .getCurrentUser();
+
+
+          if (user) {
+
+            window.location.href =
+              "./dashboard.html";
+
+          }
+
+        } catch (error) {
+
+          console.warn(
+            "WHA SOL: Could not check existing session.",
+            error
+          );
+
+        }
+
+      }
+
+
+      /* =========================
+         LOGIN
+      ========================== */
+
+      loginForm.addEventListener(
+        "submit",
+        async function (event) {
+
+          event.preventDefault();
+
+          hideError(loginError);
+          hideSuccess(loginSuccess);
+
+
+          const email =
+            emailInput.value.trim();
+
+          const password =
+            passwordInput.value;
+
+
+          /* EMAIL CHECK */
+
+          if (!email) {
+
+            showError(
+              loginError,
+              "Please enter your email address."
+            );
+
+            emailInput.focus();
+
+            return;
+
+          }
+
+
+          /* PASSWORD CHECK */
+
+          if (!password) {
+
+            showError(
+              loginError,
+              "Please enter your password."
+            );
+
+            passwordInput.focus();
+
+            return;
+
+          }
+
+
+          /* AUTH CHECK */
+
+          if (
+            !window.WHASOL ||
+            !window.WHASOL.auth
+          ) {
+
+            showError(
+              loginError,
+              "Authentication system is not ready. Please refresh the page and try again."
+            );
+
+            return;
+
+          }
+
+
+          setLoginLoading(true);
+
+
+          try {
+
+            const result =
+              await window.WHASOL.auth
+                .signInWithPassword(
+                  email,
+                  password
+                );
+
+
+            if (
+              !result ||
+              result.error
+            ) {
+
+              const message =
+                result &&
+                result.error &&
+                result.error.message
+                  ? result.error.message
+                  : "Unable to sign in. Please check your email and password.";
+
+
+              showError(
+                loginError,
+                message
+              );
+
+              setLoginLoading(false);
+
+              return;
+
+            }
+
+
+            /* LOGIN SUCCESS */
+
+            window.location.href =
+              "./dashboard.html";
+
+
+          } catch (error) {
+
+            console.error(
+              "WHA SOL login error:",
+              error
+            );
+
+
+            showError(
+              loginError,
+              "Something went wrong while signing in. Please try again."
+            );
+
+
+            setLoginLoading(false);
+
+          }
+
+        }
+      );
+
+
+      /* =========================
+         FORGOT PASSWORD
+      ========================== */
+
+      forgotForm.addEventListener(
+        "submit",
+        async function (event) {
+
+          event.preventDefault();
+
+          hideError(forgotError);
+          hideSuccess(forgotSuccess);
+
+
+          const email =
+            forgotEmail.value.trim();
+
+
+          /* EMAIL CHECK */
+
+          if (!email) {
+
+            showError(
+              forgotError,
+              "Please enter your email address."
+            );
+
+            forgotEmail.focus();
+
+            return;
+
+          }
+
+
+          /* BASIC EMAIL CHECK */
+
+          const emailPattern =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+          if (!emailPattern.test(email)) {
+
+            showError(
+              forgotError,
+              "Please enter a valid email address."
+            );
+
+            forgotEmail.focus();
+
+            return;
+
+          }
+
+
+          /* AUTH CHECK */
+
+          if (
+            !window.WHASOL ||
+            !window.WHASOL.auth
+          ) {
+
+            showError(
+              forgotError,
+              "Authentication system is not ready. Please refresh the page and try again."
+            );
+
+            return;
+
+          }
+
+
+          /* METHOD CHECK */
+
+          if (
+            typeof window.WHASOL.auth
+              .resetPasswordForEmail !== "function"
+          ) {
+
+            showError(
+              forgotError,
+              "Password recovery is not configured in the WHA SOL authentication system yet. Please update auth.js with resetPasswordForEmail()."
+            );
+
+            return;
+
+          }
+
+
+          setResetLoading(true);
+
+
+          try {
+
+            const redirectUrl =
+              window.location.origin +
+              "/admin/reset-password.html";
+
+
+            const result =
+              await window.WHASOL.auth
+                .resetPasswordForEmail(
+                  email,
+                  {
+                    redirectTo: redirectUrl
+                  }
+                );
+
+
+            if (
+              result &&
+              result.error
+            ) {
+
+              showError(
+                forgotError,
+                result.error.message ||
+                "Unable to send the password reset email. Please try again."
+              );
+
+              setResetLoading(false);
+
+              return;
+
+            }
+
+
+            /*
+             * Supabase normally returns success even
+             * when the email does not exist, which is
+             * intentional for security.
+             */
+
+            showSuccess(
+              forgotSuccess,
+              "Password reset email sent. Please check your inbox and click the reset link."
+            );
+
+
+            forgotEmail.disabled = true;
+
+            resetButton.disabled = true;
+
+
+          } catch (error) {
+
+            console.error(
+              "WHA SOL password reset error:",
+              error
+            );
+
+
+            showError(
+              forgotError,
+              "Something went wrong while sending the reset email. Please try again."
+            );
+
+
+            setResetLoading(false);
+
+          }
+
+        }
+      );
+
+
+      /* =========================
+         WAIT FOR AUTH SYSTEM
+      ========================== */
+
+      if (
+        window.WHASOL &&
+        window.WHASOL.auth &&
+        typeof window.WHASOL.auth.whenReady === "function"
+      ) {
+
+        window.WHASOL.auth.whenReady(
+          checkExistingSession
+        );
+
+      } else {
+
+        window.addEventListener(
+          "whasol:supabase-ready",
+          checkExistingSession,
+          {
+            once: true
+          }
+        );
+
+      }
+
+    })();
+  </script>
+    <script src="../js/data.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/auth.js"></script>
+</body>
+</html>
