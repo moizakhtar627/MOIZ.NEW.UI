@@ -280,8 +280,8 @@
     window.addEventListener("scroll", function () {
       if (window.scrollY > 60) {
         heroAnimTrigger();
-      } else {
-        heroAnimReset();
+      } else if (!heroAnimated) {
+        heroAnimTrigger();
       }
     }, { passive: true });
     heroAnimTrigger();
