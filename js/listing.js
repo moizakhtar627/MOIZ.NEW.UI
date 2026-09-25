@@ -64,6 +64,8 @@
     },
     "error-codes": {
       type: "codes",
+      /* Error codes live in their own table, separate from articles. */
+      hydrate: "error-codes",
       data: WHASOL.errorCodes,
       searchFields: ["code", "title", "brand", "model", "explanation"],
       stateEmpty: {
@@ -74,6 +76,8 @@
     },
     "brands-models": {
       type: "brands",
+      /* Brands and models live in their own tables, separate from articles. */
+      hydrate: "brands-models",
       data: WHASOL.brands,
       searchFields: ["name", "description", "models"],
       stateEmpty: {
@@ -84,8 +88,11 @@
     },
     blog: {
       type: "posts",
+      /* Articles live in Supabase, so this list is re-rendered from the
+         database once the client is ready. */
+      hydrate: true,
       data: WHASOL.blogPosts,
-      searchFields: ["title", "metaTitle", "metaDescription", "description", "brand", "category", "keywords"],
+      searchFields: ["title", "metaTitle", "metaDescription", "description", "brand", "model", "category", "keywords"],
       stateEmpty: {
         heading: "No Blog Articles Found",
         text:
@@ -128,6 +135,38 @@
   /* ------------------------------------------------------------------------
      Card renderers
   ------------------------------------------------------------------------- */
+  /* ------------------------------------------------------------------------
+     Category slug
+  --------------------------------------------------------------------------
+     The filter chips and the homepage links use canonical slugs ("inverter",
+     "solar-panel", ...). Articles saved through the admin editor may carry a
+     friendly title instead ("Inverter", "Wiring & Electrical"), so both sides
+     of the comparison are normalized before matching.
+
+     js/articles-api.js owns the canonical mapping; the fallback below keeps
+     the page working if that script is ever absent.
+  ------------------------------------------------------------------------- */
+  function categorySlug(value) {
+    var api = window.WHASOL && window.WHASOL.articlesApi;
+
+    if (api && typeof api.normalizeCategory === "function") {
+      return api.normalizeCategory(value);
+    }
+
+    var text = String(value == null ? "" : value).trim().toLowerCase();
+
+    if (!text) return "general";
+
+    var slug = text
+      .replace(/&/g, " and ")
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
+
+    return slug || "general";
+  }
+
   function categoryLabel(value) {
     var labels = {
       "solar-panel": "Solar Panel",
@@ -135,8 +174,11 @@
       inverter: "Inverter",
       wiring: "Wiring & Electrical",
       voltage: "Voltage & Frequency",
+      troubleshooting: "Troubleshooting",
+      "solar-battery-guide": "Solar Battery Guide",
+      general: "General",
     };
-    return labels[value] || value || "General";
+    return labels[categorySlug(value)] || value || "General";
   }
 
   function cardMeta(tags) {
@@ -378,7 +420,7 @@
     if (state.query && haystack.indexOf(state.query) === -1) return false;
 
     if (cfg.type === "articles" && state.filter !== "all") {
-      if (item.category !== state.filter) return false;
+      if (categorySlug(item.category) !== categorySlug(state.filter)) return false;
     }
 
     if (cfg.type === "brands" && state.brand) {
@@ -477,7 +519,75 @@
     }
   });
 
+  /* ------------------------------------------------------------------------
+     Supabase hydration
+  --------------------------------------------------------------------------
+     Seeded content in js/data.js renders immediately so the page is never
+     blank. Once Supabase answers, the database records for this page's
+     content type are merged in and the list re-renders.
+
+     Each content type is read from its own table, so an error code or a
+     brand is never rendered as an article and never counted as one. Drafts
+     never arrive here: the RLS policies only let the public read published
+     articles.
+  ------------------------------------------------------------------------- */
+  function hydrateFromSupabase() {
+    var mode = cfg.hydrate;
+
+    if (mode === "error-codes") {
+      var taxonomy = window.WHASOL && window.WHASOL.taxonomyApi;
+
+      if (!taxonomy || typeof taxonomy.fetchErrorCodes !== "function") return;
+
+      taxonomy.fetchErrorCodes().then(function (result) {
+        if (!result || !result.codes || !result.available) return;
+
+        cfg.data = result.codes;
+
+        normalizeInitialView();
+        apply();
+      });
+
+      return;
+    }
+
+    if (mode === "brands-models") {
+      var brandsApi = window.WHASOL && window.WHASOL.taxonomyApi;
+
+      if (!brandsApi || typeof brandsApi.fetchBrands !== "function") return;
+
+      brandsApi.fetchBrands().then(function (result) {
+        if (!result || !result.brands || !result.available) return;
+
+        cfg.data = result.brands;
+
+        normalizeInitialView();
+        apply();
+      });
+
+      return;
+    }
+
+    var api = window.WHASOL && window.WHASOL.articlesApi;
+
+    if (!api || typeof api.fetchPublishedArticles !== "function") return;
+
+    api.fetchPublishedArticles().then(function (result) {
+      if (!result || !result.articles) return;
+
+      cfg.data = result.articles;
+
+      /* A URL filter may not match the freshly loaded set. */
+      normalizeInitialView();
+      apply();
+    });
+  }
+
   normalizeInitialView();
   buildFilters();
   apply();
+
+  if (cfg.hydrate) {
+    hydrateFromSupabase();
+  }
 })();

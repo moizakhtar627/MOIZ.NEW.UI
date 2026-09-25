@@ -12,8 +12,10 @@
 
     <!-- Existing WHA SOL Data & Auth -->
     <script src="../js/data.js"></script>
+    <script src="../js/admin-content.js"></script>
     <script src="../js/supabase.js"></script>
     <script src="../js/auth.js"></script>
+    <script src="../js/articles-api.js"></script>
 
     <style>
         /* =========================================================
@@ -1166,32 +1168,53 @@
                DATA
             ===================================================== */
 
-            function getWhaSolData() {
-                if (window.WHASOL) {
-                    return window.WHASOL;
-                }
-                return {};
+            function api() {
+                return (window.WHASOL && window.WHASOL.articlesApi) || null;
             }
 
-            function getAllArticles(data) {
+            /* Supabase is the source of truth. The seeded js/data.js entries
+               are appended so nothing that already exists disappears before it
+               has been imported into the database. */
+            var ARTICLES = [];
+
+            function seedArticles() {
+                if (window.WHASOL && window.WHASOL.adminContent) {
+                    return window.WHASOL.adminContent.seedArticles();
+                }
+
                 var articles = [];
+                var data = window.WHASOL || {};
 
                 if (Array.isArray(data.troubleshootingArticles)) {
                     articles = articles.concat(data.troubleshootingArticles);
                 }
 
                 if (Array.isArray(data.blogPosts)) {
-                    data.blogPosts.forEach(function (item) {
-                        var exists = articles.some(function (article) {
-                            return article.id && item.id && article.id === item.id;
-                        });
-                        if (!exists) {
-                            articles.push(item);
-                        }
-                    });
+                    articles = articles.concat(data.blogPosts);
                 }
 
                 return articles;
+            }
+
+            /* Seeded records have no database id, so they are addressed by the
+               stable record id that js/admin-content.js derives. */
+            function seedId(article) {
+                if (window.WHASOL && window.WHASOL.adminContent) {
+                    return window.WHASOL.adminContent.recordId(article);
+                }
+                return article.link || article.slug || "";
+            }
+
+            function articleId(article) {
+                return article.id || seedId(article);
+            }
+
+            function getRecordId(article) {
+                return article ? articleId(article) : "";
+            }
+
+            function getAllArticles() {
+                return ARTICLES;
             }
 
             function getCategories(articles) {
@@ -1214,6 +1237,18 @@
                     .replace(/'/g, "&#039;");
             }
 
+            /* Categories are stored as slugs so the public filters match;
+               the admin table shows the friendly label instead. */
+            function categoryLabelFor(article) {
+                var api = window.WHASOL && window.WHASOL.articlesApi;
+
+                if (api && typeof api.categoryLabel === "function") {
+                    return api.categoryLabel(article && article.category);
+                }
+
+                return (article && article.category) || "—";
+            }
+
             function formatDate(iso) {
                 if (!iso) return "—";
                 var d = new Date(iso);
@@ -1224,21 +1259,58 @@
                 return y + "-" + m + "-" + day;
             }
 
+            /* Seeded content is published but has no status field, so treat a
+               missing status as published rather than draft. */
+            function isSeeded(article) {
+                return !article.id;
+            }
+
+            function articleStatus(article) {
+                if (article.status) return String(article.status).toLowerCase();
+                return isSeeded(article) ? "published" : "draft";
+            }
+
+            async function loadArticles() {
+                var articlesApi = api();
+                var rows = [];
+
+                if (articlesApi) {
+                    await articlesApi.waitForClient();
+                    rows = await articlesApi.fetchAdminArticles();
+                }
+
+                /* Drop any seeded article that already exists in the database so
+                   the same article is never listed twice. */
+                var dbSlugs = {};
+
+                rows.forEach(function (row) {
+                    if (row.slug) dbSlugs[String(row.slug).toLowerCase()] = true;
+                });
+
+                var seeds = seedArticles().filter(function (seed) {
+                    var slug = seed.slug || (seed.link || "").replace(/\.html$/i, "");
+                    return !(slug && dbSlugs[String(slug).toLowerCase()]);
+                });
+
+                ARTICLES = rows.concat(seeds);
+            }
+
             function renderArticles() {
-                var data = getWhaSolData();
-                var articles = getAllArticles(data);
+                var articles = getAllArticles();
                 var categories = getCategories(articles);
 
                 /* Populate category filter */
                 var catFilter = document.getElementById("categoryFilter");
                 if (catFilter) {
+                    var currentCat = catFilter.value;
                     catFilter.innerHTML = '<option value="all">All Categories</option>';
                     categories.forEach(function (cat) {
                         var opt = document.createElement("option");
                         opt.value = cat.toLowerCase();
-                        opt.textContent = cat;
+                        opt.textContent = categoryLabelFor({ category: cat });
                         catFilter.appendChild(opt);
                     });
+                    if (currentCat) catFilter.value = currentCat;
                 }
 
                 var searchInput = document.getElementById("searchInput");
@@ -1260,13 +1332,14 @@
                     var searchable = [
                         article.title || "",
                         article.brand || "",
+                        article.model || "",
                         (article.models ? article.models.join(" ") : ""),
                         article.category || "",
                         (article.keywords ? article.keywords.join(" ") : "")
                     ].join(" ").toLowerCase();
 
                     var matchesSearch = !search || searchable.indexOf(search) !== -1;
-                    var matchesStatus = status === "all" || (article.status || "").toLowerCase() === status;
+                    var matchesStatus = status === "all" || articleStatus(article) === status;
                     var matchesCategory = category === "all" || (article.category || "").toLowerCase() === category;
 
                     return matchesSearch && matchesStatus && matchesCategory;
@@ -1285,11 +1358,20 @@
                     var title = escapeHtml(article.title || article.name || "Untitled Article");
                     var brand = escapeHtml(article.brand || article.manufacturer || "—");
                     var model = escapeHtml(Array.isArray(article.models) ? article.models.join(", ") : (article.model || "—"));
-                    var categoryEl = escapeHtml(article.category || "—");
-                    var isDraft = (article.status || "").toLowerCase() === "draft";
-                    var statusClass = isDraft ? "draft" : "published";
-                    var statusText = isDraft ? "Draft" : "Published";
+                    var categoryEl = escapeHtml(categoryLabelFor(article));
+                    var state = articleStatus(article);
+                    var statusClass = state === "draft" ? "draft" : "published";
+                    var statusText = state === "draft" ? "Draft" : "Published";
                     var date = escapeHtml(formatDate(article.date || article.createdAt));
+                    var id = escapeHtml(articleId(article));
+
+                    var viewAction = isSeeded(article)
+                        ? '<a href="' + escapeHtml(article.link || "../blog.html") + '" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>'
+                        : '<button type="button" class="action-btn" title="View" onclick="viewArticle(\'' + id + '\')">↗</button>';
+
+                    var deleteAction = isSeeded(article)
+                        ? '<button type="button" class="action-btn" title="Not available" disabled>×</button>'
+                        : '<button type="button" class="action-btn action-delete" title="Delete" onclick="deleteArticle(\'' + id + '\')">×</button>';
 
                     return '<tr>' +
                         '<td><div class="article-title">' + title + '</div></td>' +
@@ -1299,13 +1381,118 @@
                         '<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
                         '<td>' + date + '</td>' +
                         '<td><div class="action-buttons">' +
-                        '<a href="./article-editor.html" class="action-btn action-edit" title="Edit">&#9998;</a>' +
-                        '<button type="button" class="action-btn" title="View" onclick="alert(\'Preview not available in admin.\')">↗</button>' +
-                        '<button type="button" class="action-btn action-delete" title="Delete" onclick="alert(\'Delete functionality coming soon.\')">×</button>' +
+                        '<a href="./article-editor.html?id=' + id + '" class="action-btn action-edit" title="Edit">&#9998;</a>' +
+                        viewAction +
+                        deleteAction +
                         '</div></td>' +
                         '</tr>';
                 }).join("");
             }
+
+            /* ---------------------------------------------------------
+               VIEW EXISTING ARTICLE (read-only)
+            --------------------------------------------------------- */
+            function findArticle(id) {
+                for (var i = 0; i < ARTICLES.length; i++) {
+                    if (String(articleId(ARTICLES[i])) === String(id)) {
+                        return ARTICLES[i];
+                    }
+                }
+                return null;
+            }
+
+            function viewArticle(id) {
+                var article = findArticle(id);
+
+                if (!article) {
+                    alert("The selected article could not be found.");
+                    return;
+                }
+
+                var html =
+                    "<div style='max-width:560px;'>" +
+                    "<h2 style='margin:0 0 14px;font-size:22px;'>" +
+                    escapeHtml(article.title || "Untitled Article") +
+                    "</h2>" +
+                    "<p style='margin:0 0 8px;color:#8d96a3;font-size:12px;'>" +
+                    "Brand: " + escapeHtml(article.brand || "—") +
+                    " | Model: " + escapeHtml(article.model || "—") +
+                    " | Category: " + escapeHtml(categoryLabelFor(article)) +
+                    "</p>" +
+                    "<p style='margin:0 0 14px;color:#8d96a3;font-size:12px;'>" +
+                    "Status: " + escapeHtml(articleStatus(article)) +
+                    "</p>";
+
+                if (article.image) {
+                    html += "<img src='" + escapeHtml(article.image) +
+                        "' style='max-width:100%;border-radius:10px;margin-bottom:14px;'>";
+                }
+
+                var body = article.description || "";
+
+                html += "<div style='margin:0 0 14px;line-height:1.7;font-size:14px;'>" +
+                    escapeHtml(body || "(No description available.)") +
+                    "</div>";
+
+                if (article.link) {
+                    html += "<p style='margin:0;font-size:12px;'>" +
+                        "<a href='" + escapeHtml(article.link) + "' target='_blank' rel='noopener'>Open full article</a>" +
+                        "</p>";
+                }
+
+                html += "</div>";
+
+                alert(html);
+            }
+
+            /* ---------------------------------------------------------
+               DELETE ARTICLE
+            --------------------------------------------------------- */
+            async function deleteArticle(id) {
+                var article = findArticle(id);
+
+                if (!article) {
+                    alert("The selected article could not be found.");
+                    return;
+                }
+
+                /* Seeded js/data.js records have no database row, so there is
+                   nothing to delete until they are imported. */
+                if (isSeeded(article)) {
+                    alert("This article comes from the seeded js/data.js content and cannot be deleted. Create a new article instead.");
+                    return;
+                }
+
+                var articlesApi = api();
+
+                if (!articlesApi) {
+                    alert("The content system is not ready. Please refresh the page and try again.");
+                    return;
+                }
+
+                var confirmed = confirm(
+                    "Are you sure you want to delete \"" +
+                    (article.title || "this article") +
+                    "\"? This cannot be undone."
+                );
+
+                if (!confirmed) return;
+
+                var result = await articlesApi.deleteArticle(article.id);
+
+                if (result.error) {
+                    console.error("WHA SOL: Delete failed.", result.error);
+                    alert("Could not delete the article.\n\n" + (result.error.message || String(result.error)));
+                    return;
+                }
+
+                await loadArticles();
+                renderArticles();
+            }
+
+            /* Expose for inline onclick handlers */
+            window.viewArticle = viewArticle;
+            window.deleteArticle = deleteArticle;
 
             /* Search and filter */
             var searchInput = document.getElementById("searchInput");
@@ -1403,11 +1590,10 @@
             protectPage();
             initAuth();
 
-            if (window.WHASOL && window.WHASOL.supabase) {
+            (async function () {
+                await loadArticles();
                 renderArticles();
-            } else {
-                setTimeout(renderArticles, 300);
-            }
+            })();
 
         })();
     </script>

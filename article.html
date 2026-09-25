@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Article — WHA SOL</title>
+  <meta name="description" content="Practical solar troubleshooting guides from WHA SOL." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body data-page="article">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="WHA SOL home">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="WHA-LOGO.PNG.png" alt="WHA SOL logo" class="brand-img" />
+        </span>
+        <span class="brand-name">WHA SOL</span>
+      </a>
+
+      <nav class="nav" id="desktop-nav" aria-label="Primary">
+        <a href="index.html" class="nav-link" data-nav="home">Home</a>
+        <a href="troubleshooting.html" class="nav-link" data-nav="troubleshooting">Troubleshooting</a>
+        <a href="error-codes.html" class="nav-link" data-nav="error-codes">Error Codes</a>
+        <a href="brands-models.html" class="nav-link" data-nav="brands-models">Brands &amp; Models</a>
+        <a href="blog.html" class="nav-link" data-nav="blog">Blog</a>
+        <a href="about.html" class="nav-link" data-nav="about">About Us</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="contact.html" class="btn btn-outline btn-contact">Contact</a>
+        <a href="contact.html" class="btn-arrow-circle" aria-label="Contact">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" strokecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile drawer -->
+  <div class="mobile-nav" id="mobile-nav" aria-hidden="true">
+    <div class="mobile-nav-head">
+      <span class="brand-name">WHA SOL</span>
+      <button class="nav-close" id="nav-close" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <nav class="mobile-nav-links" aria-label="Mobile">
+      <a href="index.html" class="mobile-link" data-nav="home">Home</a>
+      <a href="troubleshooting.html" class="mobile-link" data-nav="troubleshooting">Troubleshooting</a>
+      <a href="error-codes.html" class="mobile-link" data-nav="error-codes">Error Codes</a>
+      <a href="brands-models.html" class="mobile-link" data-nav="brands-models">Brands &amp; Models</a>
+      <a href="blog.html" class="mobile-link" data-nav="blog">Blog</a>
+      <a href="about.html" class="mobile-link" data-nav="about">About Us</a>
+      <a href="contact.html" class="mobile-link" data-nav="contact">Contact</a>
+    </nav>
+    <a href="contact.html" class="btn btn-solid mobile-cta">Contact Us</a>
+  </div>
+  <div class="nav-overlay" id="nav-overlay"></div>
+
+  <main>
+
+    <!-- ===================== LOADING ===================== -->
+    <section class="section section-top" id="articleLoading">
+      <div class="container">
+        <div class="empty-state" style="text-align:center;padding:60px 0;">
+          <p style="color:#8d96a3;">Loading article...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== NOT FOUND ===================== -->
+    <section class="section section-top" id="articleMissing" hidden>
+      <div class="container">
+        <div class="empty-state">
+          <span class="empty-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 4v13M12 4 8 7.5 12 4l4 3.5M6 20h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <h3 data-missing-heading>Article Not Found</h3>
+          <p data-missing-text>This article is not available. It may still be a draft, or the link may be out of date.</p>
+          <a href="blog.html" class="btn btn-outline">Back to Blog</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ARTICLE ===================== -->
+    <article class="section section-top" id="articleBody" hidden>
+
+      <div class="container">
+
+        <nav class="post-crumb" aria-label="Breadcrumb">
+          <a href="index.html">Home</a>
+          <span aria-hidden="true">&rsaquo;</span>
+          <a href="blog.html">Blog</a>
+          <span aria-hidden="true">&rsaquo;</span>
+          <span id="articleCrumb">Article</span>
+        </nav>
+
+        <header class="post-head">
+          <div class="post-tags" id="articleTags"></div>
+          <h1 class="post-title" id="articleTitle">Article</h1>
+          <div class="post-meta">
+            <span class="post-avatar" aria-hidden="true">WHA</span>
+            <span>By WHA SOL Technical Team</span>
+            <span aria-hidden="true">&bull;</span>
+            <span id="articleDate"></span>
+            <span aria-hidden="true">&bull;</span>
+            <span id="articleReadTime"></span>
+          </div>
+        </header>
+
+        <figure class="post-hero" id="articleHero" hidden>
+          <img id="articleImage" src="" alt="" fetchpriority="high" />
+        </figure>
+
+        <div class="post-layout">
+          <div class="post-content" id="articleContent"></div>
+        </div>
+
+      </div>
+
+    </article>
+
+    <!-- ===================== RELATED ===================== -->
+    <section class="post-related" id="articleRelated" hidden>
+      <div class="container">
+        <div class="section-head">
+          <span class="section-tag">Keep Reading</span>
+          <h2 class="section-title">Related Solar Resources</h2>
+        </div>
+        <div class="cards" id="relatedCards"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a class="brand" href="index.html">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="WHA-LOGO.PNG.png" alt="WHA SOL logo" class="brand-img" />
+        </span>
+        <span class="brand-name">WHA SOL</span>
+      </a>
+      <p class="footer-note">Clean energy, kept working.</p>
+      <ul class="footer-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="troubleshooting.html">Troubleshooting</a></li>
+        <li><a href="error-codes.html">Error Codes</a></li>
+        <li><a href="brands-models.html">Brands &amp; Models</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div class="container footer-bottom">
+      <span>&copy; <span id="year">2026</span> WHA SOL Energy</span>
+      <span>moizakhtar.info@gmail.com</span>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/articles-api.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    /* =========================================================
+       WHA SOL — ARTICLE PAGE
+       Loads a published article from Supabase by ?slug=
+       ========================================================= */
+
+    (function () {
+      "use strict";
+
+      var NS = window.WHASOL || {};
+
+      var loadingEl = document.getElementById("articleLoading");
+      var missingEl = document.getElementById("articleMissing");
+      var bodyEl = document.getElementById("articleBody");
+      var relatedEl = document.getElementById("articleRelated");
+      var relatedCards = document.getElementById("relatedCards");
+
+      function show(el, visible) {
+        if (el) el.hidden = !visible;
+      }
+
+      function readParam(key) {
+        var m = new RegExp("[?&]" + key + "=([^&#]*)").exec(window.location.search);
+        return m ? decodeURIComponent(m[1].replace(/\+/g, " ")) : "";
+      }
+
+      function escapeHtml(str) {
+        return String(str === undefined || str === null ? "" : str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      /* Rough reading time, rounded to the nearest minute. */
+      function readTime(html) {
+        var words = String(html || "")
+          .replace(/<[^>]*>/g, " ")
+          .trim()
+          .split(/\s+/)
+          .filter(Boolean).length;
+
+        if (!words) return "1 min read";
+
+        return Math.max(1, Math.round(words / 200)) + " min read";
+      }
+
+      function formatDate(value) {
+        if (!value) return "";
+
+        var d = new Date(value);
+
+        if (isNaN(d.getTime())) return "";
+
+        return d.toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+      }
+
+      /* Only allow the article body through when it is well-formed markup we
+         recognise. Anything else falls back to escaped plain text so admin
+         content can never inject script into the public page. */
+      function safeHtml(html) {
+        var value = String(html || "").trim();
+
+        if (!value) return "";
+
+        var cleaned = value
+          .replace(/<script[\s\S]*?<\/script>/gi, "")
+          .replace(/<style[\s\S]*?<\/style>/gi, "")
+          .replace(/<iframe[\s\S]*?<\/iframe>/gi, "")
+          .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+          .replace(/(href|src)\s*=\s*(["'])\s*javascript:[^"']*\2/gi, "");
+
+        return cleaned;
+      }
+
+      function renderTags(article) {
+        var tags = [article.brand, article.model, article.category].filter(Boolean);
+
+        var el = document.getElementById("articleTags");
+
+        if (!el) return;
+
+        el.innerHTML = tags
+          .map(function (t) {
+            return '<span class="section-tag">' + escapeHtml(t) + "</span>";
+          })
+          .join("");
+      }
+
+      function renderArticle(article) {
+        document.title = (article.metaTitle || article.title) + " | WHA SOL";
+
+        var metaDescription = document.querySelector('meta[name="description"]');
+
+        if (metaDescription && (article.metaDescription || article.description)) {
+          metaDescription.setAttribute(
+            "content",
+            article.metaDescription || article.description
+          );
+        }
+
+        var titleEl = document.getElementById("articleTitle");
+        titleEl.textContent = article.title;
+
+        var crumbEl = document.getElementById("articleCrumb");
+        crumbEl.textContent = article.title;
+
+        renderTags(article);
+
+        var dateEl = document.getElementById("articleDate");
+        var formatted = formatDate(article.date || article.updatedAt);
+        dateEl.textContent = formatted ? "Updated " + formatted : "";
+
+        document.getElementById("articleReadTime").textContent = readTime(
+          article.content || article.description
+        );
+
+        var image = article.image || article.featuredImage;
+
+        if (image) {
+          var hero = document.getElementById("articleHero");
+          var img = document.getElementById("articleImage");
+
+          img.src = image;
+          img.alt = article.title;
+
+          show(hero, true);
+        }
+
+        var html = safeHtml(article.content);
+
+        if (!html) {
+          html = "<p>" + escapeHtml(article.description || article.metaDescription || "") + "</p>";
+        }
+
+        document.getElementById("articleContent").innerHTML = html;
+
+        show(loadingEl, false);
+        show(missingEl, false);
+        show(bodyEl, true);
+
+        if (window.whasolReveal) {
+          window.whasolReveal(document.getElementById("articleBody"));
+        }
+      }
+
+      function renderMissing(message) {
+        if (message) {
+          var textEl = missingEl.querySelector("[data-missing-text]");
+          if (textEl) textEl.textContent = message;
+        }
+
+        show(loadingEl, false);
+        show(bodyEl, false);
+        show(relatedEl, false);
+        show(missingEl, true);
+      }
+
+      function renderRelated(articles, current) {
+        if (!articles || !articles.length) {
+          show(relatedEl, false);
+          return;
+        }
+
+        var others = articles.filter(function (a) {
+          return a.slug !== current.slug;
+        });
+
+        if (!others.length) {
+          show(relatedEl, false);
+          return;
+        }
+
+        relatedCards.innerHTML = others
+          .slice(0, 3)
+          .map(function (a) {
+            var image = a.image || "";
+
+            var media = image
+              ? '<div class="card-media"><img src="' + escapeHtml(image) + '" alt="' + escapeHtml(a.title) + '" loading="lazy" /></div>'
+              : "";
+
+            var tags = [a.brand, a.category]
+              .filter(Boolean)
+              .map(function (t) {
+                return '<span class="card-tag">' + escapeHtml(t) + "</span>";
+              })
+              .join("");
+
+            return (
+              '<article class="card">' +
+              media +
+              '<div class="card-body">' +
+              (tags ? '<div class="card-meta">' + tags + "</div>" : "") +
+              "<h3>" + escapeHtml(a.title) + "</h3>" +
+              "<p>" + escapeHtml(a.metaDescription || a.description || "") + "</p>" +
+              '<a href="' + escapeHtml(a.link || "blog.html") + '" class="card-link">Read More <span aria-hidden="true">&rarr;</span></a>' +
+              "</div></article>"
+            );
+          })
+          .join("");
+
+        show(relatedEl, true);
+      }
+
+      async function init() {
+        var slug = readParam("slug");
+        var api = NS.articlesApi;
+
+        if (!api) {
+          renderMissing("This article could not be loaded right now.");
+          return;
+        }
+
+        await api.waitForClient();
+
+        if (!slug) {
+          renderMissing("No article was requested. Open an article from the blog to read it.");
+          return;
+        }
+
+        var published = await api.fetchPublishedArticles();
+
+        /* Prefer the published list: it is the same query the blog uses, so a
+           draft slug simply will not be found. */
+        var article = null;
+
+        for (var i = 0; i < published.articles.length; i++) {
+          if (String(published.articles[i].slug || "").toLowerCase() === slug.toLowerCase()) {
+            article = published.articles[i];
+            break;
+          }
+        }
+
+        if (!article) {
+          article = await api.fetchArticleBySlug(slug);
+        }
+
+        if (!article) {
+          renderMissing(
+            "This article is not published. It may still be a draft, or the link may be out of date."
+          );
+          return;
+        }
+
+        renderArticle(article);
+        renderRelated(published.articles, article);
+      }
+
+      init();
+    })();
+  </script>
+
+</body>
+</html>

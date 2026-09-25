@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<script src="../js/data.js"></script>
+<script src="../js/admin-content.js"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/articles-api.js"></script>
+<script src="../js/taxonomy-api.js"></script>
     <title>Article Editor | WHA SOL Admin</title>
 
     <link rel="stylesheet" href="../css/styles.css">
@@ -922,11 +927,10 @@
                     ← Dashboard
                 </a>
 
-                <button type="button" class="btn btn-primary" id="publishTopBtn">
+<button type="button" class="btn btn-primary" id="publishTopBtn">
                     Publish
                 </button>
-            </div>
-
+                </div>
         </header>
 
 
@@ -934,8 +938,8 @@
         <div class="editor-container">
 
         <div class="page-heading">
-            <h1>Create Article</h1>
-            <p>Create a troubleshooting guide, solar article, or knowledge-base article for WHA SOL.</p>
+            <h1 id="editorModeHeading">Create Article</h1>
+            <p id="editorModeSubheading">Create a troubleshooting guide, solar article, or knowledge-base article for WHA SOL.</p>
         </div>
 
 
@@ -978,11 +982,21 @@
                                     Brand
                                 </label>
 
-                                <select id="brand" name="brand">
-                                    <option value="">
-                                        Select Brand
-                                    </option>
-                                </select>
+                                <input
+                                    type="text"
+                                    id="brand"
+                                    name="brand"
+                                    placeholder="Example: Growatt"
+                                    autocomplete="off"
+                                    list="brandList"
+                                >
+
+                                <datalist id="brandList">
+                                </datalist>
+
+                                <div class="help-text">
+                                    Type the brand name exactly as it should appear on the public site. Existing brands will auto-suggest below.
+                                </div>
 
                             </div>
 
@@ -993,11 +1007,17 @@
                                     Model
                                 </label>
 
-                                <select id="model" name="model">
-                                    <option value="">
-                                        Select Model
-                                    </option>
-                                </select>
+                                <input
+                                    type="text"
+                                    id="model"
+                                    name="model"
+                                    placeholder="Example: MIN 2500-6000TL-X"
+                                    autocomplete="off"
+                                >
+
+                                <div class="help-text">
+                                    Type the model name manually. Leave blank for "All Models".
+                                </div>
 
                             </div>
 
@@ -1014,43 +1034,50 @@
 
                                 <select id="category" name="category" required>
 
+                                    <!-- Values are the canonical slugs the
+                                         public site filters with. Labels stay
+                                         friendly for the editor. -->
                                     <option value="">
                                         Select Category
                                     </option>
 
-                                    <option value="Inverter">
+                                    <option value="inverter">
                                         Inverter
                                     </option>
 
-                                    <option value="Battery">
+                                    <option value="battery">
                                         Battery
                                     </option>
 
-                                    <option value="Solar Panel">
+                                    <option value="solar-panel">
                                         Solar Panel
                                     </option>
 
-                                    <option value="Wiring & Electrical">
-                                        Wiring & Electrical
+                                    <option value="wiring">
+                                        Wiring &amp; Electrical
                                     </option>
 
-                                    <option value="Voltage & Frequency">
-                                        Voltage & Frequency
+                                    <option value="voltage">
+                                        Voltage &amp; Frequency
                                     </option>
 
-                                    <option value="Troubleshooting">
+                                    <option value="troubleshooting">
                                         Troubleshooting
                                     </option>
 
-                                    <option value="Solar Battery Guide">
+                                    <option value="solar-battery-guide">
                                         Solar Battery Guide
                                     </option>
 
-                                    <option value="General">
+                                    <option value="general">
                                         General
                                     </option>
 
                                 </select>
+
+                                <div class="help-text">
+                                    Controls which sections of the website show this article.
+                                </div>
 
                             </div>
 
@@ -1310,15 +1337,37 @@
                                 Image URL
                             </label>
 
-                            <input
-                                type="url"
-                                id="featuredImage"
-                                name="featuredImage"
-                                placeholder="https://..."
-                            >
+                            <div style="display:flex; gap:8px; align-items:center;">
+
+                                <input
+                                    type="url"
+                                    id="featuredImage"
+                                    name="featuredImage"
+                                    placeholder="https://..."
+                                    style="flex:1;"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="btn"
+                                    id="uploadFeaturedImageBtn"
+                                    style="white-space:nowrap;"
+                                >
+                                    Upload Image
+                                </button>
+
+                                <input
+                                    type="file"
+                                    id="featuredImageFile"
+                                    name="featuredImageFile"
+                                    accept="image/*"
+                                    style="display:none;"
+                                >
+
+                            </div>
 
                             <div class="help-text">
-                                Add the image URL that should appear as the article's featured image.
+                                Add the image URL that should appear as the article's featured image, or upload an image from your computer.
                             </div>
 
                         </div>
@@ -1388,9 +1437,9 @@
 
     /* =========================================================
        WHA SOL ARTICLE EDITOR
-       ========================================================= */
-
-    const STORAGE_KEY = "whasol_admin_articles";
+       Articles are stored in Supabase. localStorage is no longer
+       the source of truth.
+    ========================================================= */
 
     const contentEditor = document.getElementById("articleContent");
     const titleInput = document.getElementById("title");
@@ -1416,7 +1465,7 @@
                 typeof window.WHASOL.auth.requireAuth === "function"
             ) {
 
-                await window.WHASOL.auth.requireAuth("./login.html");
+                return await window.WHASOL.auth.requireAuth("./login.html");
 
             }
 
@@ -1427,6 +1476,8 @@
             window.location.href = "./login.html";
 
         }
+
+        return false;
 
     }
 
@@ -1588,9 +1639,9 @@
     );
 
 
-    /* ---------------------------------------------------------
-       FEATURED IMAGE PREVIEW
-       --------------------------------------------------------- */
+/* ---------------------------------------------------------
+        FEATURED IMAGE PREVIEW
+        --------------------------------------------------------- */
 
     featuredImageInput.addEventListener(
         "input",
@@ -1618,135 +1669,618 @@
 
 
     /* ---------------------------------------------------------
-       SAVE ARTICLE
-       --------------------------------------------------------- */
+        FEATURED IMAGE FILE UPLOAD
+        Uploads an image from the user's computer and populates the
+        featured image URL field with the data URL.
+        --------------------------------------------------------- */
 
-    function getArticleData(statusOverride = null) {
+    var uploadFeaturedImageBtn = document.getElementById("uploadFeaturedImageBtn");
+    var featuredImageFile = document.getElementById("featuredImageFile");
 
-        const title =
-            titleInput.value.trim();
+    if (uploadFeaturedImageBtn && featuredImageFile) {
 
-        if (!title) {
+        uploadFeaturedImageBtn.addEventListener(
+            "click",
+            function () {
+                featuredImageFile.click();
+            }
+        );
 
-            alert("Please enter an article title.");
+        featuredImageFile.addEventListener(
+            "change",
+            function () {
+                var file = featuredImageFile.files[0];
+                if (!file) return;
 
-            titleInput.focus();
-
-            return null;
-
-        }
-
-
-        const category =
-            document.getElementById("category").value;
-
-        if (!category) {
-
-            alert("Please select a category.");
-
-            return null;
-
-        }
-
-
-        const article = {
-
-            id:
-                "article-" +
-                Date.now(),
-
-            title: title,
-
-            brand:
-                document.getElementById("brand").value.trim(),
-
-            model:
-                document.getElementById("model").value.trim(),
-
-            category: category,
-
-            metaTitle:
-                document.getElementById("metaTitle").value.trim(),
-
-            metaDescription:
-                document.getElementById("metaDescription").value.trim(),
-
-            slug:
-                slugInput.value.trim() ||
-                createSlug(title),
-
-            featuredImage:
-                featuredImageInput.value.trim(),
-
-            content:
-                contentEditor.innerHTML,
-
-            status:
-                statusOverride ||
-                statusInput.value,
-
-            createdAt:
-                new Date().toISOString(),
-
-            updatedAt:
-                new Date().toISOString()
-
-        };
-
-
-        return article;
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    var dataUrl = event.target.result;
+                    featuredImageInput.value = dataUrl;
+                    featuredImageInput.dispatchEvent(new Event("input"));
+                };
+                reader.readAsDataURL(file);
+                featuredImageFile.value = "";
+            }
+        );
 
     }
 
 
-    function saveArticle(statusOverride = null) {
+    /* ---------------------------------------------------------
+       EDIT MODE STATE
+    --------------------------------------------------------- */
+    var EDIT_MODE = false;
+    var EDIT_ARTICLE_ID = null;
+    var WHASOL_ADMIN = (window.WHASOL && window.WHASOL.adminContent) || null;
 
-        const article =
-            getArticleData(statusOverride);
+    function getParam(name) {
+        var params = new URLSearchParams(window.location.search);
+        return params.get(name);
+    }
+
+    function api() {
+        return (window.WHASOL && window.WHASOL.articlesApi) || null;
+    }
+
+    /* Supabase first, then the seeded / localStorage records as a fallback. */
+    async function loadArticle(articleId) {
+        if (!articleId) return null;
+
+        var articles = api();
+
+        if (articles) {
+            await articles.waitForClient();
+
+            var record = await articles.fetchArticleById(articleId);
+
+            if (record) return record;
+
+            /* The seeded data.js entries have no database id, so the ?id= value
+               may be a slug instead. */
+            var bySlug = await articles.fetchArticleBySlugAdmin(articleId);
+
+            if (bySlug) return bySlug;
+        }
+
+        if (WHASOL_ADMIN) {
+            var found = WHASOL_ADMIN.getArticleById(String(articleId));
+
+            if (found && found.record) {
+                var local = localRecordToArticle(found.record);
+
+                /* A seeded article may already exist in the database under the
+                   slug derived from its static page name. Load that real row so
+                   saving updates it instead of creating a duplicate. */
+                if (articles && local.slug) {
+                    var existing = await articles.fetchArticleBySlugAdmin(local.slug);
+
+                    if (existing) return existing;
+                }
+
+                return local;
+            }
+        }
+
+        return null;
+    }
+
+    /* A seeded post links to a static page such as "growatt-error-102.html".
+       That file name is the slug the database uses for the same article. */
+    function slugFromLink(link) {
+        if (!link) return "";
+
+        var file = String(link).split("?")[0].split("#")[0];
+
+        file = file.substring(file.lastIndexOf("/") + 1);
+
+        return file.replace(/\.(html?|php|aspx?)$/i, "").toLowerCase();
+    }
+
+    /* Shape a seeded / localStorage record like a database article. */
+    function localRecordToArticle(record) {
+        if (!record) return null;
+
+        return {
+            id: record.id || null,
+            title: record.title || record.name || "",
+            slug: record.slug || slugFromLink(record.link),
+            brand: record.brand || record.manufacturer || "",
+            model: record.model || (Array.isArray(record.models) ? record.models[0] : "") || "",
+            category: record.category || "",
+            metaTitle: record.metaTitle || "",
+            metaDescription: record.metaDescription || "",
+            description: record.description || "",
+            content: record.content || "",
+            image: record.image || record.featuredImage || "",
+            keywords: Array.isArray(record.keywords) ? record.keywords : [],
+            status: record.status || "published",
+            date: record.date || record.createdAt || "",
+            isLocal: true,
+        };
+    }
+
+    /* Category is stored as a canonical slug, so a record written before that
+       rule existed still lands on the right option. */
+    function categoryValueFor(record) {
+        var api = window.WHASOL && window.WHASOL.articlesApi;
+
+        if (api && typeof api.normalizeCategory === "function") {
+            return api.normalizeCategory(record && record.category);
+        }
+
+        return (record && record.category) || "";
+    }
+
+    function populateEditorWithArticle(record) {
+        if (!record) return;
+
+        titleInput.value = record.title || "";
+        document.getElementById("brand").value = record.brand || "";
+        document.getElementById("model").value = record.model || "";
+        document.getElementById("category").value = categoryValueFor(record);
+        statusInput.value = record.status || "draft";
+        document.getElementById("metaTitle").value = record.metaTitle || "";
+        document.getElementById("metaDescription").value = record.metaDescription || "";
+        slugInput.value = record.slug || "";
+        featuredImageInput.value = record.image || record.featuredImage || "";
+        contentEditor.innerHTML = record.content || record.description || "";
+
+        /* Sync status badge */
+        statusBadge.textContent = statusInput.value === "published" ? "Published" : "Draft";
+
+        /* Trigger dependent UI updates */
+        updateSlugPreview();
+        featuredImageInput.dispatchEvent(new Event("input"));
+    }
+
+    async function applyEditorMode() {
+        var articleId = getParam("id");
+
+        console.log("Article editor init | articleId =", articleId);
+
+        if (!articleId) {
+            EDIT_MODE = false;
+            EDIT_ARTICLE_ID = null;
+            setModeUI(false);
+            return;
+        }
+
+        setEditorBusy(true);
+
+        var record = await loadArticle(articleId);
+
+        setEditorBusy(false);
+
+        if (!record) {
+            console.error("Article not found for ID:", articleId);
+            alert("The selected article could not be found.");
+            EDIT_MODE = false;
+            EDIT_ARTICLE_ID = null;
+            setModeUI(false);
+            return;
+        }
+
+        EDIT_MODE = true;
+
+        /* A seeded record with no database row yet is imported on first save
+           instead of failing an update against a missing id. */
+        EDIT_ARTICLE_ID = record.id || null;
+
+        populateEditorWithArticle(record);
+        setModeUI(true);
+    }
+
+    function setModeUI(isEdit) {
+        var heading = document.getElementById("editorModeHeading");
+        var subheading = document.getElementById("editorModeSubheading");
+        var topBtn = document.getElementById("publishTopBtn");
+        var publishBtn = document.getElementById("publishBtn");
+        var draftBtn = document.getElementById("draftBtn");
+
+        if (isEdit) {
+            if (heading) heading.textContent = "Edit Article";
+            if (subheading) subheading.textContent = "Update the existing article content for WHA SOL.";
+            if (topBtn) topBtn.textContent = "Update Article";
+            if (publishBtn) publishBtn.textContent = "Update Article";
+            if (draftBtn) draftBtn.textContent = "Save Changes";
+        } else {
+            if (heading) heading.textContent = "Create Article";
+            if (subheading) subheading.textContent = "Create a troubleshooting guide, solar article, or knowledge-base article for WHA SOL.";
+            if (topBtn) topBtn.textContent = "Publish";
+            if (publishBtn) publishBtn.textContent = "Publish";
+            if (draftBtn) draftBtn.textContent = "Save Draft";
+        }
+    }
+
+/* ---------------------------------------------------------
+        TAXONOMY HELPERS
+        Error codes and brands are separate content types stored in their
+        own tables (see sql/002 and sql/003). They are read and written
+        through WHASOL.taxonomyApi, which uses the same authenticated
+        Supabase client as the articles API and respects the same RLS
+        policies. Nothing here invents a second data store.
+        --------------------------------------------------------- */
+
+    function taxonomy() {
+        return (window.WHASOL && window.WHASOL.taxonomyApi) || null;
+    }
+
+    /* Fill the brand suggestions from the database, falling back to the
+       seeded list when the brands table is not reachable. */
+    async function populateBrandList() {
+        var datalist = document.getElementById("brandList");
+
+        if (!datalist) return [];
+
+        var api = taxonomy();
+        var brands = [];
+
+        if (api && typeof api.fetchBrands === "function") {
+            var result = await api.fetchBrands();
+            brands = (result && result.brands) || [];
+        }
+
+        if (!brands.length && window.WHASOL && Array.isArray(window.WHASOL.brands)) {
+            brands = window.WHASOL.brands;
+        }
+
+        datalist.innerHTML = "";
+
+        brands.forEach(function (brand) {
+            var name = brand && (brand.name || brand.slug);
+
+            if (!name) return;
+
+            var opt = document.createElement("option");
+            opt.value = name;
+
+            /* Keep the logo reachable without another lookup. */
+            if (brand.logo || brand.image) {
+                opt.setAttribute("data-logo", brand.logo || brand.image || "");
+            }
+
+            datalist.appendChild(opt);
+        });
+
+        return brands;
+    }
+
+    /* When the brand matches one we already know, copy its logo into the
+       featured image. Only fills an empty field, so an image the editor
+       uploaded or chose is never overwritten. */
+    function applyBrandLogo(brand) {
+        if (!brand) return;
+
+        var logo = brand.logo || brand.image || "";
+
+        if (!logo) return;
+
+        if (featuredImageInput.value.trim()) return;
+
+        featuredImageInput.value = logo;
+        featuredImageInput.dispatchEvent(new Event("input"));
+    }
+
+    async function onBrandInput() {
+        var brandInput = document.getElementById("brand");
+        var brandName = (brandInput.value || "").trim();
+
+        if (!brandName) return;
+
+        var api = taxonomy();
+
+        if (!api || typeof api.findBrandByName !== "function") return;
+
+        applyBrandLogo(await api.findBrandByName(brandName));
+    }
+
+    var brandInputEl = document.getElementById("brand");
+
+    if (brandInputEl) {
+        brandInputEl.addEventListener("blur", onBrandInput);
+    }
+
+    /* ---------------------------------------------------------
+        ERROR CODE DETECTION
+        Reads the codes an article talks about ("Error 102", "error code
+        F01", "fault 12") so each one can be documented on the Error
+        Codes page. Detection reads only; nothing is written until the
+        article itself has been saved successfully.
+    --------------------------------------------------------- */
+
+    function stripHtml(html) {
+        return String(html || "")
+            .replace(/<[^>]*>/g, " ")
+            .replace(/&nbsp;/g, " ")
+            .replace(/&amp;/g, "&");
+    }
+
+    function detectErrorCodes(article) {
+        var text = [
+            article.title,
+            article.description,
+            article.metaDescription,
+            stripHtml(article.content),
+        ].join(" ");
+
+        var found = [];
+
+        /* "Error 102", "error code 102", "fault F01", "error-102" */
+        var pattern = /\b(?:error|errors|fault|code)\s*[-:#]?\s*([A-Z]{0,3}\d{1,5})\b/gi;
+        var match;
+
+        while ((match = pattern.exec(text)) !== null) {
+            var code = match[1].toUpperCase();
+
+            /* Ignore bare numbers that are clearly not a fault code. */
+            if (!code || /^\d{1,2}$/.test(code)) continue;
+
+            if (found.indexOf(code) === -1) found.push(code);
+        }
+
+        return found;
+    }
+
+    /* Document every code the article mentions. Each code is upserted on
+       (brand, code), so re-saving an article updates its codes instead of
+       duplicating them. */
+    async function syncErrorCodes(article) {
+        var api = taxonomy();
+
+        if (!api || typeof api.saveErrorCode !== "function") return;
+
+        var codes = detectErrorCodes(article);
+
+        if (!codes.length) return;
+
+        for (var i = 0; i < codes.length; i++) {
+            var code = codes[i];
+
+            /* Only codes this article actually mentions. */
+            var excerpt = articleExcerptFor(article, code);
+
+            var result = await api.saveErrorCode({
+                code: code,
+                title: codeTitle(article, code),
+                brand: article.brand || "",
+                model: article.model || "",
+                category: categoryLabelFor(article),
+                explanation: excerpt,
+                image: article.image || "",
+                link: article.link || "",
+                keywords: [code, article.brand, categoryLabelFor(article)]
+                    .filter(Boolean)
+                    .map(function (k) {
+                        return String(k).toLowerCase();
+                    }),
+                sourceArticleId: article.id || null,
+                sourceArticleTitle: article.title || "",
+            });
+
+            if (result && result.error) {
+                /* A missing table is a setup gap; the article is still saved. */
+                console.warn(
+                    "WHA SOL: Could not document error code " + code + ".",
+                    result.error
+                );
+            }
+        }
+    }
+
+    function codeTitle(article, code) {
+        var brand = (article.brand || "").trim();
+
+        return brand ? brand + " Error " + code : "Error " + code;
+    }
+
+    function categoryLabelFor(article) {
+        var api = window.WHASOL && window.WHASOL.articlesApi;
+
+        if (api && typeof api.categoryLabel === "function") {
+            return api.categoryLabel(article.category);
+        }
+
+        return "Inverter";
+    }
+
+    /* A short plain-text passage around the code, used as the starting
+       explanation on the Error Codes page. */
+    function articleExcerptFor(article, code) {
+        var text = stripHtml(article.content || article.description || "")
+            .replace(/\s+/g, " ")
+            .trim();
+
+        if (!text) return "Referenced in: " + (article.title || "an article");
+
+        var at = text.toLowerCase().indexOf(code.toLowerCase());
+
+        if (at === -1) return text.slice(0, 220);
+
+        var start = Math.max(0, at - 90);
+
+        return (start > 0 ? "…" : "") + text.slice(start, start + 220);
+    }
+
+    /* ---------------------------------------------------------
+        BRAND SYNC
+        An article that names a brand is linked to that brand's page. A
+        brand that does not exist yet is created, so the equipment grid
+        grows from real content instead of staying empty.
+    --------------------------------------------------------- */
+
+    async function syncBrand(article) {
+        var api = taxonomy();
+
+        if (!api || typeof api.ensureBrand !== "function") return;
+
+        var brandName = (article.brand || "").trim();
+
+        if (!brandName) return;
+
+        var result = await api.ensureBrand({
+            name: brandName,
+            model: article.model || "",
+            image: article.image || "",
+            /* A brand created from an article has no separate logo yet, so
+               the article image stands in until one is uploaded. */
+            logo: article.image || "",
+            description: "Brand referenced in: " + (article.title || "an article"),
+            articleTitle: article.title || "",
+            articleDescription:
+                article.metaDescription || article.description || "",
+            articleImage: article.image || "",
+            articleLink: article.link || "",
+            sourceArticleId: article.id || null,
+            sourceArticleTitle: article.title || "",
+        });
+
+        if (!result || result.error || !result.brand) {
+            if (result && result.error) {
+                console.warn(
+                    "WHA SOL: Could not sync brand " + brandName + ".",
+                    result.error
+                );
+            }
+            return;
+        }
+
+        var brand = result.brand;
+
+        /* An existing brand keeps whatever guide an editor already chose;
+           only empty slots are filled. */
+        if (!result.created) {
+            await api.linkBrandArticle(brand.id, {
+                title: article.title,
+                metaDescription: article.metaDescription || article.description || "",
+                image: article.image || "",
+                link: article.link || "",
+            });
+        }
+
+        await populateBrandList();
+    }
+
+    /* ---------------------------------------------------------
+        SAVE ARTICLE (CREATE OR UPDATE)
+        --------------------------------------------------------- */
+
+    function getArticleData(statusOverride) {
+        var title = titleInput.value.trim();
+
+        if (!title) {
+            alert("Please enter an article title.");
+            titleInput.focus();
+            return null;
+        }
+
+        var category = document.getElementById("category").value;
+
+        if (!category) {
+            alert("Please select a category.");
+            return null;
+        }
+
+        var metaDescription = document
+            .getElementById("metaDescription")
+            .value.trim();
+
+        return {
+            title: title,
+            brand: document.getElementById("brand").value.trim(),
+            model: document.getElementById("model").value.trim(),
+            category: category,
+            metaTitle: document.getElementById("metaTitle").value.trim(),
+            metaDescription: metaDescription,
+            /* The listing pages already render metaDescription on the cards, so
+               reuse it for the short description rather than asking for the
+               same text twice. */
+            description: metaDescription,
+            slug: slugInput.value.trim() || createSlug(title),
+            image: featuredImageInput.value.trim(),
+            content: contentEditor.innerHTML,
+            status: statusOverride || statusInput.value,
+        };
+    }
+
+    function setEditorBusy(isBusy) {
+        ["draftBtn", "publishBtn", "publishTopBtn"].forEach(function (id) {
+            var el = document.getElementById(id);
+
+            if (el) el.disabled = !!isBusy;
+        });
+    }
+
+    function setStatusUi(status) {
+        statusInput.value = status;
+        statusBadge.textContent = status === "published" ? "Published" : "Draft";
+    }
+
+    async function saveArticle(statusOverride) {
+        var article = getArticleData(statusOverride);
 
         if (!article) return;
 
+        var articles = api();
 
-        let articles = [];
-
-        try {
-
-            articles =
-                JSON.parse(
-                    localStorage.getItem(STORAGE_KEY)
-                ) || [];
-
-        } catch (error) {
-
-            articles = [];
-
+        if (!articles) {
+            alert("The content system is not ready. Please refresh the page and try again.");
+            return;
         }
 
+        await articles.waitForClient();
 
-        articles.unshift(article);
+        article.status = statusOverride || statusInput.value;
 
+        /* Slugs are the public URL, so they must stay unique. */
+        article.slug = await articles.uniqueSlug(article.slug, EDIT_ARTICLE_ID);
 
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(articles)
-        );
+        setEditorBusy(true);
 
+        var result = await articles.saveArticle(EDIT_ARTICLE_ID || null, article);
 
-        statusInput.value =
-            article.status;
+        setEditorBusy(false);
 
-        statusBadge.textContent =
-            article.status === "published"
-                ? "Published"
-                : "Draft";
+        if (result.error) {
+            console.error("WHA SOL: Save failed.", result.error);
+            alert("Could not save the article.\n\n" + (result.error.message || String(result.error)));
+            return;
+        }
 
+        setStatusUi(result.article.status);
+        slugInput.value = result.article.slug;
+        updateSlugPreview();
 
-        alert(
-            article.status === "published"
-                ? "Article published successfully."
-                : "Article saved as draft."
-        );
+        /* Stay in edit mode after the first save so further edits update the
+           same record instead of creating a new one. */
+        EDIT_MODE = true;
+        EDIT_ARTICLE_ID = result.article.id;
+        setModeUI(true);
 
+        /* Auto-categorize into the other content types. This runs only after
+           the article itself is stored, so a failure here never loses the
+           article. Codes go to the error_codes table and the brand is linked
+           to (or created in) the brands table — never into the articles
+           table, so no content type is counted as another. */
+        try {
+            await Promise.all([
+                syncErrorCodes(result.article),
+                syncBrand(result.article),
+            ]);
+        } catch (taxonomyError) {
+            console.error(
+                "WHA SOL: Article saved, but auto-categorization failed.",
+                taxonomyError
+            );
+        }
+
+        if (result.article.status === "published") {
+            window.location.href = "../article.html?slug=" + encodeURIComponent(result.article.slug);
+            return;
+        }
+
+        alert("Article saved as draft.");
+
+        window.location.href = "./articles.html";
     }
 
 
@@ -1822,102 +2356,6 @@
             }
         );
 
-
-    </script>
-
-
-    <script src="../js/data.js"></script>
-    <script src="../js/supabase.js"></script>
-    <script src="../js/auth.js"></script>
-
-
-    <script>
-
-    /* ---------------------------------------------------------
-       BRAND / MODEL DROPDOWNS
-       --------------------------------------------------------- */
-
-    const brandSelect = document.getElementById("brand");
-    const modelSelect = document.getElementById("model");
-
-
-    function populateBrandDropdown() {
-
-        brandSelect.innerHTML =
-            '<option value="">Select Brand</option>';
-
-        if (
-            !window.WHASOL ||
-            !Array.isArray(window.WHASOL.brands)
-        ) {
-
-            return;
-
-        }
-
-        window.WHASOL.brands.forEach(function (brand) {
-
-            const option = document.createElement("option");
-
-            option.value = brand.name || "";
-            option.textContent = brand.name || "";
-
-            brandSelect.appendChild(option);
-
-        });
-
-    }
-
-
-    function populateModelDropdown(brandName) {
-
-        modelSelect.innerHTML =
-            '<option value="">Select Model</option>';
-
-        if (!brandName) {
-
-            modelSelect.disabled = true;
-
-            return;
-
-        }
-
-        if (
-            !window.WHASOL ||
-            !Array.isArray(window.WHASOL.brands)
-        ) {
-
-            return;
-
-        }
-
-        modelSelect.disabled = false;
-
-        const brand = window.WHASOL.brands.find(function (b) {
-            return (b.name || "").toLowerCase() === brandName.toLowerCase();
-        });
-
-        if (brand && Array.isArray(brand.models)) {
-
-            brand.models.forEach(function (model) {
-
-                const option = document.createElement("option");
-
-                option.value = model || "";
-                option.textContent = model || "";
-
-                modelSelect.appendChild(option);
-
-            });
-
-        }
-
-    }
-
-
-    brandSelect.addEventListener("change", function () {
-        populateModelDropdown(brandSelect.value);
-    });
 
 
     /* ---------------------------------------------------------
@@ -2142,11 +2580,25 @@
 
     /* ---------------------------------------------------------
        START
-       --------------------------------------------------------- */
+    --------------------------------------------------------- */
 
-    checkAdminAccess();
+    /* Wait for authentication before loading or saving anything, so the
+       Supabase session is attached to the request. */
+    (async function start() {
 
-    updateSlugPreview();
+        var allowed = await checkAdminAccess();
+
+        if (allowed === false) return;
+
+        updateSlugPreview();
+
+        /* Brand suggestions and logo lookup both need the brands table, so
+           this is fire-and-forget: the editor stays usable if it is slow. */
+        populateBrandList();
+
+        await applyEditorMode();
+
+    })();
 
 </script>
 

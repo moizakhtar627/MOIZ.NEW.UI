@@ -1077,6 +1077,23 @@
 
                     <article class="stat-card">
                         <div class="stat-label">
+                            Total Articles
+                        </div>
+
+                        <div
+                            class="stat-number"
+                            id="totalArticlesCount"
+                        >
+                            0
+                        </div>
+
+                        <div class="stat-note">
+                            All content records combined
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-label">
                             Published Articles
                         </div>
 
@@ -1223,6 +1240,7 @@
                                         <th>Brand</th>
                                         <th>Category</th>
                                         <th>Status</th>
+                                        <th>Created</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -1274,12 +1292,19 @@
 
     <!-- Existing project data -->
     <script src="../js/data.js"></script>
+    <script src="../js/admin-content.js"></script>
 
     <!-- Existing Supabase -->
     <script src="../js/supabase.js"></script>
 
     <!-- Existing authentication -->
     <script src="../js/auth.js"></script>
+
+    <!-- Article data access -->
+    <script src="../js/articles-api.js"></script>
+
+    <!-- Error code and brand data access (separate content types) -->
+    <script src="../js/taxonomy-api.js"></script>
 
     <script>
         /* =========================================================
@@ -1393,6 +1418,13 @@
                 return {};
             }
 
+            function getRecordId(article) {
+                if (window.WHASOL && window.WHASOL.adminContent) {
+                    return window.WHASOL.adminContent.recordId(article);
+                }
+                return article && (article.id || article.slug || article.code || article.link) || "";
+            }
+
             function getArticles(data) {
                 var articles = [];
 
@@ -1442,6 +1474,14 @@
                 var errors = getErrorCodes(data);
                 var brands = getBrands(data);
 
+                var drafts = articles.filter(function (article) {
+                    return (
+                        article &&
+                        article.status &&
+                        String(article.status).toLowerCase() === "draft"
+                    );
+                });
+
                 var publishedArticles = articles.filter(function (article) {
                     if (!article) return false;
 
@@ -1453,14 +1493,6 @@
                     }
 
                     return true;
-                });
-
-                var drafts = articles.filter(function (article) {
-                    return (
-                        article &&
-                        article.status &&
-                        String(article.status).toLowerCase() === "draft"
-                    );
                 });
 
                 var publishedCount =
@@ -1506,6 +1538,121 @@
                 renderRecentArticles(articles);
             }
 
+            /* Lifetime and current status counters come from the database so they
+               always reflect the actual content stored in Supabase.
+               "Total Articles" is the grand total across ALL content types:
+               articles + error codes + brands/models. Each content type is
+               counted on its own table, so an error code or a brand is never
+               counted as an article. */
+            async function loadArticleCounters() {
+                var api =
+                    window.WHASOL && window.WHASOL.articlesApi;
+
+                if (
+                    !api ||
+                    typeof api.fetchCounts !== "function"
+                ) {
+                    return;
+                }
+
+                await api.waitForClient();
+
+                var counts = await api.fetchCounts();
+
+                var taxonomy =
+                    window.WHASOL && window.WHASOL.taxonomyApi;
+
+                var errorCodeTotal = 0;
+                var brandTotal = 0;
+
+                if (taxonomy && typeof taxonomy.fetchCounts === "function") {
+                    var taxonomyCounts = await taxonomy.fetchCounts();
+
+                    errorCodeTotal = taxonomyCounts.errorCodes || 0;
+                    brandTotal = taxonomyCounts.brands || 0;
+                } else {
+                    /* Seeded content keeps the cards meaningful before the
+                       taxonomy tables exist. */
+                    var seeded = getWhaSolData();
+
+                    errorCodeTotal = getErrorCodes(seeded).length;
+                    brandTotal = getBrands(seeded).length;
+                }
+
+                var totalEl =
+                    document.getElementById(
+                        "totalArticlesCount"
+                    );
+
+                var publishedCount =
+                    document.getElementById(
+                        "publishedArticlesCount"
+                    );
+
+                var draftsCount =
+                    document.getElementById(
+                        "draftsCount"
+                    );
+
+                var errorsCount =
+                    document.getElementById(
+                        "errorCodesCount"
+                    );
+
+                var brandsCount =
+                    document.getElementById(
+                        "brandsModelsCount"
+                    );
+
+                /* Total Articles = all content types combined */
+                var grandTotal =
+                    (counts.total || 0) +
+                    errorCodeTotal +
+                    brandTotal;
+
+                if (totalEl) {
+                    totalEl.textContent = grandTotal;
+                }
+
+                if (publishedCount) {
+                    publishedCount.textContent = counts.published;
+                }
+
+                if (draftsCount) {
+                    draftsCount.textContent = counts.drafts;
+                }
+
+                if (errorsCount) {
+                    errorsCount.textContent = errorCodeTotal;
+                }
+
+                if (brandsCount) {
+                    brandsCount.textContent = brandTotal;
+                }
+            }
+
+            /* Recent articles are the newest records in the database, sorted by
+               created_at DESC so the most recently uploaded articles appear
+               first. Falls back to seeded content when Supabase is
+               unreachable. */
+            async function loadRecentArticles() {
+                var api =
+                    window.WHASOL && window.WHASOL.articlesApi;
+
+                var tbody =
+                    document.getElementById("recentArticlesBody");
+
+                if (!tbody || !api) return;
+
+                await api.waitForClient();
+
+                var rows = await api.fetchAdminArticles();
+
+                if (!rows.length) return;
+
+                renderRecentArticles(rows);
+            }
+
             function renderRecentArticles(articles) {
                 var tbody =
                     document.getElementById(
@@ -1530,7 +1677,7 @@
                 if (!articles.length) {
                     tbody.innerHTML =
                         '<tr>' +
-                        '<td colspan="5" style="text-align:center;color:var(--admin-muted-2);padding:28px 16px;">' +
+                        '<td colspan="6" style="text-align:center;color:var(--admin-muted-2);padding:28px 16px;">' +
                         "No articles yet." +
                         "</td>" +
                         "</tr>";
@@ -1538,7 +1685,24 @@
                     return;
                 }
 
-                var recent = articles.slice(-5).reverse();
+                /* Newest first by created_at (the upload timestamp), so the
+                   most recently uploaded articles appear at the top. */
+                var recent = articles
+                    .slice()
+                    .sort(function (a, b) {
+                        var ta = new Date(
+                            a.createdAt || a.created_at || 0
+                        ).getTime();
+                        var tb = new Date(
+                            b.createdAt || b.created_at || 0
+                        ).getTime();
+
+                        if (isNaN(ta)) ta = 0;
+                        if (isNaN(tb)) tb = 0;
+
+                        return tb - ta;
+                    })
+                    .slice(0, 5);
 
                 tbody.innerHTML = recent
                     .map(function (article) {
@@ -1552,7 +1716,15 @@
                             article.manufacturer ||
                             "—";
 
+                        var api =
+                            window.WHASOL &&
+                            window.WHASOL.articlesApi;
+
                         var category =
+                            (api &&
+                                typeof api.categoryLabel ===
+                                    "function" &&
+                                api.categoryLabel(article.category)) ||
                             article.category ||
                             "Troubleshooting";
 
@@ -1566,6 +1738,11 @@
 
                         var statusText =
                             isDraft ? "Draft" : "Published";
+
+                        var createdTime =
+                            article.createdAt ||
+                            article.created_at ||
+                            "";
 
                         return (
                             "<tr>" +
@@ -1583,11 +1760,73 @@
                             '">' +
                             statusText +
                             "</span></td>" +
-                            '<td><a href="./article-editor.html" class="table-action">Edit</a></td>' +
+                            '<td><span class="brand-text">' +
+                            escapeHtml(formatRelativeTime(createdTime)) +
+                            "</span></td>" +
+                            '<td><a href="./article-editor.html?id=' + encodeURIComponent(getRecordId(article)) + '" class="table-action">Edit</a></td>' +
                             "</tr>"
                         );
                     })
                     .join("");
+            }
+
+            /* Human-friendly relative timestamp for the Created column.
+               Reuses no external libraries and never invents fake dates. */
+            function formatRelativeTime(value) {
+                if (!value) return "—";
+
+                var date = new Date(value);
+
+                if (isNaN(date.getTime())) return "—";
+
+                var now = new Date();
+                var diffMs = now.getTime() - date.getTime();
+
+                if (diffMs < 0) {
+                    return formatDate(date);
+                }
+
+                var seconds = Math.floor(diffMs / 1000);
+                var minutes = Math.floor(seconds / 60);
+                var hours = Math.floor(minutes / 60);
+                var days = Math.floor(hours / 24);
+
+                if (seconds < 60) {
+                    return "Just now";
+                }
+
+                if (minutes < 60) {
+                    return minutes + " minute" +
+                        (minutes === 1 ? "" : "s") + " ago";
+                }
+
+                if (hours < 24) {
+                    return hours + " hour" +
+                        (hours === 1 ? "" : "s") + " ago";
+                }
+
+                if (days === 1) {
+                    return "Yesterday";
+                }
+
+                if (days < 7) {
+                    return days + " days ago";
+                }
+
+                return formatDate(date);
+            }
+
+            function formatDate(date) {
+                var months = [
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                ];
+
+                var day = date.getDate();
+                var month = months[date.getMonth()];
+                var year = date.getFullYear();
+
+                return month + " " + day + ", " + year;
             }
 
             function escapeHtml(value) {
@@ -1787,14 +2026,15 @@
              * Give the existing data.js a moment to initialize,
              * then render dashboard information.
              */
-            if (
-                window.WHASOL &&
-                window.WHASOL.supabase
-            ) {
-                renderDashboard();
-            } else {
-                setTimeout(renderDashboard, 300);
-            }
+            /*
+             * Render the seeded content immediately so the page is never
+             * blank, then refresh the article counters and recent articles
+             * from Supabase.
+             */
+            renderDashboard();
+
+            loadArticleCounters();
+            loadRecentArticles();
 
         })();
     </script>

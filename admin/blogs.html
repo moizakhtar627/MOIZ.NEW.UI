@@ -592,43 +592,62 @@
 
 
 <script src="../js/data.js"></script>
+<script src="../js/admin-content.js"></script>
 <script src="../js/supabase.js"></script>
 <script src="../js/auth.js"></script>
+<script src="../js/articles-api.js"></script>
 
 
 <script>
 
     const STORAGE_KEY = "whasol_admin_articles";
 
+    function getRecordId(article) {
+        if (window.WHASOL && window.WHASOL.adminContent) {
+            return window.WHASOL.adminContent.recordId(article);
+        }
+        return article && (article.id || article.slug || article.code || article.link) || "";
+    }
+
+
     let articles = [];
 
 
     /* =========================================================
        LOAD ARTICLES
-       ========================================================= */
+    ========================================================= */
 
-    function loadArticles() {
+    /* Supabase is the source of truth. Seeded data.js posts that are not in
+       the database yet are appended so nothing disappears. */
+    async function loadArticles() {
 
-        let localArticles = [];
+        const api =
+            window.WHASOL &&
+            window.WHASOL.articlesApi;
 
-        try {
+        let rows = [];
 
-            localArticles =
-                JSON.parse(
-                    localStorage.getItem(STORAGE_KEY)
-                ) || [];
+        if (api) {
 
-        } catch (error) {
+            await api.waitForClient();
 
-            localArticles = [];
+            rows = await api.fetchAdminArticles();
 
         }
 
 
-        /*
-         * Existing WHA SOL blog articles from data.js
-         * are also displayed.
-         */
+        const dbSlugs = {};
+
+        rows.forEach(row => {
+
+            if (row.slug) {
+                dbSlugs[
+                    String(row.slug).toLowerCase()
+                ] = true;
+            }
+
+        });
+
 
         let existingArticles = [];
 
@@ -638,50 +657,62 @@
         ) {
 
             existingArticles =
-                window.WHASOL.blogPosts.map(
-                    article => ({
-                        id:
-                            article.id ||
-                            "existing-" + Math.random(),
+                window.WHASOL.blogPosts
+                    .map(article => {
 
-                        title:
-                            article.title ||
-                            "Untitled Article",
+                        const seedSlug =
+                            article.slug ||
+                            String(
+                                article.link || ""
+                            ).replace(
+                                /\.html$/i,
+                                ""
+                            );
 
-                        brand:
-                            article.brand ||
-                            "",
+                        if (
+                            seedSlug &&
+                            dbSlugs[
+                                seedSlug.toLowerCase()
+                            ]
+                        ) {
+                            return null;
+                        }
 
-                        model:
-                            article.model ||
-                            "",
+                        return {
+                            id: article.link || seedSlug,
+                            title:
+                                article.title ||
+                                "Untitled Article",
 
-                        category:
-                            article.category ||
-                            "General",
+                            brand:
+                                article.brand || "",
 
-                        status:
-                            "published",
+                            model:
+                                article.model || "",
 
-                        createdAt:
-                            article.date ||
-                            article.createdAt ||
-                            new Date().toISOString(),
+                            category:
+                                article.category ||
+                                "General",
 
-                        existing:
-                            true
+                            status: "published",
+
+                            createdAt:
+                                article.date ||
+                                article.createdAt ||
+                                new Date()
+                                    .toISOString(),
+
+                            existing: true
+                        };
+
                     })
-                );
+                    .filter(Boolean);
 
         }
 
 
-        /*
-         * Show newly-created admin articles first.
-         */
-
         articles = [
-            ...localArticles,
+            ...rows,
             ...existingArticles
         ];
 
@@ -868,6 +899,7 @@
             const categoryColumn =
                 document.createElement("div");
 
+            /* Categories are stored as slugs; show the friendly label. */
             const categoryTag =
                 document.createElement("span");
 
@@ -875,7 +907,14 @@
                 "tag";
 
             categoryTag.textContent =
-                article.category ||
+                (window.WHASOL &&
+                    window.WHASOL.articlesApi &&
+                    typeof window.WHASOL.articlesApi.categoryLabel ===
+                        "function"
+                    ? window.WHASOL.articlesApi.categoryLabel(
+                          article.category
+                      )
+                    : article.category) ||
                 "General";
 
             categoryColumn.appendChild(
@@ -935,11 +974,15 @@
             viewButton.onclick =
                 function () {
 
-                    if (article.slug) {
+                    if (article.link) {
 
                         window.open(
                             "../" +
-                            article.slug,
+                            String(article.link)
+                                .replace(
+                                    /^\.?\//,
+                                    ""
+                                ),
                             "_blank"
                         );
 
@@ -986,6 +1029,39 @@
                 viewButton
             );
 
+
+            /*
+             * Edit
+             */
+
+            const editButton =
+                document.createElement("button");
+
+            editButton.className =
+                "action-btn action-edit";
+
+            editButton.title =
+                "Edit";
+
+            editButton.innerHTML =
+                "✎";
+
+            editButton.onclick =
+                function () {
+
+                    window.location.href =
+                        "./article-editor.html?id=" +
+                        encodeURIComponent(
+                            getRecordId(article)
+                        );
+
+                };
+
+
+            actionsColumn.appendChild(
+                editButton
+            );
+
             actionsColumn.appendChild(
                 deleteButton
             );
@@ -1021,9 +1097,9 @@
 
     /* =========================================================
        DELETE
-       ========================================================= */
+    ========================================================= */
 
-    function deleteArticle(
+    async function deleteArticle(
         id,
         isExisting
     ) {
@@ -1031,7 +1107,7 @@
         if (isExisting) {
 
             alert(
-                "This article comes from your existing WHA SOL data.js content. Manage it from the original article data for now."
+                "This article comes from your seeded WHA SOL content and cannot be deleted from here."
             );
 
             return;
@@ -1041,40 +1117,47 @@
 
         const confirmed =
             confirm(
-                "Are you sure you want to delete this article?"
+                "Are you sure you want to delete this article? This cannot be undone."
             );
 
 
         if (!confirmed) return;
 
 
-        let stored = [];
+        const api =
+            window.WHASOL &&
+            window.WHASOL.articlesApi;
 
-        try {
+        if (!api) {
 
-            stored =
-                JSON.parse(
-                    localStorage.getItem(STORAGE_KEY)
-                ) || [];
+            alert(
+                "The content system is not ready. Please refresh the page and try again."
+            );
 
-        } catch (error) {
-
-            stored = [];
+            return;
 
         }
 
 
-        stored =
-            stored.filter(
-                article =>
-                    article.id !== id
+        const result =
+            await api.deleteArticle(id);
+
+        if (result.error) {
+
+            console.error(
+                "WHA SOL: Delete failed.",
+                result.error
             );
 
+            alert(
+                "Could not delete the article.\n\n" +
+                (result.error.message ||
+                    String(result.error))
+            );
 
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(stored)
-        );
+            return;
+
+        }
 
 
         loadArticles();
@@ -1114,7 +1197,11 @@
                 typeof window.WHASOL.auth.requireAuth === "function"
             ) {
 
-                await window.WHASOL.auth.requireAuth("./login.html");
+                const allowed =
+                    await window.WHASOL.auth
+                        .requireAuth("./login.html");
+
+                if (allowed === false) return;
 
             }
 
@@ -1133,7 +1220,8 @@
         }
 
 
-        loadArticles();
+        /* Load only once the session exists, so RLS sees the admin role. */
+        await loadArticles();
 
     }
 

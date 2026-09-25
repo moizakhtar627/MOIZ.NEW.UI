@@ -12,6 +12,7 @@
 
     <!-- Existing WHA SOL Data & Auth -->
     <script src="../js/data.js"></script>
+    <script src="../js/admin-content.js"></script>
     <script src="../js/supabase.js"></script>
     <script src="../js/auth.js"></script>
 
@@ -1094,6 +1095,13 @@
                 return Array.isArray(data.brands) ? data.brands : [];
             }
 
+            function getRecordId(brand) {
+                if (window.WHASOL && window.WHASOL.adminContent) {
+                    return window.WHASOL.adminContent.recordId(brand);
+                }
+                return brand && (brand.id || brand.slug || brand.code || brand.link) || "";
+            }
+
             function getArticles() {
                 var data = window.WHASOL || {};
                 var articles = [];
@@ -1176,11 +1184,23 @@
                         '<td><span class="article-count">' + articleCount + '</span></td>' +
                         '<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
                         '<td><div class="action-buttons">' +
-                        '<button type="button" class="action-btn action-edit" title="Edit" onclick="alert(\'Edit functionality coming soon.\')">&#9998;</button>' +
+                        '<button type="button" class="action-btn action-edit" title="Edit" onclick="editBrand(\'' + escapeHtml(getRecordId(brand)) + '\')">&#9998;</button>' +
                         '<button type="button" class="action-btn" title="View" onclick="alert(\'Brand view not available in admin yet.\')">↗</button>' +
                         '</div></td>' +
                         '</tr>';
                 }).join("");
+            }
+
+            function editBrand(recordId) {
+                /* Brands are not articles, so the article editor cannot open
+                   them. Sending the slug there would silently discard the
+                   record, so say so plainly instead. */
+                alert(
+                    "Editing brands is not wired up yet.\n\n" +
+                    "The record \"" +
+                    (recordId || "this brand") +
+                    "\" is a separate content type from articles and is not stored in Supabase."
+                );
             }
 
             /* Search */
@@ -1270,6 +1290,9 @@
             /* =====================================================
                START
             ===================================================== */
+
+            /* Expose for inline onclick handlers */
+            window.editBrand = editBrand;
 
             protectPage();
             initAuth();

@@ -12,6 +12,7 @@
 
     <!-- Existing WHA SOL Data & Auth -->
     <script src="../js/data.js"></script>
+    <script src="../js/admin-content.js"></script>
     <script src="../js/supabase.js"></script>
     <script src="../js/auth.js"></script>
 
@@ -1100,6 +1101,13 @@
                 return Array.isArray(data.errorCodes) ? data.errorCodes : [];
             }
 
+            function getRecordId(code) {
+                if (window.WHASOL && window.WHASOL.adminContent) {
+                    return window.WHASOL.adminContent.recordId(code);
+                }
+                return code && (code.id || code.slug || code.code || code.link) || "";
+            }
+
             function escapeHtml(value) {
                 return String(value)
                     .replace(/&/g, "&amp;")
@@ -1168,12 +1176,24 @@
                         '<td>' + categoryText + '</td>' +
                         '<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
                         '<td><div class="action-buttons">' +
-                        '<button type="button" class="action-btn action-edit" title="Edit" onclick="alert(\'Edit functionality coming soon.\')">&#9998;</button>' +
+                        '<button type="button" class="action-btn action-edit" title="Edit" onclick="editErrorCode(\'' + escapeHtml(getRecordId(code)) + '\')">&#9998;</button>' +
                         '<button type="button" class="action-btn" title="View" onclick="alert(\'Preview not available in admin.\')">↗</button>' +
                         '<button type="button" class="action-btn action-delete" title="Delete" onclick="alert(\'Delete functionality coming soon.\')">×</button>' +
                         '</div></td>' +
                         '</tr>';
                 }).join("");
+            }
+
+            function editErrorCode(recordId) {
+                /* Error codes are not articles, so the article editor cannot
+                   open them. Sending the id there would silently discard the
+                   record, so say so plainly instead. */
+                alert(
+                    "Editing error codes is not wired up yet.\n\n" +
+                    "The record \"" +
+                    (recordId || "this code") +
+                    "\" is a separate content type from articles and is not stored in Supabase."
+                );
             }
 
             /* Search and filter */
@@ -1266,6 +1286,9 @@
             /* =====================================================
                START
             ===================================================== */
+
+            /* Expose for inline onclick handlers */
+            window.editErrorCode = editErrorCode;
 
             protectPage();
             initAuth();
