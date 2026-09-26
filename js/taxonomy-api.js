@@ -321,26 +321,59 @@
   /* Lifetime counts for the dashboard. Each content type is counted on its
      own so an error code is never included in an article total. */
   async function fetchCounts() {
-    var result = {
-      errorCodes: seedCodes().length,
-      brands: seedBrands().length,
-      models: 0,
-      available: false,
-    };
+    var c = client();
 
-    var brandResult = await fetchBrands();
+    if (!c) {
+      await waitForClient();
+      c = client();
+    }
 
-    result.brands = brandResult.brands.length;
-    result.models = brandResult.brands.reduce(function (sum, brand) {
-      return sum + (Array.isArray(brand.models) ? brand.models.length : 0);
-    }, 0);
+    if (!c) {
+      return {
+        errorCodes: 0,
+        brands: 0,
+        models: 0,
+        available: false,
+        errorCodesAvailable: false,
+        brandsAvailable: false,
+        modelsAvailable: false,
+      };
+    }
 
-    var codeResult = await fetchErrorCodes();
+    try {
+      var results = await Promise.all([
+        c.from(CODES_TABLE).select("id", { count: "exact", head: true }),
+        c.from(BRANDS_TABLE).select("id", { count: "exact", head: true }),
+        c.from(MODELS_TABLE).select("id", { count: "exact", head: true }),
+      ]);
 
-    result.errorCodes = codeResult.codes.length;
-    result.available = codeResult.available && brandResult.available;
+      var codes = results[0];
+      var brands = results[1];
+      var models = results[2];
 
-    return result;
+      return {
+        errorCodes: codes.count || 0,
+        brands: brands.count || 0,
+        models: models.count || 0,
+        available: !codes.error && !brands.error && !models.error,
+        errorCodesAvailable: !codes.error,
+        brandsAvailable: !brands.error,
+        modelsAvailable: !models.error,
+        error: codes.error || brands.error || models.error || null,
+      };
+    } catch (error) {
+      console.error("WHA SOL: Failed to load taxonomy counts.", error);
+      return {
+        errorCodes: 0,
+        brands: 0,
+        models: 0,
+        available: false,
+        errorCodesAvailable: false,
+        brandsAvailable: false,
+        modelsAvailable: false,
+        error: error,
+      };
+    }
   }
 
   /* --------------------------------------------------------------------------

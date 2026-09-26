@@ -1084,11 +1084,11 @@
                             class="stat-number"
                             id="totalArticlesCount"
                         >
-                            0
+                            &mdash;
                         </div>
 
                         <div class="stat-note">
-                            All content records combined
+                            All article records stored
                         </div>
                     </article>
 
@@ -1101,7 +1101,7 @@
                             class="stat-number"
                             id="publishedArticlesCount"
                         >
-                            0
+                            &mdash;
                         </div>
 
                         <div class="stat-note">
@@ -1118,7 +1118,7 @@
                             class="stat-number"
                             id="errorCodesCount"
                         >
-                            0
+                            &mdash;
                         </div>
 
                         <div class="stat-note">
@@ -1135,7 +1135,7 @@
                             class="stat-number"
                             id="brandsModelsCount"
                         >
-                            0
+                            &mdash;
                         </div>
 
                         <div class="stat-note">
@@ -1152,7 +1152,7 @@
                             class="stat-number"
                             id="draftsCount"
                         >
-                            0
+                            &mdash;
                         </div>
 
                         <div class="stat-note">
@@ -1226,7 +1226,7 @@
                         <div class="panel-header">
                             <h2>Recent Articles</h2>
                             <span id="articleCountLabel">
-                                0 articles
+                                &mdash; articles
                             </span>
                         </div>
 
@@ -1291,7 +1291,6 @@
     </div>
 
     <!-- Existing project data -->
-    <script src="../js/data.js"></script>
     <script src="../js/admin-content.js"></script>
 
     <!-- Existing Supabase -->
@@ -1410,14 +1409,6 @@
                DATA
             ===================================================== */
 
-            function getWhaSolData() {
-                if (window.WHASOL) {
-                    return window.WHASOL;
-                }
-
-                return {};
-            }
-
             function getRecordId(article) {
                 if (window.WHASOL && window.WHASOL.adminContent) {
                     return window.WHASOL.adminContent.recordId(article);
@@ -1425,125 +1416,9 @@
                 return article && (article.id || article.slug || article.code || article.link) || "";
             }
 
-            function getArticles(data) {
-                var articles = [];
-
-                if (
-                    Array.isArray(data.troubleshootingArticles)
-                ) {
-                    articles = articles.concat(
-                        data.troubleshootingArticles
-                    );
-                }
-
-                if (Array.isArray(data.blogPosts)) {
-                    data.blogPosts.forEach(function (item) {
-                        var exists = articles.some(function (article) {
-                            return (
-                                article.id &&
-                                item.id &&
-                                article.id === item.id
-                            );
-                        });
-
-                        if (!exists) {
-                            articles.push(item);
-                        }
-                    });
-                }
-
-                return articles;
-            }
-
-            function getErrorCodes(data) {
-                return Array.isArray(data.errorCodes)
-                    ? data.errorCodes
-                    : [];
-            }
-
-            function getBrands(data) {
-                return Array.isArray(data.brands)
-                    ? data.brands
-                    : [];
-            }
-
-            function renderDashboard() {
-                var data = getWhaSolData();
-
-                var articles = getArticles(data);
-                var errors = getErrorCodes(data);
-                var brands = getBrands(data);
-
-                var drafts = articles.filter(function (article) {
-                    return (
-                        article &&
-                        article.status &&
-                        String(article.status).toLowerCase() === "draft"
-                    );
-                });
-
-                var publishedArticles = articles.filter(function (article) {
-                    if (!article) return false;
-
-                    if (
-                        article.status &&
-                        String(article.status).toLowerCase() === "draft"
-                    ) {
-                        return false;
-                    }
-
-                    return true;
-                });
-
-                var publishedCount =
-                    document.getElementById(
-                        "publishedArticlesCount"
-                    );
-
-                var errorsCount =
-                    document.getElementById(
-                        "errorCodesCount"
-                    );
-
-                var brandsCount =
-                    document.getElementById(
-                        "brandsModelsCount"
-                    );
-
-                var draftsCount =
-                    document.getElementById(
-                        "draftsCount"
-                    );
-
-                if (publishedCount) {
-                    publishedCount.textContent =
-                        publishedArticles.length;
-                }
-
-                if (errorsCount) {
-                    errorsCount.textContent =
-                        errors.length;
-                }
-
-                if (brandsCount) {
-                    brandsCount.textContent =
-                        brands.length;
-                }
-
-                if (draftsCount) {
-                    draftsCount.textContent =
-                        drafts.length;
-                }
-
-                renderRecentArticles(articles);
-            }
-
-            /* Lifetime and current status counters come from the database so they
-               always reflect the actual content stored in Supabase.
-               "Total Articles" is the grand total across ALL content types:
-               articles + error codes + brands/models. Each content type is
-               counted on its own table, so an error code or a brand is never
-               counted as an article. */
+            /* Lifetime and current status counters come from their own database
+               tables. Article totals never include error codes, brands, or
+               models. */
             async function loadArticleCounters() {
                 var api =
                     window.WHASOL && window.WHASOL.articlesApi;
@@ -1559,24 +1434,29 @@
 
                 var counts = await api.fetchCounts();
 
+                if (!counts || counts.available === false) {
+                    console.warn("WHA SOL: Article counts are unavailable.", counts && counts.error);
+                    return;
+                }
+
                 var taxonomy =
                     window.WHASOL && window.WHASOL.taxonomyApi;
 
                 var errorCodeTotal = 0;
-                var brandTotal = 0;
+                var brandAndModelTotal = 0;
 
                 if (taxonomy && typeof taxonomy.fetchCounts === "function") {
                     var taxonomyCounts = await taxonomy.fetchCounts();
 
-                    errorCodeTotal = taxonomyCounts.errorCodes || 0;
-                    brandTotal = taxonomyCounts.brands || 0;
-                } else {
-                    /* Seeded content keeps the cards meaningful before the
-                       taxonomy tables exist. */
-                    var seeded = getWhaSolData();
+                    if (taxonomyCounts.errorCodesAvailable) {
+                        errorCodeTotal = taxonomyCounts.errorCodes || 0;
+                    }
 
-                    errorCodeTotal = getErrorCodes(seeded).length;
-                    brandTotal = getBrands(seeded).length;
+                    if (taxonomyCounts.brandsAvailable && taxonomyCounts.modelsAvailable) {
+                        brandAndModelTotal =
+                            (taxonomyCounts.brands || 0) +
+                            (taxonomyCounts.models || 0);
+                    }
                 }
 
                 var totalEl =
@@ -1604,14 +1484,8 @@
                         "brandsModelsCount"
                     );
 
-                /* Total Articles = all content types combined */
-                var grandTotal =
-                    (counts.total || 0) +
-                    errorCodeTotal +
-                    brandTotal;
-
                 if (totalEl) {
-                    totalEl.textContent = grandTotal;
+                    totalEl.textContent = counts.total || 0;
                 }
 
                 if (publishedCount) {
@@ -1627,14 +1501,13 @@
                 }
 
                 if (brandsCount) {
-                    brandsCount.textContent = brandTotal;
+                    brandsCount.textContent = brandAndModelTotal;
                 }
             }
 
             /* Recent articles are the newest records in the database, sorted by
                created_at DESC so the most recently uploaded articles appear
-               first. Falls back to seeded content when Supabase is
-               unreachable. */
+               first. Supabase remains the only source for this admin list. */
             async function loadRecentArticles() {
                 var api =
                     window.WHASOL && window.WHASOL.articlesApi;
@@ -1647,8 +1520,6 @@
                 await api.waitForClient();
 
                 var rows = await api.fetchAdminArticles();
-
-                if (!rows.length) return;
 
                 renderRecentArticles(rows);
             }
@@ -2021,17 +1892,6 @@
             ===================================================== */
 
             protectDashboard();
-
-            /*
-             * Give the existing data.js a moment to initialize,
-             * then render dashboard information.
-             */
-            /*
-             * Render the seeded content immediately so the page is never
-             * blank, then refresh the article counters and recent articles
-             * from Supabase.
-             */
-            renderDashboard();
 
             loadArticleCounters();
             loadRecentArticles();

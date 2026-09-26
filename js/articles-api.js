@@ -360,7 +360,7 @@
     var res = await c
       .from(TABLE)
       .select("*")
-      .order("updated_at", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (res.error) {
       console.error("WHA SOL: Failed to load admin articles.", res.error);
@@ -528,13 +528,15 @@
       c = client();
     }
 
-    var fallback = {
-      total: seedPosts().length,
-      published: seedPosts().length,
-      drafts: 0,
-    };
-
-    if (!c) return fallback;
+    if (!c) {
+      return {
+        total: 0,
+        published: 0,
+        drafts: 0,
+        available: false,
+        error: new Error("Supabase is not ready."),
+      };
+    }
 
     try {
       var total = await c
@@ -555,10 +557,18 @@
         total: total.count || 0,
         published: published.count || 0,
         drafts: drafts.count || 0,
+        available: !total.error && !published.error && !drafts.error,
+        error: total.error || published.error || drafts.error || null,
       };
     } catch (error) {
       console.error("WHA SOL: Failed to load article counts.", error);
-      return fallback;
+      return {
+        total: 0,
+        published: 0,
+        drafts: 0,
+        available: false,
+        error: error,
+      };
     }
   }
 
