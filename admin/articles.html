@@ -697,116 +697,270 @@
             backdrop-filter: blur(2px);
         }
 
-        /* =========================================================
-           RESPONSIVE
-        ========================================================= */
+/* =========================================================
+            RESPONSIVE
+         ========================================================= */
 
-        @media (max-width: 1050px) {
-            :root {
-                --admin-sidebar-width: 225px;
-            }
+         @media (max-width: 1050px) {
+             :root {
+                 --admin-sidebar-width: 225px;
+             }
 
-            .admin-topbar,
-            .dashboard-content {
-                padding-left: 25px;
-                padding-right: 25px;
-            }
+             .admin-topbar,
+             .dashboard-content {
+                 padding-left: 25px;
+                 padding-right: 25px;
+             }
 
-            .search-box input {
-                width: 220px;
-            }
-        }
+             .search-box input {
+                 width: 220px;
+             }
+         }
 
-        @media (max-width: 760px) {
-            .admin-sidebar {
-                transform: translateX(-100%);
-                box-shadow: 18px 0 40px rgba(0, 0, 0, 0.35);
-            }
+         @media (max-width: 760px) {
+             .admin-sidebar {
+                 transform: translateX(-100%);
+                 box-shadow: 18px 0 40px rgba(0, 0, 0, 0.35);
+             }
 
-            .admin-sidebar.open {
-                transform: translateX(0);
-            }
+             .admin-sidebar.open {
+                 transform: translateX(0);
+             }
 
-            .sidebar-overlay.open {
-                display: block;
-            }
+             .sidebar-overlay.open {
+                 display: block;
+             }
 
-            .admin-main {
-                width: 100%;
-                margin-left: 0;
-            }
+             .admin-main {
+                 width: 100%;
+                 margin-left: 0;
+             }
 
-            .admin-topbar {
-                display: none;
-            }
+             .admin-topbar {
+                 display: none;
+             }
 
-            .mobile-header {
-                position: sticky;
-                top: 0;
-                z-index: 800;
-                height: 62px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 15px;
-                border-bottom: 1px solid var(--admin-border);
-                background: rgba(7, 16, 24, 0.94);
-                backdrop-filter: blur(14px);
-            }
+             .mobile-header {
+                 position: sticky;
+                 top: 0;
+                 z-index: 800;
+                 height: 62px;
+                 display: flex;
+                 align-items: center;
+                 justify-content: space-between;
+                 padding: 0 15px;
+                 border-bottom: 1px solid var(--admin-border);
+                 background: rgba(7, 16, 24, 0.94);
+                 backdrop-filter: blur(14px);
+             }
 
-            .mobile-brand {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
+             .mobile-brand {
+                 display: flex;
+                 align-items: center;
+                 gap: 10px;
+             }
 
-            .mobile-logo {
-                width: 92px;
-                height: auto;
-                max-height: 32px;
-                object-fit: contain;
-            }
+             .mobile-logo {
+                 width: 92px;
+                 height: auto;
+                 max-height: 32px;
+                 object-fit: contain;
+             }
 
-            .mobile-admin {
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                color: var(--admin-muted);
-                font-size: 10px;
-            }
+             .mobile-admin {
+                 display: flex;
+                 align-items: center;
+                 gap: 6px;
+                 color: var(--admin-muted);
+                 font-size: 10px;
+             }
 
-            .dashboard-content {
-                padding: 27px 15px 45px;
-            }
+             .dashboard-content {
+                 padding: 27px 15px 45px;
+             }
 
-            .page-heading {
-                margin-bottom: 22px;
-            }
+             .page-heading {
+                 margin-bottom: 22px;
+             }
 
-            .page-heading h1 {
-                font-size: 26px;
-            }
+             .page-heading h1 {
+                 font-size: 26px;
+             }
 
-            .search-box input {
-                width: 100%;
-            }
+             .search-box input {
+                 width: 100%;
+             }
 
-            .table-controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
+             .table-controls {
+                 flex-direction: column;
+                 align-items: stretch;
+             }
 
-            .controls-left {
-                flex-direction: column;
-                gap: 10px;
-            }
-        }
+             .controls-left {
+                 flex-direction: column;
+                 gap: 10px;
+             }
 
-        @media (max-width: 430px) {
-            .mobile-admin {
-                display: none;
-            }
-        }
+             /* Mobile table improvements */
+             .filter-group {
+                 width: 100%;
+             }
+
+             .filter-group select {
+                 width: 100%;
+             }
+
+             .btn-primary {
+                 width: 100%;
+                 justify-content: center;
+             }
+
+             /* Stack table as cards on mobile */
+             .table-wrap {
+                 overflow-x: visible;
+             }
+
+             .articles-table {
+                 display: block;
+             }
+
+             .articles-table thead {
+                 display: none;
+             }
+
+             .articles-table tbody {
+                 display: block;
+             }
+
+             .articles-table tr {
+                 display: block;
+                 background: var(--admin-panel);
+                 border: 1px solid var(--admin-border);
+                 border-radius: var(--admin-radius);
+                 margin-bottom: 12px;
+                 padding: 16px;
+             }
+
+             .articles-table td {
+                 display: flex;
+                 align-items: center;
+                 justify-content: space-between;
+                 padding: 10px 0;
+                 border-bottom: 1px solid var(--admin-border);
+                 white-space: normal;
+                 font-size: 13px;
+             }
+
+             .articles-table tr:last-child td {
+                 border-bottom: 0;
+             }
+
+             .articles-table td::before {
+                 content: attr(data-label);
+                 font-weight: 700;
+                 font-size: 10px;
+                 text-transform: uppercase;
+                 letter-spacing: 0.05em;
+                 color: var(--admin-muted-2);
+                 margin-right: 12px;
+                 flex-shrink: 0;
+             }
+
+             .article-title {
+                 max-width: none;
+                 text-overflow: unset;
+                 white-space: normal;
+                 word-break: break-word;
+             }
+
+             .action-buttons {
+                 justify-content: flex-end;
+                 gap: 8px;
+                 padding-top: 8px;
+             }
+
+             .action-btn {
+                 width: 36px;
+                 height: 36px;
+                 font-size: 13px;
+             }
+
+             .status {
+                 padding: 6px 12px;
+                 font-size: 11px;
+             }
+
+             .empty-state {
+                 padding: 40px 20px;
+             }
+
+             .empty-icon {
+                 font-size: 40px;
+             }
+
+             .empty-state h3 {
+                 font-size: 15px;
+             }
+
+             .empty-state p {
+                 font-size: 12px;
+             }
+         }
+
+         @media (max-width: 480px) {
+             .dashboard-content {
+                 padding: 20px 12px 40px;
+             }
+
+             .page-heading h1 {
+                 font-size: 22px;
+             }
+
+             .page-heading p {
+                 font-size: 12px;
+             }
+
+             .search-box input {
+                 height: 44px;
+                 font-size: 16px; /* Prevents zoom on iOS */
+             }
+
+             .filter-group select {
+                 height: 44px;
+                 font-size: 16px;
+             }
+
+             .btn-primary {
+                 height: 44px;
+                 font-size: 14px;
+             }
+
+             .articles-table td {
+                 flex-direction: column;
+                 align-items: flex-start;
+                 gap: 4px;
+             }
+
+             .articles-table td::before {
+                 margin-right: 0;
+                 margin-bottom: 2px;
+             }
+
+             .action-buttons {
+                 width: 100%;
+                 justify-content: flex-start;
+             }
+
+             .sidebar-logo {
+                 width: 96px;
+             }
+         }
+
+         @media (max-width: 430px) {
+             .mobile-admin {
+                 display: none;
+             }
+         }
     </style>
 </head>
 
@@ -1374,13 +1528,13 @@
                         : '<button type="button" class="action-btn action-delete" title="Delete" onclick="deleteArticle(\'' + id + '\')">×</button>';
 
                     return '<tr>' +
-                        '<td><div class="article-title">' + title + '</div></td>' +
-                        '<td><span class="brand-text">' + brand + '</span></td>' +
-                        '<td><span class="brand-text">' + model + '</span></td>' +
-                        '<td>' + categoryEl + '</td>' +
-                        '<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
-                        '<td>' + date + '</td>' +
-                        '<td><div class="action-buttons">' +
+                        '<td data-label="Title"><div class="article-title">' + title + '</div></td>' +
+                        '<td data-label="Brand"><span class="brand-text">' + brand + '</span></td>' +
+                        '<td data-label="Model"><span class="brand-text">' + model + '</span></td>' +
+                        '<td data-label="Category">' + categoryEl + '</td>' +
+                        '<td data-label="Status"><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
+                        '<td data-label="Date">' + date + '</td>' +
+                        '<td data-label="Actions"><div class="action-buttons">' +
                         '<a href="./article-editor.html?id=' + id + '" class="action-btn action-edit" title="Edit">&#9998;</a>' +
                         viewAction +
                         deleteAction +
@@ -1392,10 +1546,35 @@
             /* ---------------------------------------------------------
                VIEW EXISTING ARTICLE (read-only)
             --------------------------------------------------------- */
+            function extractSlugFromArtId(id) {
+                if (!id) return "";
+                var str = String(id);
+                if (str.indexOf("art:") === 0) {
+                    var link = str.substring(4);
+                    var file = link.split("?")[0].split("#")[0];
+                    file = file.substring(file.lastIndexOf("/") + 1);
+                    return file.replace(/\.(html?|php|aspx?)$/i, "").toLowerCase();
+                }
+                return "";
+            }
+
             function findArticle(id) {
+                var searchSlug = extractSlugFromArtId(id);
+
                 for (var i = 0; i < ARTICLES.length; i++) {
-                    if (String(articleId(ARTICLES[i])) === String(id)) {
-                        return ARTICLES[i];
+                    var article = ARTICLES[i];
+                    var currentId = String(articleId(article));
+
+                    if (currentId === String(id)) {
+                        return article;
+                    }
+
+                    /* If the ID is an "art:" prefixed ID or a slug, also check
+                       against the article's slug (for database articles that
+                       were imported from seeded content). */
+                    if (searchSlug && article.slug &&
+                        String(article.slug).toLowerCase() === searchSlug.toLowerCase()) {
+                        return article;
                     }
                 }
                 return null;

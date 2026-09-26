@@ -427,16 +427,53 @@
             }
 
             .editor-container {
-                padding: 22px 15px 50px;
+                padding: 20px 12px 40px;
+            }
+
+            .page-heading {
+                margin-bottom: 20px;
             }
 
             .page-heading h1 {
-                font-size: 25px;
+                font-size: 24px;
+            }
+
+            .page-heading p {
+                font-size: 13px;
             }
 
             .card {
-                padding: 17px;
+                padding: 16px;
                 border-radius: 12px;
+                margin-bottom: 16px;
+            }
+
+            .card-title {
+                font-size: 15px;
+                margin-bottom: 16px;
+            }
+
+            .field {
+                margin-bottom: 16px;
+            }
+
+            label {
+                font-size: 12px;
+                margin-bottom: 6px;
+            }
+
+            input,
+            select,
+            textarea {
+                height: 44px;
+                padding: 12px 14px;
+                font-size: 16px;
+                border-radius: 8px;
+            }
+
+            textarea {
+                min-height: 120px;
+                padding-top: 12px;
             }
 
             .two-columns {
@@ -444,22 +481,185 @@
                 gap: 0;
             }
 
+            .help-text {
+                font-size: 11px;
+                margin-top: 5px;
+            }
+
+            .toolbar {
+                padding: 8px;
+                gap: 4px;
+            }
+
+            .tool-btn {
+                min-width: 36px;
+                height: 36px;
+                padding: 0 8px;
+                font-size: 12px;
+                border-radius: 6px;
+            }
+
+            .tool-separator {
+                margin: 0 4px;
+            }
+
             #articleContent {
-                min-height: 500px;
-                padding: 20px;
+                min-height: 400px;
+                padding: 16px;
+                font-size: 16px;
+                line-height: 1.7;
+            }
+
+            #articleContent h1 {
+                font-size: 26px;
+                margin: 20px 0 12px;
+            }
+
+            #articleContent h2 {
+                font-size: 22px;
+                margin: 24px 0 10px;
+            }
+
+            #articleContent h3 {
+                font-size: 18px;
+                margin: 20px 0 8px;
+            }
+
+            #articleContent h4 {
+                font-size: 16px;
+                margin: 16px 0 8px;
+            }
+
+            #articleContent p {
+                margin: 0 0 16px;
+            }
+
+            .sidebar-buttons {
+                flex-direction: column;
+            }
+
+            .sidebar-buttons .btn {
+                width: 100%;
+                height: 44px;
+                font-size: 14px;
+            }
+
+            .status-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .status-badge {
+                padding: 8px 14px;
+                font-size: 12px;
+            }
+
+            .preview-placeholder,
+            .preview-image {
+                height: 140px;
+            }
+
+            .slug-preview {
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .topbar {
+                padding: 10px 12px;
+                min-height: 60px;
+            }
+
+            .brand img {
+                width: 90px;
+            }
+
+            .top-actions .btn {
+                flex: 1 1 100%;
+                padding: 12px;
+                font-size: 13px;
+            }
+
+            .editor-container {
+                padding: 16px 10px 30px;
+            }
+
+            .page-heading h1 {
+                font-size: 20px;
+            }
+
+            .card {
+                padding: 14px;
+                border-radius: 10px;
+            }
+
+            .card-title {
+                font-size: 14px;
+            }
+
+            input,
+            select,
+            textarea {
+                padding: 12px;
+            }
+
+            .toolbar {
+                padding: 6px;
+            }
+
+            .tool-btn {
+                min-width: 34px;
+                height: 34px;
+                padding: 0 6px;
+                font-size: 11px;
+            }
+
+            #articleContent {
+                min-height: 350px;
+                padding: 14px;
                 font-size: 15px;
             }
 
             #articleContent h1 {
-                font-size: 28px;
+                font-size: 22px;
             }
 
             #articleContent h2 {
-                font-size: 23px;
+                font-size: 19px;
             }
 
             #articleContent h3 {
-                font-size: 19px;
+                font-size: 17px;
+            }
+
+            .sidebar-buttons .btn {
+                height: 48px;
+                font-size: 15px;
+            }
+
+            .preview-placeholder,
+            .preview-image {
+                height: 120px;
+            }
+
+            .notice {
+                padding: 10px;
+                font-size: 11px;
+            }
+
+            .sidebar-card .card-title {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .top-actions {
+                flex-direction: column;
+            }
+
+            .top-actions .btn {
+                width: 100%;
             }
         }
 
@@ -774,6 +974,55 @@
                 height: auto;
                 max-height: 32px;
                 object-fit: contain;
+            }
+
+            .sidebar-logo {
+                width: 96px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mobile-header-ed {
+                height: 56px;
+                padding: 0 12px;
+            }
+
+            .mobile-logo-ed {
+                width: 80px;
+                max-height: 28px;
+            }
+
+            .sidebar-logo {
+                width: 88px;
+            }
+
+            .nav-icon-ed {
+                width: 16px;
+                min-width: 16px;
+                height: 16px;
+                font-size: 13px;
+            }
+
+            .sidebar-link-ed {
+                min-height: 40px;
+                padding: 0 10px;
+                font-size: 12px;
+            }
+
+            .account-avatar-ed {
+                width: 28px;
+                height: 28px;
+                font-size: 10px;
+            }
+
+            .account-name-ed {
+                font-size: 11px;
+            }
+
+            .logout-button-ed {
+                min-height: 38px;
+                padding: 0 10px;
+                font-size: 12px;
             }
         }
     </style>
@@ -1728,6 +1977,10 @@
 
         var articles = api();
 
+        /* Admin list uses "art:growatt-error-102.html" IDs for seeded articles.
+           Extract the slug part to look up in the database. */
+        var slugFromId = extractSlugFromArtId(articleId);
+
         if (articles) {
             await articles.waitForClient();
 
@@ -1736,8 +1989,8 @@
             if (record) return record;
 
             /* The seeded data.js entries have no database id, so the ?id= value
-               may be a slug instead. */
-            var bySlug = await articles.fetchArticleBySlugAdmin(articleId);
+               may be a slug instead. Try both the original id and the extracted slug. */
+            var bySlug = await articles.fetchArticleBySlugAdmin(slugFromId || articleId);
 
             if (bySlug) return bySlug;
         }
@@ -1762,6 +2015,17 @@
         }
 
         return null;
+    }
+
+    /* "art:growatt-error-102.html" -> "growatt-error-102" */
+    function extractSlugFromArtId(id) {
+        if (!id) return "";
+        var str = String(id);
+        if (str.indexOf("art:") === 0) {
+            var link = str.substring(4);
+            return slugFromLink(link);
+        }
+        return "";
     }
 
     /* A seeded post links to a static page such as "growatt-error-102.html".
