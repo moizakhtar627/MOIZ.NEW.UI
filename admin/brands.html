@@ -15,6 +15,7 @@
     <script src="../js/admin-content.js"></script>
     <script src="../js/supabase.js"></script>
     <script src="../js/auth.js"></script>
+    <script src="../js/taxonomy-api.js"></script>
 
     <style>
         /* =========================================================
@@ -1090,6 +1091,22 @@
                DATA
             ===================================================== */
 
+            /* Supabase is the source of truth. Seeded js/data.js brands that are
+               not in the database yet are merged in by taxonomy-api.js so
+               nothing disappears. */
+            var BRANDS = [];
+
+            async function loadBrands() {
+                var taxonomy = window.WHASOL && window.WHASOL.taxonomyApi;
+                if (taxonomy) {
+                    await taxonomy.waitForClient();
+                    var result = await taxonomy.fetchBrands();
+                    BRANDS = result.brands || [];
+                } else {
+                    BRANDS = getBrands();
+                }
+            }
+
             function getBrands() {
                 var data = window.WHASOL || {};
                 return Array.isArray(data.brands) ? data.brands : [];
@@ -1139,7 +1156,7 @@
             }
 
             function renderBrands() {
-                var brands = getBrands();
+                var brands = BRANDS.length ? BRANDS : getBrands();
                 var articles = getArticles();
 
                 var searchInput = document.getElementById("searchInput");
@@ -1183,23 +1200,25 @@
                         '<td>' + modelHtml + '</td>' +
                         '<td><span class="article-count">' + articleCount + '</span></td>' +
                         '<td><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
-                        '<td><div class="action-buttons">' +
-                        '<button type="button" class="action-btn action-edit" title="Edit" onclick="editBrand(\'' + escapeHtml(getRecordId(brand)) + '\')">&#9998;</button>' +
-                        '<button type="button" class="action-btn" title="View" onclick="alert(\'Brand view not available in admin yet.\')">↗</button>' +
-                        '</div></td>' +
+                         '<td><div class="action-buttons">' +
+                         '<button type="button" class="action-btn action-edit" title="Edit" onclick="editBrand(\'' + escapeHtml(getRecordId(brand)) + '\')">&#9998;</button>' +
+                         (brand.articleLink
+                             ? '<a href="' + escapeHtml("../" + String(brand.articleLink).replace(/^\.?\//, "")) + '" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>'
+                             : '<button type="button" class="action-btn" title="View" onclick="alert(\'This brand does not have a public URL.\')">↗</button>') +
+                         '</div></td>' +
                         '</tr>';
                 }).join("");
             }
 
             function editBrand(recordId) {
-                /* Brands are not articles, so the article editor cannot open
-                   them. Sending the slug there would silently discard the
-                   record, so say so plainly instead. */
+                /* Brands live in the public.brands + public.brand_models tables
+                   via taxonomy-api.js. There is no dedicated editor page yet. */
                 alert(
-                    "Editing brands is not wired up yet.\n\n" +
+                    "Editing brands is not yet available in this interface.\n\n" +
                     "The record \"" +
                     (recordId || "this brand") +
-                    "\" is a separate content type from articles and is not stored in Supabase."
+                    "\" is a separate content type stored in Supabase under the\n" +
+                    "brands and brand_models tables."
                 );
             }
 
@@ -1297,11 +1316,9 @@
             protectPage();
             initAuth();
 
-            if (window.WHASOL && window.WHASOL.supabase) {
+            loadBrands().then(function () {
                 renderBrands();
-            } else {
-                setTimeout(renderBrands, 300);
-            }
+            });
 
         })();
     </script>

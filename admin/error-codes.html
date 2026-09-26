@@ -1348,7 +1348,9 @@
                         '<td data-label="Status"><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
                         '<td data-label="Actions"><div class="action-buttons">' +
                         '<button type="button" class="action-btn action-edit" title="Edit" onclick="editErrorCode(\'' + escapeHtml(getRecordId(code)) + '\')">&#9998;</button>' +
-                        '<button type="button" class="action-btn" title="View" onclick="alert(\'Preview not available in admin.\')">↗</button>' +
+                        (code.link
+                            ? '<a href="' + escapeHtml("../" + String(code.link).replace(/^\.?\//, "")) + '" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>'
+                            : '<button type="button" class="action-btn" title="View" onclick="alert(\'This error code does not have a public URL.\')">↗</button>') +
                         '<button type="button" class="action-btn action-delete" title="Delete" onclick="alert(\'Delete functionality coming soon.\')">×</button>' +
                         '</div></td>' +
                         '</tr>';
@@ -1356,14 +1358,14 @@
             }
 
             function editErrorCode(recordId) {
-                /* Error codes are not articles, so the article editor cannot
-                   open them. Sending the id there would silently discard the
-                   record, so say so plainly instead. */
+                /* Error codes live in the public.error_codes table, not in the
+                   articles table. There is no dedicated editor page yet. */
                 alert(
-                    "Editing error codes is not wired up yet.\n\n" +
+                    "Editing error codes is not yet available in this interface.\n\n" +
                     "The record \"" +
                     (recordId || "this code") +
-                    "\" is a separate content type from articles and is not stored in Supabase."
+                    "\" is a separate content type stored in Supabase under the\n" +
+                    "error_codes table."
                 );
             }
 

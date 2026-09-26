@@ -1520,7 +1520,7 @@
                     var id = escapeHtml(articleId(article));
 
                     var viewAction = isSeeded(article)
-                        ? '<a href="' + escapeHtml(article.link || "../blog.html") + '" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>'
+                        ? '<a href="' + escapeHtml("../" + (article.link || "blog.html").replace(/^\.?\//, "")) + '" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>'
                         : '<button type="button" class="action-btn" title="View" onclick="viewArticle(\'' + id + '\')">↗</button>';
 
                     var deleteAction = isSeeded(article)
@@ -1615,7 +1615,7 @@
 
                 if (article.link) {
                     html += "<p style='margin:0;font-size:12px;'>" +
-                        "<a href='" + escapeHtml(article.link) + "' target='_blank' rel='noopener'>Open full article</a>" +
+                        "<a href='" + escapeHtml("../" + String(article.link).replace(/^\.?\//, "")) + "' target='_blank' rel='noopener'>Open full article</a>" +
                         "</p>";
                 }
 

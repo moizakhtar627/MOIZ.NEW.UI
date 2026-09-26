@@ -2017,7 +2017,9 @@
         return null;
     }
 
-    /* "art:growatt-error-102.html" -> "growatt-error-102" */
+    /* "art:growatt-error-102.html" -> "growatt-error-102"
+       Also handles raw link ids like "growatt-error-102.html" that may come
+       from older admin list pages. */
     function extractSlugFromArtId(id) {
         if (!id) return "";
         var str = String(id);
@@ -2025,7 +2027,7 @@
             var link = str.substring(4);
             return slugFromLink(link);
         }
-        return "";
+        return slugFromLink(str);
     }
 
     /* A seeded post links to a static page such as "growatt-error-102.html".
