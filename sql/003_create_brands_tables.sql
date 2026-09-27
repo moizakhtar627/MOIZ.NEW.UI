@@ -29,6 +29,7 @@ create table if not exists public.brands (
     slug                text        not null unique,
     name                text        not null,
     description         text        not null default '',
+    content             text        not null default '',
 
     -- Equipment photo used on the brand card.
     image               text        not null default '',

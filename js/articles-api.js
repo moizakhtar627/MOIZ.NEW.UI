@@ -195,6 +195,11 @@
       .trim();
   }
 
+  function isMissingContentTypeError(error) {
+    var text = String((error && (error.message || error.details || error.hint)) || error || "").toLowerCase();
+    return (error && error.code === "42703") || text.indexOf("content_type") !== -1 && text.indexOf("column") !== -1;
+  }
+
   /* Site shape -> database columns. Only the keys we actually write. */
   function toRow(article) {
     var row = {
@@ -323,6 +328,26 @@
     } catch (error) {
       console.error("WHA SOL: Failed to load published articles.", error);
 
+      /* Keep pre-migration article rows visible as Blog records. Existing
+         rows are not guessed into Troubleshooting; they remain unclassified
+         until the content_type migration is applied and an editor classifies
+         them safely. */
+      if (isMissingContentTypeError(error) && contentType !== CONTENT_TYPES.troubleshooting) {
+        var legacy = await c
+          .from(TABLE)
+          .select("*")
+          .eq("status", "published")
+          .order("published_at", { ascending: false, nullsFirst: false });
+
+        if (!legacy.error) {
+          return {
+            articles: mergeSeedPosts((legacy.data || []).map(toArticle)),
+            source: "supabase-legacy-blog",
+            error: null,
+          };
+        }
+      }
+
       return {
         articles: mergeSeedPosts([]),
         source: "seed",
@@ -387,6 +412,18 @@
     }
 
     var res = await query;
+
+    /* If 004 has not been run yet, legacy article rows must still appear in
+       Blog / Articles. They are safely treated as Blog by toArticle(); no
+       existing row is hidden or rewritten. Troubleshooting cannot be safely
+       inferred without the structured field, so it remains empty until the
+       migration is applied. */
+    if (res.error && isMissingContentTypeError(res.error) && contentType === CONTENT_TYPES.blog) {
+      res = await c
+        .from(TABLE)
+        .select("*")
+        .order("created_at", { ascending: false });
+    }
 
     if (res.error) {
       console.error("WHA SOL: Failed to load admin articles.", res.error);

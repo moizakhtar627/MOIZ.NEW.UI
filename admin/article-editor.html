@@ -1071,11 +1071,6 @@
                 <span>Blog / Articles</span>
             </a>
 
-            <a href="./article-editor.html" class="sidebar-link-ed active">
-                <span class="nav-icon-ed">&#65371;</span>
-                <span>Create Article</span>
-            </a>
-
             <a href="./error-codes.html" class="sidebar-link-ed">
                 <span class="nav-icon-ed">&#9673;</span>
                 <span>Error Codes</span>
@@ -1407,6 +1402,25 @@
 
                         </div>
 
+                        <div class="field">
+
+                            <label for="primaryKeyword">
+                                Primary Keyword / Tags
+                            </label>
+
+                            <input
+                                type="text"
+                                id="primaryKeyword"
+                                name="primaryKeyword"
+                                placeholder="solar inverter not starting, inverter, Growatt"
+                            >
+
+                            <div class="help-text">
+                                Editorial guidance only. Separate multiple terms with commas; they are stored as article tags.
+                            </div>
+
+                        </div>
+
 
                         <div class="field">
 
@@ -1588,7 +1602,7 @@
                         <div class="field">
 
                             <label for="featuredImage">
-                                Image URL
+                                Featured Image / Thumbnail URL
                             </label>
 
                             <div style="display:flex; gap:8px; align-items:center;">
@@ -1621,7 +1635,7 @@
                             </div>
 
                             <div class="help-text">
-                                Add the image URL that should appear as the article's featured image, or upload an image from your computer.
+                                This existing schema uses one image for the main article image and listing thumbnail. Add a URL or upload an image.
                             </div>
 
                         </div>
@@ -2099,6 +2113,7 @@
         statusInput.value = record.status || "draft";
         document.getElementById("metaTitle").value = record.metaTitle || "";
         document.getElementById("metaDescription").value = record.metaDescription || "";
+        document.getElementById("primaryKeyword").value = (record.keywords || []).join(", ");
         slugInput.value = record.slug || "";
         featuredImageInput.value = record.image || record.featuredImage || "";
         contentEditor.innerHTML = record.content || record.description || "";
@@ -2461,6 +2476,11 @@
             .getElementById("metaDescription")
             .value.trim();
 
+        var keywords = document.getElementById("primaryKeyword").value
+            .split(",")
+            .map(function (keyword) { return keyword.trim(); })
+            .filter(Boolean);
+
         return {
             title: title,
             brand: document.getElementById("brand").value.trim(),
@@ -2468,6 +2488,7 @@
             category: category,
             metaTitle: document.getElementById("metaTitle").value.trim(),
             metaDescription: metaDescription,
+            keywords: keywords,
             /* The listing pages already render metaDescription on the cards, so
                reuse it for the short description rather than asking for the
                same text twice. */

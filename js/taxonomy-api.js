@@ -160,6 +160,7 @@
       slug: row.slug || "",
       name: row.name || "",
       description: row.description || "",
+      content: row.content || "",
       image: row.image || "",
       /* Brand logo, copied into an article's featured image by the editor. */
       logo: row.logo || "",
@@ -445,6 +446,7 @@
 
     var row = {
       code: code,
+      error_code: code,
       title: String(input.title || ("Error " + code)).trim(),
       brand: brand,
       model: String(input.model || "").trim(),
@@ -495,7 +497,13 @@
     if (existing && existing.id) {
       var models = [];
 
-      if (input.model) models.push(String(input.model).trim());
+      if (input.model) {
+        String(input.model)
+          .split(",")
+          .map(function (model) { return model.trim(); })
+          .filter(Boolean)
+          .forEach(function (model) { models.push(model); });
+      }
 
       if (models.length) {
         await addModels(existing.id, models);
@@ -504,6 +512,32 @@
             return existing.models.indexOf(m) === -1;
           })
         );
+      }
+
+      /* The dedicated Brands & Models editor may update the optional long
+         form content and existing presentation fields. Article auto-linking
+         does not pass these properties, so it cannot overwrite editor data. */
+      var brandPatch = {};
+      ["description", "content", "image", "logo"].forEach(function (field) {
+        if (Object.prototype.hasOwnProperty.call(input, field)) {
+          brandPatch[field] = String(input[field] || "").trim();
+        }
+      });
+
+      if (Object.keys(brandPatch).length) {
+        var updated = await c
+          .from(BRANDS_TABLE)
+          .update(brandPatch)
+          .eq("id", existing.id)
+          .select()
+          .single();
+
+        if (updated.error) {
+          console.error("WHA SOL: Failed to update brand.", updated.error);
+          return { brand: null, created: false, error: updated.error };
+        }
+
+        existing = toBrand(updated.data, existing.models || []);
       }
 
       return { brand: existing, created: false, error: null };
@@ -517,6 +551,7 @@
         slug: slug,
         name: name,
         description: String(input.description || "").trim(),
+        content: String(input.content || "").trim(),
         image: String(input.image || "").trim(),
         logo: String(input.logo || "").trim(),
         article_title: String(input.articleTitle || "").trim(),
@@ -537,8 +572,12 @@
     var created = toBrand(res.data, []);
 
     if (input.model) {
-      await addModels(created.id, [String(input.model).trim()]);
-      created.models = [String(input.model).trim()];
+      var newModels = String(input.model)
+        .split(",")
+        .map(function (model) { return model.trim(); })
+        .filter(Boolean);
+      await addModels(created.id, newModels);
+      created.models = newModels;
     }
 
     return { brand: created, created: true, error: null };

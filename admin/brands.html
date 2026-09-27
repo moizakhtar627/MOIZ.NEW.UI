@@ -870,11 +870,6 @@
                     <span>Blog / Articles</span>
                 </a>
 
-                <a href="./article-editor.html" class="sidebar-link">
-                    <span class="nav-icon">&#65371;</span>
-                    <span>Create Article</span>
-                </a>
-
                 <a href="./error-codes.html" class="sidebar-link">
                     <span class="nav-icon">&#9673;</span>
                     <span>Error Codes</span>
@@ -1051,6 +1046,12 @@
                         <div class="full-width">
                             <label for="brandDescriptionInput">Description</label>
                             <textarea id="brandDescriptionInput" placeholder="Describe this solar equipment brand."></textarea>
+                        </div>
+
+                        <div class="full-width">
+                            <label for="brandContentInput">Full Content / Information</label>
+                            <textarea id="brandContentInput" rows="10" placeholder="Write the complete brand or model information, installation notes, common problems, safe checks, and maintenance guidance."></textarea>
+                            <div class="help-text">Use Description for a short summary and this field for the complete information.</div>
                         </div>
 
                         <div class="brand-form-actions">
@@ -1323,15 +1324,22 @@
             }
 
             function editBrand(recordId) {
-                /* Brands live in the public.brands + public.brand_models tables
-                   via taxonomy-api.js. There is no dedicated editor page yet. */
-                alert(
-                    "Editing brands is not yet available in this interface.\n\n" +
-                    "The record \"" +
-                    (recordId || "this brand") +
-                    "\" is a separate content type stored in Supabase under the\n" +
-                    "brands and brand_models tables."
-                );
+                var brand = BRANDS.filter(function (item) {
+                    return String(getRecordId(item)) === String(recordId);
+                })[0];
+
+                if (!brand) {
+                    alert("This brand could not be loaded from Supabase.");
+                    return;
+                }
+
+                openBrandEditor();
+                document.getElementById("brandNameInput").value = brand.name || "";
+                document.getElementById("modelNameInput").value = (brand.models || []).join(", ");
+                document.getElementById("brandImageInput").value = brand.image || "";
+                document.getElementById("brandLogoInput").value = brand.logo || "";
+                document.getElementById("brandDescriptionInput").value = brand.description || "";
+                document.getElementById("brandContentInput").value = brand.content || "";
             }
 
             /* Brands and models use taxonomyApi directly. They never pass
@@ -1384,6 +1392,7 @@
                             image: document.getElementById("brandImageInput").value.trim(),
                             logo: document.getElementById("brandLogoInput").value.trim(),
                             description: document.getElementById("brandDescriptionInput").value.trim(),
+                            content: document.getElementById("brandContentInput").value.trim(),
                         });
 
                         if (result && result.error) throw result.error;
