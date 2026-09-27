@@ -169,9 +169,9 @@
 
   function categoryLabel(value) {
     var labels = {
-      "solar-panel": "Solar Panel",
-      battery: "Battery",
-      inverter: "Inverter",
+      "solar-panel": "Solar Panel Problems",
+      battery: "Battery Problems",
+      inverter: "Inverter Problems",
       wiring: "Wiring & Electrical",
       voltage: "Voltage & Frequency",
       troubleshooting: "Troubleshooting",
@@ -304,6 +304,45 @@
         '" class="card-link">Read Guide <span aria-hidden="true">→</span></a>' +
         "</div></div>";
     }
+
+    /* Also render every published article that names this brand. The two
+       legacy featured-guide fields remain unchanged, while newer articles
+       continue to appear in the same brand card. */
+    if (Array.isArray(item.relatedArticles)) {
+      var featuredTitles = [item.articleTitle, item.articleTitle2]
+        .filter(Boolean)
+        .map(function (title) { return String(title).toLowerCase(); });
+
+      item.relatedArticles.forEach(function (article) {
+        var title = String(article.title || "");
+
+        if (!title || !article.link || featuredTitles.indexOf(title.toLowerCase()) !== -1) {
+          return;
+        }
+
+        featuredTitles.push(title.toLowerCase());
+        guide +=
+          '<div class="card-guide">' +
+          '<div class="card-guide-media"><img src="' +
+          imagePath(article.image) +
+          '" alt="' +
+          escapeHtml(title) +
+          '" loading="lazy" /></div>' +
+          '<div class="card-guide-body">' +
+          '<span class="card-guide-label">Related Article</span>' +
+          "<h4>" +
+          escapeHtml(title) +
+          "</h4>" +
+          "<p>" +
+          escapeHtml(article.description || "") +
+          "</p>" +
+          '<a href="' +
+          escapeHtml(article.link) +
+          '" class="card-link">Read Guide <span aria-hidden="true">â†’</span></a>' +
+          "</div></div>";
+      });
+    }
+
     return (
       '<article class="card list-card brand-card reveal">' +
       '<div class="card-media"><img src="' +

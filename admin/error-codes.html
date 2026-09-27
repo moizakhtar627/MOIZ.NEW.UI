@@ -483,6 +483,80 @@
             border-color: rgba(143, 211, 255, 0.4);
         }
 
+        .error-code-editor {
+            margin-bottom: 16px;
+            padding: 18px;
+        }
+
+        .error-code-editor[hidden] {
+            display: none;
+        }
+
+        .error-code-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 13px;
+        }
+
+        .error-code-form label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--admin-muted);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .error-code-form input,
+        .error-code-form select,
+        .error-code-form textarea {
+            width: 100%;
+            padding: 10px 11px;
+            border: 1px solid var(--admin-border);
+            border-radius: 8px;
+            background: var(--admin-bg);
+            color: var(--admin-text);
+            font: inherit;
+            font-size: 12px;
+        }
+
+        .error-code-form textarea {
+            min-height: 92px;
+            resize: vertical;
+        }
+
+        .error-code-form .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .error-code-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
+            grid-column: 1 / -1;
+        }
+
+        .error-code-form .btn-secondary {
+            height: 42px;
+            padding: 0 18px;
+            border: 1px solid var(--admin-border);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--admin-muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 650px) {
+            .error-code-form {
+                grid-template-columns: 1fr;
+            }
+
+            .error-code-form .full-width,
+            .error-code-form-actions {
+                grid-column: auto;
+            }
+        }
+
         /* Table */
         .table-card {
             border: 1px solid var(--admin-border);
@@ -1104,11 +1178,66 @@
 
                     </div>
 
-                    <a href="./article-editor.html" class="btn-primary">
+                    <a href="?create=1#error-code-editor" class="btn-primary" id="addErrorCodeButton">
                         + Add Error Code
                     </a>
 
                 </div>
+
+                <section class="table-card error-code-editor" id="error-code-editor" hidden>
+                    <form class="error-code-form" id="errorCodeForm">
+                        <div>
+                            <label for="errorCodeInput">Error Code</label>
+                            <input id="errorCodeInput" name="code" required placeholder="Example: 02 or F01">
+                        </div>
+
+                        <div>
+                            <label for="errorTitleInput">Title</label>
+                            <input id="errorTitleInput" name="title" required placeholder="DC Bus Overvoltage">
+                        </div>
+
+                        <div>
+                            <label for="errorBrandInput">Brand</label>
+                            <input id="errorBrandInput" name="brand" placeholder="Growatt">
+                        </div>
+
+                        <div>
+                            <label for="errorModelInput">Model</label>
+                            <input id="errorModelInput" name="model" placeholder="All Models">
+                        </div>
+
+                        <div>
+                            <label for="errorCategoryInput">Category</label>
+                            <select id="errorCategoryInput" name="category">
+                                <option value="Inverter Problems">Inverter Problems</option>
+                                <option value="Solar Panel Problems">Solar Panel Problems</option>
+                                <option value="Battery Problems">Battery Problems</option>
+                                <option value="Wiring &amp; Electrical">Wiring &amp; Electrical</option>
+                                <option value="Voltage &amp; Frequency">Voltage &amp; Frequency</option>
+                            </select>
+                        </div>
+
+                        <div class="full-width">
+                            <label for="errorExplanationInput">Description / Fix</label>
+                            <textarea id="errorExplanationInput" name="explanation" required placeholder="Explain the fault and the recommended solution."></textarea>
+                        </div>
+
+                        <div>
+                            <label for="errorImageInput">Image path</label>
+                            <input id="errorImageInput" name="image" placeholder="assets/inverter-error.jpg">
+                        </div>
+
+                        <div>
+                            <label for="errorLinkInput">Article link</label>
+                            <input id="errorLinkInput" name="link" placeholder="article.html?slug=...">
+                        </div>
+
+                        <div class="error-code-form-actions">
+                            <button type="button" class="btn-secondary" id="cancelErrorCodeButton">Cancel</button>
+                            <button type="submit" class="btn-primary" id="saveErrorCodeButton">Save Error Code</button>
+                        </div>
+                    </form>
+                </section>
 
                 <!-- Error Codes Table -->
                 <div class="table-card">
@@ -1158,7 +1287,7 @@
                         No error codes match your current search or filter criteria.
                     </p>
 
-                    <a href="./article-editor.html" class="btn-primary">
+                    <a href="?create=1#error-code-editor" class="btn-primary">
                         Add Error Code
                     </a>
 
@@ -1367,6 +1496,99 @@
                     "\" is a separate content type stored in Supabase under the\n" +
                     "error_codes table."
                 );
+            }
+
+            /* Error codes use taxonomyApi directly and never pass through the
+               normal article save path. The existing page remains the editor. */
+            var errorCodeEditor = document.getElementById("error-code-editor");
+            var errorCodeForm = document.getElementById("errorCodeForm");
+            var addErrorCodeButton = document.getElementById("addErrorCodeButton");
+            var cancelErrorCodeButton = document.getElementById("cancelErrorCodeButton");
+            var saveErrorCodeButton = document.getElementById("saveErrorCodeButton");
+
+            function openErrorCodeEditor(event) {
+                if (event) event.preventDefault();
+                if (!errorCodeEditor) return;
+
+                errorCodeEditor.hidden = false;
+                errorCodeEditor.scrollIntoView({ behavior: "smooth", block: "start" });
+                var codeInput = document.getElementById("errorCodeInput");
+                if (codeInput) codeInput.focus();
+            }
+
+            function closeErrorCodeEditor() {
+                if (errorCodeEditor) errorCodeEditor.hidden = true;
+                if (errorCodeForm) errorCodeForm.reset();
+            }
+
+            if (addErrorCodeButton) {
+                addErrorCodeButton.addEventListener("click", openErrorCodeEditor);
+            }
+
+            if (cancelErrorCodeButton) {
+                cancelErrorCodeButton.addEventListener("click", closeErrorCodeEditor);
+            }
+
+            if (window.location.search.indexOf("create=1") !== -1) {
+                openErrorCodeEditor();
+            }
+
+            if (errorCodeForm) {
+                errorCodeForm.addEventListener("submit", async function (event) {
+                    event.preventDefault();
+
+                    var taxonomy = window.WHASOL && window.WHASOL.taxonomyApi;
+
+                    if (!taxonomy || typeof taxonomy.saveErrorCode !== "function") {
+                        alert("The error-code content system is not ready. Please refresh the page and try again.");
+                        return;
+                    }
+
+                    var code = document.getElementById("errorCodeInput").value.trim().toUpperCase();
+                    var title = document.getElementById("errorTitleInput").value.trim();
+                    var brand = document.getElementById("errorBrandInput").value.trim();
+                    var model = document.getElementById("errorModelInput").value.trim();
+                    var category = document.getElementById("errorCategoryInput").value;
+                    var explanation = document.getElementById("errorExplanationInput").value.trim();
+                    var image = document.getElementById("errorImageInput").value.trim();
+                    var link = document.getElementById("errorLinkInput").value.trim();
+
+                    if (!code || !title || !explanation) {
+                        alert("Error code, title, and description/fix are required.");
+                        return;
+                    }
+
+                    saveErrorCodeButton.disabled = true;
+
+                    try {
+                        await taxonomy.waitForClient();
+
+                        var result = await taxonomy.saveErrorCode({
+                            code: code,
+                            title: title,
+                            brand: brand,
+                            model: model,
+                            category: category,
+                            explanation: explanation,
+                            image: image,
+                            link: link,
+                            keywords: [code, title, brand, category].filter(Boolean),
+                        });
+
+                        if (result && result.error) {
+                            throw result.error;
+                        }
+
+                        closeErrorCodeEditor();
+                        await loadErrorCodes();
+                        renderErrorCodes();
+                    } catch (error) {
+                        console.error("WHA SOL: Failed to save error code.", error);
+                        alert("Could not save the error code.\n\n" + (error.message || String(error)));
+                    } finally {
+                        saveErrorCodeButton.disabled = false;
+                    }
+                });
             }
 
             /* Search and filter */

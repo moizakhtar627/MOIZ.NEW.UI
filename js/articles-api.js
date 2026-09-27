@@ -122,9 +122,9 @@
   /* Human-readable label for a stored slug, for places that show the raw
      value (admin tables, article pages). Mirrors listing.js categoryLabel. */
   var CATEGORY_LABELS = {
-    "solar-panel": "Solar Panel",
-    battery: "Battery",
-    inverter: "Inverter",
+    "solar-panel": "Solar Panel Problems",
+    battery: "Battery Problems",
+    inverter: "Inverter Problems",
     wiring: "Wiring & Electrical",
     voltage: "Voltage & Frequency",
     troubleshooting: "Troubleshooting",

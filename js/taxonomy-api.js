@@ -152,7 +152,7 @@
     };
   }
 
-  function toBrand(row, models) {
+  function toBrand(row, models, relatedArticles) {
     if (!row) return null;
 
     return {
@@ -164,6 +164,7 @@
       /* Brand logo, copied into an article's featured image by the editor. */
       logo: row.logo || "",
       models: Array.isArray(models) ? models : [],
+      relatedArticles: Array.isArray(relatedArticles) ? relatedArticles : [],
       articleTitle: row.article_title || "",
       articleDescription: row.article_description || "",
       articleImage: row.article_image || "",
@@ -253,6 +254,7 @@
       /* Models are a separate table. One extra query keeps the mapping
          correct without an N+1 loop over the brands. */
       var modelsByBrand = {};
+      var articlesByBrand = {};
 
       if (rows.length) {
         var brandIds = rows.map(function (r) {
@@ -272,8 +274,47 @@
         });
       }
 
+      /* Keep brand records separate from articles, but expose the published
+         articles that reference each brand so the existing brand card can
+         show every related guide, not only its two legacy featured slots. */
+      try {
+        var articlesRes = await c
+          .from("articles")
+          .select("id, title, slug, description, meta_description, image, brand, model, category, created_at")
+          .eq("status", "published")
+          .order("created_at", { ascending: false });
+
+        if (!articlesRes.error) {
+          (articlesRes.data || []).forEach(function (article) {
+            var key = String(article.brand || "").trim().toLowerCase();
+
+            if (!key) return;
+
+            if (!articlesByBrand[key]) articlesByBrand[key] = [];
+
+            articlesByBrand[key].push({
+              id: article.id,
+              title: article.title || "",
+              description: article.description || article.meta_description || "",
+              image: article.image || "",
+              link: "article.html?slug=" + encodeURIComponent(article.slug || ""),
+              category: article.category || "",
+              model: article.model || "",
+              createdAt: article.created_at || "",
+            });
+          });
+        }
+      } catch (articleError) {
+        console.warn("WHA SOL: Related brand articles unavailable.", articleError);
+      }
+
       var brands = rows.map(function (row) {
-        return toBrand(row, modelsByBrand[row.id] || []);
+        var key = String(row.name || "").trim().toLowerCase();
+        return toBrand(
+          row,
+          modelsByBrand[row.id] || [],
+          articlesByBrand[key] || []
+        );
       });
 
       return {

@@ -1291,15 +1291,15 @@
                                     </option>
 
                                     <option value="inverter">
-                                        Inverter
+                                        Inverter Problems
                                     </option>
 
                                     <option value="battery">
-                                        Battery
+                                        Battery Problems
                                     </option>
 
                                     <option value="solar-panel">
-                                        Solar Panel
+                                        Solar Panel Problems
                                     </option>
 
                                     <option value="wiring">
@@ -2278,8 +2278,7 @@
         while ((match = pattern.exec(text)) !== null) {
             var code = match[1].toUpperCase();
 
-            /* Ignore bare numbers that are clearly not a fault code. */
-            if (!code || /^\d{1,2}$/.test(code)) continue;
+            if (!code) continue;
 
             if (found.indexOf(code) === -1) found.push(code);
         }
