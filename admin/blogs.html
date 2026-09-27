@@ -617,8 +617,7 @@
        LOAD ARTICLES
     ========================================================= */
 
-    /* Supabase is the source of truth. Seeded data.js posts that are not in
-       the database yet are appended so nothing disappears. */
+    /* Blog admin records come only from the blog content type in Supabase. */
     async function loadArticles() {
 
         const api =
@@ -631,90 +630,12 @@
 
             await api.waitForClient();
 
-            rows = await api.fetchAdminArticles();
+            rows = await api.fetchAdminArticles("blog");
 
         }
 
 
-        const dbSlugs = {};
-
-        rows.forEach(row => {
-
-            if (row.slug) {
-                dbSlugs[
-                    String(row.slug).toLowerCase()
-                ] = true;
-            }
-
-        });
-
-
-        let existingArticles = [];
-
-        if (
-            window.WHASOL &&
-            Array.isArray(window.WHASOL.blogPosts)
-        ) {
-
-            existingArticles =
-                window.WHASOL.blogPosts
-                    .map(article => {
-
-                        const seedSlug =
-                            article.slug ||
-                            String(
-                                article.link || ""
-                            ).replace(
-                                /\.html$/i,
-                                ""
-                            );
-
-                        if (
-                            seedSlug &&
-                            dbSlugs[
-                                seedSlug.toLowerCase()
-                            ]
-                        ) {
-                            return null;
-                        }
-
-                        return {
-                            link: article.link || seedSlug,
-                            title:
-                                article.title ||
-                                "Untitled Article",
-
-                            brand:
-                                article.brand || "",
-
-                            model:
-                                article.model || "",
-
-                            category:
-                                article.category ||
-                                "General",
-
-                            status: "published",
-
-                            createdAt:
-                                article.date ||
-                                article.createdAt ||
-                                new Date()
-                                    .toISOString(),
-
-                            existing: true
-                        };
-
-                    })
-                    .filter(Boolean);
-
-        }
-
-
-        articles = [
-            ...rows,
-            ...existingArticles
-        ];
+        articles = rows;
 
         updateStats();
 

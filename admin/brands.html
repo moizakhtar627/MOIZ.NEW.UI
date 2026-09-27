@@ -483,6 +483,79 @@
             border-color: rgba(143, 211, 255, 0.4);
         }
 
+        .brand-editor {
+            margin-bottom: 16px;
+            padding: 18px;
+        }
+
+        .brand-editor[hidden] {
+            display: none;
+        }
+
+        .brand-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 13px;
+        }
+
+        .brand-form label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--admin-muted);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .brand-form input,
+        .brand-form textarea {
+            width: 100%;
+            padding: 10px 11px;
+            border: 1px solid var(--admin-border);
+            border-radius: 8px;
+            background: var(--admin-bg);
+            color: var(--admin-text);
+            font: inherit;
+            font-size: 12px;
+        }
+
+        .brand-form textarea {
+            min-height: 92px;
+            resize: vertical;
+        }
+
+        .brand-form .full-width,
+        .brand-form-actions {
+            grid-column: 1 / -1;
+        }
+
+        .brand-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
+        }
+
+        .brand-form .btn-secondary {
+            height: 42px;
+            padding: 0 18px;
+            border: 1px solid var(--admin-border);
+            border-radius: 10px;
+            background: transparent;
+            color: var(--admin-muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 650px) {
+            .brand-form {
+                grid-template-columns: 1fr;
+            }
+
+            .brand-form .full-width,
+            .brand-form-actions {
+                grid-column: auto;
+            }
+        }
+
         /* Table */
         .table-card {
             border: 1px solid var(--admin-border);
@@ -787,9 +860,14 @@
                     <span>Dashboard</span>
                 </a>
 
+                <a href="./troubleshooting.html" class="sidebar-link">
+                    <span class="nav-icon">&#9637;</span>
+                    <span>Troubleshooting</span>
+                </a>
+
                 <a href="./articles.html" class="sidebar-link">
                     <span class="nav-icon">&#9633;</span>
-                    <span>Articles</span>
+                    <span>Blog / Articles</span>
                 </a>
 
                 <a href="./article-editor.html" class="sidebar-link">
@@ -941,12 +1019,46 @@
                     </div>
 
                     <div class="controls-right">
-                        <a href="./article-editor.html" class="btn-primary">
+                        <a href="#brand-editor" class="btn-primary" id="addBrandButton">
                             + Add Brand
                         </a>
                     </div>
 
                 </div>
+
+                <section class="table-card brand-editor" id="brand-editor" hidden>
+                    <form class="brand-form" id="brandForm">
+                        <div>
+                            <label for="brandNameInput">Brand Name</label>
+                            <input id="brandNameInput" required placeholder="Growatt">
+                        </div>
+
+                        <div>
+                            <label for="modelNameInput">Model Name</label>
+                            <input id="modelNameInput" placeholder="MIN 2500-6000TL-X">
+                        </div>
+
+                        <div>
+                            <label for="brandImageInput">Brand Image</label>
+                            <input id="brandImageInput" placeholder="assets/growatt-inverter.png">
+                        </div>
+
+                        <div>
+                            <label for="brandLogoInput">Brand Logo</label>
+                            <input id="brandLogoInput" placeholder="assets/growatt-inverter.png">
+                        </div>
+
+                        <div class="full-width">
+                            <label for="brandDescriptionInput">Description</label>
+                            <textarea id="brandDescriptionInput" placeholder="Describe this solar equipment brand."></textarea>
+                        </div>
+
+                        <div class="brand-form-actions">
+                            <button type="button" class="btn-secondary" id="cancelBrandButton">Cancel</button>
+                            <button type="submit" class="btn-primary" id="saveBrandButton">Save Brand / Model</button>
+                        </div>
+                    </form>
+                </section>
 
                 <!-- Brands Table -->
                 <div class="table-card">
@@ -994,7 +1106,7 @@
                         No brands match your current search criteria.
                     </p>
 
-                    <a href="./article-editor.html" class="btn-primary">
+                    <a href="#brand-editor" class="btn-primary">
                         Add Brand
                     </a>
 
@@ -1220,6 +1332,72 @@
                     "\" is a separate content type stored in Supabase under the\n" +
                     "brands and brand_models tables."
                 );
+            }
+
+            /* Brands and models use taxonomyApi directly. They never pass
+               through the normal article editor or articles table. */
+            var brandEditor = document.getElementById("brand-editor");
+            var brandForm = document.getElementById("brandForm");
+            var addBrandButton = document.getElementById("addBrandButton");
+            var cancelBrandButton = document.getElementById("cancelBrandButton");
+            var saveBrandButton = document.getElementById("saveBrandButton");
+
+            function openBrandEditor(event) {
+                if (event) event.preventDefault();
+                if (!brandEditor) return;
+
+                brandEditor.hidden = false;
+                brandEditor.scrollIntoView({ behavior: "smooth", block: "start" });
+                var nameInput = document.getElementById("brandNameInput");
+                if (nameInput) nameInput.focus();
+            }
+
+            function closeBrandEditor() {
+                if (brandEditor) brandEditor.hidden = true;
+                if (brandForm) brandForm.reset();
+            }
+
+            document.querySelectorAll('a[href="#brand-editor"]').forEach(function (button) {
+                button.addEventListener("click", openBrandEditor);
+            });
+            if (cancelBrandButton) cancelBrandButton.addEventListener("click", closeBrandEditor);
+
+            if (brandForm) {
+                brandForm.addEventListener("submit", async function (event) {
+                    event.preventDefault();
+
+                    var taxonomy = window.WHASOL && window.WHASOL.taxonomyApi;
+
+                    if (!taxonomy || typeof taxonomy.ensureBrand !== "function") {
+                        alert("The brand/model content system is not ready. Please refresh the page and try again.");
+                        return;
+                    }
+
+                    saveBrandButton.disabled = true;
+
+                    try {
+                        await taxonomy.waitForClient();
+
+                        var result = await taxonomy.ensureBrand({
+                            name: document.getElementById("brandNameInput").value.trim(),
+                            model: document.getElementById("modelNameInput").value.trim(),
+                            image: document.getElementById("brandImageInput").value.trim(),
+                            logo: document.getElementById("brandLogoInput").value.trim(),
+                            description: document.getElementById("brandDescriptionInput").value.trim(),
+                        });
+
+                        if (result && result.error) throw result.error;
+
+                        closeBrandEditor();
+                        await loadBrands();
+                        renderBrands();
+                    } catch (error) {
+                        console.error("WHA SOL: Failed to save brand/model.", error);
+                        alert("Could not save the brand/model.\n\n" + (error.message || String(error)));
+                    } finally {
+                        saveBrandButton.disabled = false;
+                    }
+                });
             }
 
             /* Search */

@@ -25,6 +25,8 @@ create table if not exists public.articles (
     brand           text        not null default '',
     model           text        not null default '',
     category        text        not null default 'General',
+    content_type    text        not null default 'blog'
+                                check (content_type in ('blog', 'troubleshooting')),
 
     meta_title      text        not null default '',
     meta_description text       not null default '',
@@ -51,6 +53,7 @@ create index if not exists articles_published_idx
     where status = 'published';
 create index if not exists articles_category_idx on public.articles (category);
 create index if not exists articles_brand_idx    on public.articles (brand);
+create index if not exists articles_content_type_idx on public.articles (content_type);
 create index if not exists articles_keywords_idx on public.articles using gin (keywords);
 
 -- ---------------------------------------------------------------------------

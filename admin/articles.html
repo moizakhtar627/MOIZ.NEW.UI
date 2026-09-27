@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
 
-    <title>Articles | WHA SOL Admin</title>
+    <title>Blog / Articles | WHA SOL Admin</title>
 
     <!-- Existing WHA SOL stylesheet -->
     <link rel="stylesheet" href="../css/styles.css">
@@ -998,9 +998,14 @@
                     <span>Dashboard</span>
                 </a>
 
+                <a href="./troubleshooting.html" class="sidebar-link">
+                    <span class="nav-icon">&#9637;</span>
+                    <span>Troubleshooting</span>
+                </a>
+
                 <a href="./articles.html" class="sidebar-link active">
                     <span class="nav-icon">&#9633;</span>
-                    <span>Articles</span>
+                    <span>Blog / Articles</span>
                 </a>
 
                 <a href="./article-editor.html" class="sidebar-link">
@@ -1086,7 +1091,7 @@
                 <div class="topbar-left">
                     <span class="topbar-title">WHA SOL</span>
                     <span class="topbar-separator">/</span>
-                    <span class="topbar-section">Articles</span>
+                    <span class="topbar-section">Blog / Articles</span>
                 </div>
 
                 <div class="topbar-admin">
@@ -1132,10 +1137,10 @@
             <section class="dashboard-content">
 
                 <div class="page-heading">
-                    <h1>Articles</h1>
+                    <h1 id="articlesPageTitle">Blog / Articles</h1>
 
-                    <p>
-                        Manage your WHA SOL troubleshooting articles, solar guides, and knowledge-base content.
+                    <p id="articlesPageDescription">
+                        Manage WHA SOL blog articles and published knowledge content.
                     </p>
                 </div>
 
@@ -1171,7 +1176,7 @@
 
                     </div>
 
-                    <a href="./article-editor.html" class="btn-primary">
+                    <a href="./article-editor.html" id="createArticleButton" class="btn-primary">
                         + Create Article
                     </a>
 
@@ -1326,9 +1331,27 @@
                 return (window.WHASOL && window.WHASOL.articlesApi) || null;
             }
 
-            /* Supabase is the source of truth. The seeded js/data.js entries
-               are appended so nothing that already exists disappears before it
-               has been imported into the database. */
+            var ACTIVE_CONTENT_TYPE = new URLSearchParams(window.location.search).get("contentType") === "troubleshooting"
+                ? "troubleshooting"
+                : "blog";
+
+            var contentTypeQuery = "?contentType=" + encodeURIComponent(ACTIVE_CONTENT_TYPE);
+            var pageTitle = document.getElementById("articlesPageTitle");
+            var pageDescription = document.getElementById("articlesPageDescription");
+            var createArticleButton = document.getElementById("createArticleButton");
+
+            if (ACTIVE_CONTENT_TYPE === "troubleshooting") {
+                if (pageTitle) pageTitle.textContent = "Troubleshooting";
+                if (pageDescription) pageDescription.textContent = "Manage WHA SOL troubleshooting guides and repair content.";
+                if (createArticleButton) {
+                    createArticleButton.textContent = "+ Create Troubleshooting Guide";
+                    createArticleButton.href = "./troubleshooting-editor.html";
+                }
+            } else if (createArticleButton) {
+                createArticleButton.href = "./article-editor.html" + contentTypeQuery;
+            }
+
+            /* Supabase is the source of truth for the selected content type. */
             var ARTICLES = [];
 
             function seedArticles() {
@@ -1430,23 +1453,10 @@
 
                 if (articlesApi) {
                     await articlesApi.waitForClient();
-                    rows = await articlesApi.fetchAdminArticles();
+                    rows = await articlesApi.fetchAdminArticles(ACTIVE_CONTENT_TYPE);
                 }
 
-                /* Drop any seeded article that already exists in the database so
-                   the same article is never listed twice. */
-                var dbSlugs = {};
-
-                rows.forEach(function (row) {
-                    if (row.slug) dbSlugs[String(row.slug).toLowerCase()] = true;
-                });
-
-                var seeds = seedArticles().filter(function (seed) {
-                    var slug = seed.slug || (seed.link || "").replace(/\.html$/i, "");
-                    return !(slug && dbSlugs[String(slug).toLowerCase()]);
-                });
-
-                ARTICLES = rows.concat(seeds);
+                ARTICLES = rows;
             }
 
             function renderArticles() {
@@ -1535,7 +1545,7 @@
                         '<td data-label="Status"><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
                         '<td data-label="Date">' + date + '</td>' +
                         '<td data-label="Actions"><div class="action-buttons">' +
-                        '<a href="./article-editor.html?id=' + id + '" class="action-btn action-edit" title="Edit">&#9998;</a>' +
+                        '<a href="./article-editor.html?id=' + id + '&contentType=' + encodeURIComponent(ACTIVE_CONTENT_TYPE) + '" class="action-btn action-edit" title="Edit">&#9998;</a>' +
                         viewAction +
                         deleteAction +
                         '</div></td>' +

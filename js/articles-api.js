@@ -29,6 +29,10 @@
 
   var NS = window.WHASOL;
   var TABLE = "articles";
+  var CONTENT_TYPES = {
+    blog: "blog",
+    troubleshooting: "troubleshooting",
+  };
 
   /* --------------------------------------------------------------------------
      Client access
@@ -162,6 +166,7 @@
       cardText: stripHtml(description) || stripHtml(content).slice(0, 220),
       brand: row.brand || "",
       model: row.model || "",
+      contentType: row.content_type || CONTENT_TYPES.blog,
       models: row.model ? [row.model] : [],
       /* Stored as a canonical slug; keep the label for display. */
       category: normalizeCategory(row.category),
@@ -198,6 +203,10 @@
       description: (article.description || "").trim(),
       brand: (article.brand || "").trim(),
       model: (article.model || "").trim(),
+      content_type:
+        article.contentType === CONTENT_TYPES.troubleshooting
+          ? CONTENT_TYPES.troubleshooting
+          : CONTENT_TYPES.blog,
       category: normalizeCategory(article.category),
       meta_title: (article.metaTitle || "").trim(),
       meta_description: (article.metaDescription || "").trim(),
@@ -275,7 +284,7 @@
 
   /* Published articles for the public blog. Always resolves — falls back to
      the seeded posts if Supabase is unavailable or errors. */
-  async function fetchPublishedArticles() {
+  async function fetchPublishedArticles(contentType) {
     var c = client();
 
     if (!c) {
@@ -289,11 +298,22 @@
     }
 
     try {
-      var res = await c
+      var query = c
         .from(TABLE)
         .select("*")
-        .eq("status", "published")
-        .order("published_at", { ascending: false, nullsFirst: false });
+        .eq("status", "published");
+
+      query = query.eq(
+        "content_type",
+        contentType === CONTENT_TYPES.troubleshooting
+          ? CONTENT_TYPES.troubleshooting
+          : CONTENT_TYPES.blog
+      );
+
+      var res = await query.order("published_at", {
+        ascending: false,
+        nullsFirst: false,
+      });
 
       if (res.error) throw res.error;
 
@@ -346,7 +366,7 @@
 
   /* Every article, drafts included. Authenticated + editor role required by
      RLS; returns [] when the caller lacks access. */
-  async function fetchAdminArticles() {
+  async function fetchAdminArticles(contentType) {
     var c = client();
 
     if (!c) {
@@ -357,10 +377,16 @@
 
     if (!c) return [];
 
-    var res = await c
+    var query = c
       .from(TABLE)
       .select("*")
       .order("created_at", { ascending: false });
+
+    if (contentType === CONTENT_TYPES.troubleshooting || contentType === CONTENT_TYPES.blog) {
+      query = query.eq("content_type", contentType);
+    }
+
+    var res = await query;
 
     if (res.error) {
       console.error("WHA SOL: Failed to load admin articles.", res.error);
@@ -647,6 +673,7 @@
     waitForClient: waitForClient,
     normalizeCategory: normalizeCategory,
     categoryLabel: categoryLabel,
+    CONTENT_TYPES: CONTENT_TYPES,
   };
 
   console.log("WHA SOL: Articles API initialized.");

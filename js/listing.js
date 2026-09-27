@@ -41,6 +41,7 @@
   var config = {
     troubleshooting: {
       type: "articles",
+      hydrate: "troubleshooting",
       data: WHASOL.troubleshootingArticles,
       searchFields: ["title", "description", "category", "brand", "models", "keywords"],
       stateEmpty: {
@@ -90,7 +91,7 @@
       type: "posts",
       /* Articles live in Supabase, so this list is re-rendered from the
          database once the client is ready. */
-      hydrate: true,
+      hydrate: "blog",
       data: WHASOL.blogPosts,
       searchFields: ["title", "metaTitle", "metaDescription", "description", "brand", "model", "category", "keywords"],
       stateEmpty: {
@@ -611,7 +612,7 @@
 
     if (!api || typeof api.fetchPublishedArticles !== "function") return;
 
-    api.fetchPublishedArticles().then(function (result) {
+    api.fetchPublishedArticles(mode === "troubleshooting" ? "troubleshooting" : "blog").then(function (result) {
       if (!result || !result.articles) return;
 
       cfg.data = result.articles;
