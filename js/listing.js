@@ -434,6 +434,13 @@
     if (grid) {
       grid.hidden = false;
       grid.innerHTML = html;
+      /* Hydrated Supabase cards are inserted after main.js has registered its
+         initial reveal observer. Ensure dynamically loaded cards do not stay
+         at opacity: 0 when that event was missed or IntersectionObserver is
+         unavailable. */
+      grid.querySelectorAll(".reveal").forEach(function (card) {
+        card.classList.add("in");
+      });
       window.dispatchEvent(new Event("whasol:rendered"));
     }
     if (stateEl) {
