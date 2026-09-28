@@ -92,7 +92,7 @@
             var id = encodeURIComponent(idFor(article));
             var edit = './troubleshooting-editor.html?id=' + id;
             var view = article.status === "published" && article.slug ? '../article.html?slug=' + encodeURIComponent(article.slug) : edit;
-            return '<tr><td><div class="title">' + escapeHtml(article.title || "Untitled") + '</div><div class="muted">' + escapeHtml(article.model || "") + '</div></td>' + '<td>' + escapeHtml(article.brand || "—") + '</td><td>' + escapeHtml(article.categoryLabel || article.category || "General") + '</td>' + '<td><span class="status ' + (article.status === "draft" ? "draft" : "") + '">' + escapeHtml(article.status || "draft") + '</span></td>' + '<td class="muted">' + escapeHtml(dateLabel(article.createdAt || article.date)) + '</td>' + '<td><div class="actions"><a class="action" href="' + edit + '" title="Edit">Edit</a><a class="action" href="' + view + '" target="_blank" rel="noopener" title="View">View</a></div></td></tr>';
+            return '<tr><td><div class="title">' + escapeHtml(article.title || "Untitled") + '</div><div class="muted">' + escapeHtml(article.model || "") + '</div></td>' + '<td>' + escapeHtml(article.brand || "—") + '</td><td>' + escapeHtml(article.categoryLabel || article.category || "General") + '</td>' + '<td><span class="status ' + (article.status === "draft" ? "draft" : "") + '">' + escapeHtml(article.status || "draft") + '</span></td>' + '<td class="muted">' + escapeHtml(dateLabel(article.createdAt || article.date)) + '</td>' + '<td><div class="actions"><a class="action" href="' + edit + '" title="Edit">Edit</a><a class="action" href="' + view + '" target="_blank" rel="noopener" title="View">View</a><button class="action" type="button" title="Delete" data-delete-id="' + escapeHtml(article.id || "") + '">Delete</button></div></td></tr>';
         }).join("");
     }
     async function load() {
@@ -105,6 +105,21 @@
             render();
         } catch (error) { console.error("WHA SOL: Failed to load troubleshooting guides.", error); body.innerHTML = '<tr><td colspan="6" class="empty">Troubleshooting data is temporarily unavailable.</td></tr>'; }
     }
+    body.addEventListener("click", async function (event) {
+        var button = event.target.closest("[data-delete-id]");
+        if (!button || !button.getAttribute("data-delete-id")) return;
+        if (!window.confirm("Delete this troubleshooting guide?")) return;
+        var api = window.WHASOL && window.WHASOL.articlesApi;
+        try {
+            var result = await api.deleteArticle(button.getAttribute("data-delete-id"));
+            if (result.error) throw result.error;
+            records = records.filter(function (article) { return String(article.id) !== button.getAttribute("data-delete-id"); });
+            render();
+        } catch (error) {
+            console.error("WHA SOL: Failed to delete troubleshooting guide.", error);
+            alert("Could not delete the troubleshooting guide.\n\n" + (error.message || String(error)));
+        }
+    });
     search.addEventListener("input", render); status.addEventListener("change", render); load();
 }());
 </script>

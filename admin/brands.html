@@ -1331,6 +1331,7 @@
                          (brand.articleLink
                              ? '<a href="' + escapeHtml("../" + String(brand.articleLink).replace(/^\.?\//, "")) + '" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>'
                              : '<a href="../brands-models.html" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>') +
+                         '<button type="button" class="action-btn action-delete" title="Delete" onclick="deleteBrand(\'' + escapeHtml(getRecordId(brand)) + '\')">×</button>' +
                          '</div></td>' +
                         '</tr>';
                 }).join("");
@@ -1354,6 +1355,30 @@
                 document.getElementById("brandDescriptionInput").value = brand.description || "";
                 document.getElementById("brandContentInput").value = brand.content || "";
             }
+
+            async function deleteBrand(recordId) {
+                var brand = BRANDS.filter(function (item) {
+                    return String(getRecordId(item)) === String(recordId);
+                })[0];
+                if (!brand || !brand.id) {
+                    alert("This fallback brand cannot be deleted from Supabase.");
+                    return;
+                }
+                if (!window.confirm("Delete brand " + (brand.name || "this brand") + " and its models?")) return;
+
+                var taxonomy = window.WHASOL && window.WHASOL.taxonomyApi;
+                try {
+                    var result = await taxonomy.deleteBrand(brand.id);
+                    if (result.error) throw result.error;
+                    await loadBrands();
+                    renderBrands();
+                } catch (error) {
+                    console.error("WHA SOL: Failed to delete brand.", error);
+                    alert("Could not delete the brand.\n\n" + (error.message || String(error)));
+                }
+            }
+
+            window.deleteBrand = deleteBrand;
 
             /* Brands and models use taxonomyApi directly. They never pass
                through the normal article editor or articles table. */

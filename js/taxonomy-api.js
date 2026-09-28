@@ -143,13 +143,29 @@
       category: row.category || "Inverter",
       explanation: row.explanation || "",
       image: row.image || "",
-      link: row.link || "",
+      link: safeCodeLink(row.link, row.code, row.brand),
       keywords: Array.isArray(row.keywords) ? row.keywords : [],
       sourceArticleId: row.source_article_id || "",
       sourceArticleTitle: row.source_article_title || "",
       createdAt: row.created_at || "",
       updatedAt: row.updated_at || "",
     };
+  }
+
+  function safeCodeLink(value, code, brand) {
+    var link = String(value || "").trim();
+
+    /* Old/imported records can contain an internal record key such as
+       `brand::slug`. It is not a public route and causes a 404 when rendered
+       as an href. Keep valid existing article links, otherwise use the real
+       Error Codes page as a safe destination. */
+    if (!link || link.indexOf("::") !== -1 || !/\.html(?:[?#].*)?$/i.test(link)) {
+      var params = "?code=" + encodeURIComponent(String(code || ""));
+      if (brand) params += "&brand=" + encodeURIComponent(String(brand));
+      return "error-codes.html" + params;
+    }
+
+    return link;
   }
 
   function toBrand(row, models, relatedArticles) {
@@ -659,6 +675,30 @@
     return { error: null };
   }
 
+  async function deleteErrorCode(id) {
+    var c = client();
+    if (!c || !id) return { ok: false, error: new Error("Error code id is required.") };
+
+    var res = await c.from(CODES_TABLE).delete().eq("id", String(id));
+    if (res.error) {
+      console.error("WHA SOL: Failed to delete error code.", res.error);
+      return { ok: false, error: res.error };
+    }
+    return { ok: true, error: null };
+  }
+
+  async function deleteBrand(id) {
+    var c = client();
+    if (!c || !id) return { ok: false, error: new Error("Brand id is required.") };
+
+    var res = await c.from(BRANDS_TABLE).delete().eq("id", String(id));
+    if (res.error) {
+      console.error("WHA SOL: Failed to delete brand.", res.error);
+      return { ok: false, error: res.error };
+    }
+    return { ok: true, error: null };
+  }
+
   /* --------------------------------------------------------------------------
      Slug helper
      Same rule as articles-api.js so both content types produce identical
@@ -687,7 +727,9 @@
 
     /* Editor writes */
     saveErrorCode: saveErrorCode,
+    deleteErrorCode: deleteErrorCode,
     ensureBrand: ensureBrand,
+    deleteBrand: deleteBrand,
     addModels: addModels,
     linkBrandArticle: linkBrandArticle,
 

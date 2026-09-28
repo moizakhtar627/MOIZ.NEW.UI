@@ -1403,6 +1403,14 @@
                 return code && (code.id || code.slug || code.code || code.link) || "";
             }
 
+            function publicErrorLink(code) {
+                var link = String(code && code.link || "").trim();
+                if (!link || link.indexOf("::") !== -1 || !/\.html(?:[?#].*)?$/i.test(link)) {
+                    return "../error-codes.html?code=" + encodeURIComponent(code && code.code || "");
+                }
+                return "../" + link.replace(/^\.?\//, "");
+            }
+
             function escapeHtml(value) {
                 return String(value)
                     .replace(/&/g, "&amp;")
@@ -1472,10 +1480,8 @@
                         '<td data-label="Status"><span class="status ' + statusClass + '">' + statusText + '</span></td>' +
                         '<td data-label="Actions"><div class="action-buttons">' +
                         '<button type="button" class="action-btn action-edit" title="Edit" onclick="editErrorCode(\'' + escapeHtml(getRecordId(code)) + '\')">&#9998;</button>' +
-                        (code.link
-                            ? '<a href="' + escapeHtml("../" + String(code.link).replace(/^\.?\//, "")) + '" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>'
-                            : '<a href="../error-codes.html" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>') +
-                        '<button type="button" class="action-btn action-delete" title="Delete" onclick="alert(\'Delete functionality coming soon.\')">×</button>' +
+                        '<a href="' + escapeHtml(publicErrorLink(code)) + '" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>' +
+                        '<button type="button" class="action-btn action-delete" title="Delete" onclick="deleteErrorCode(\'' + escapeHtml(getRecordId(code)) + '\')">×</button>' +
                         '</div></td>' +
                         '</tr>';
                 }).join("");
@@ -1501,6 +1507,30 @@
                 document.getElementById("errorImageInput").value = code.image || "";
                 document.getElementById("errorLinkInput").value = code.link || "";
             }
+
+            async function deleteErrorCode(recordId) {
+                var code = ERROR_CODES.filter(function (item) {
+                    return String(getRecordId(item)) === String(recordId);
+                })[0];
+                if (!code || !code.id) {
+                    alert("This fallback record cannot be deleted from Supabase.");
+                    return;
+                }
+                if (!window.confirm("Delete error code " + (code.code || "") + " for " + (code.brand || "this brand") + "?")) return;
+
+                var taxonomy = window.WHASOL && window.WHASOL.taxonomyApi;
+                try {
+                    var result = await taxonomy.deleteErrorCode(code.id);
+                    if (result.error) throw result.error;
+                    await loadErrorCodes();
+                    renderErrorCodes();
+                } catch (error) {
+                    console.error("WHA SOL: Failed to delete error code.", error);
+                    alert("Could not delete the error code.\n\n" + (error.message || String(error)));
+                }
+            }
+
+            window.deleteErrorCode = deleteErrorCode;
 
             /* Error codes use taxonomyApi directly and never pass through the
                normal article save path. The existing page remains the editor. */
