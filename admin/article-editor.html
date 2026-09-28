@@ -9,6 +9,7 @@
 <script src="../js/auth.js"></script>
 <script src="../js/articles-api.js"></script>
 <script src="../js/taxonomy-api.js"></script>
+<script src="../js/seo-planner.js"></script>
     <title>Article Editor | WHA SOL Admin</title>
 
     <link rel="stylesheet" href="../css/styles.css">
@@ -1439,6 +1440,14 @@
                     </section>
 
 
+                    <div data-seo-planner data-content-type="blog"
+                         data-seo-title="#title" data-seo-slug="#slug"
+                         data-seo-meta-title="#metaTitle" data-seo-meta-description="#metaDescription"
+                         data-seo-keyword="#primaryKeyword" data-seo-category="#category"
+                         data-seo-brand="#brand" data-seo-model="#model" data-seo-content="#articleContent"
+                         data-seo-image="#featuredImage" data-seo-featured-image="#featuredImage"
+                         data-seo-alt-text="#imageAltText" data-seo-status="#status"></div>
+
                     <!-- ARTICLE CONTENT -->
                     <section class="card">
 
@@ -1632,6 +1641,9 @@
                             <div class="help-text">
                                 This existing schema uses one image for the main article image and listing thumbnail. Add a URL or upload an image.
                             </div>
+
+                            <label for="imageAltText">Image Alt Text</label>
+                            <input type="text" id="imageAltText" name="imageAltText" placeholder="Describe what the image shows.">
 
                         </div>
 
