@@ -51,6 +51,69 @@
             z-index: 100;
         }
 
+        .workspace-sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 230px;
+            padding: 24px 14px;
+            background: #0b1016;
+            border-right: 1px solid var(--border);
+            z-index: 101;
+        }
+
+        .workspace-sidebar-label {
+            margin: 4px 12px 14px;
+            color: var(--muted);
+            font-size: 11px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+        }
+
+        .workspace-sidebar a {
+            display: block;
+            padding: 11px 12px;
+            border-radius: 8px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .workspace-sidebar a:hover,
+        .workspace-sidebar a.active {
+            background: #18212b;
+            color: var(--text);
+        }
+
+        .topbar,
+        .container {
+            margin-left: 230px;
+        }
+
+        @media (max-width: 760px) {
+            .workspace-sidebar {
+                position: static;
+                width: auto;
+                padding: 10px 16px;
+                display: flex;
+                gap: 6px;
+                overflow-x: auto;
+                border-right: 0;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .workspace-sidebar-label {
+                display: none;
+            }
+
+            .workspace-sidebar a {
+                white-space: nowrap;
+            }
+
+            .topbar,
+            .container {
+                margin-left: 0;
+            }
+        }
+
         .brand {
             display: flex;
             align-items: center;
@@ -403,6 +466,17 @@
 
 <body>
 
+<nav class="workspace-sidebar" aria-label="Workspace">
+    <div class="workspace-sidebar-label">Workspace</div>
+    <a href="./dashboard.html">Dashboard</a>
+    <a href="./troubleshooting.html">Troubleshooting</a>
+    <a href="./error-codes.html">Error Codes</a>
+    <a href="./brands.html">Brands &amp; Models</a>
+    <a href="./media.html">Media Library</a>
+    <a href="./blogs.html" class="active">Blogs</a>
+    <a href="./settings.html">Settings</a>
+</nav>
+
 <header class="topbar">
 
     <div class="brand">
@@ -424,7 +498,7 @@
             ← Dashboard
         </a>
 
-        <a href="./article-editor.html" class="btn btn-primary">
+        <a href="./article-editor.html?contentType=blog" class="btn btn-primary">
             + Create Blog
         </a>
 
@@ -974,7 +1048,7 @@
                         "./article-editor.html?id=" +
                         encodeURIComponent(
                             getRecordId(article)
-                        );
+                        ) + "&contentType=blog";
 
                 };
 

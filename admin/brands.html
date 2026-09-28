@@ -865,11 +865,6 @@
                     <span>Troubleshooting</span>
                 </a>
 
-                <a href="./articles.html" class="sidebar-link">
-                    <span class="nav-icon">&#9633;</span>
-                    <span>Blog / Articles</span>
-                </a>
-
                 <a href="./error-codes.html" class="sidebar-link">
                     <span class="nav-icon">&#9673;</span>
                     <span>Error Codes</span>
@@ -885,14 +880,14 @@
                     <span>Media Library</span>
                 </a>
 
-                <a href="./settings.html" class="sidebar-link">
-                    <span class="nav-icon">&#9881;</span>
-                    <span>Settings</span>
-                </a>
-
                 <a href="./blogs.html" class="sidebar-link">
                     <span class="nav-icon">&#9637;</span>
                     <span>Blogs</span>
+                </a>
+
+                <a href="./settings.html" class="sidebar-link">
+                    <span class="nav-icon">&#9881;</span>
+                    <span>Settings</span>
                 </a>
 
             </nav>
@@ -1034,7 +1029,7 @@
                         </div>
 
                         <div>
-                            <label for="brandImageInput">Brand Image</label>
+                            <label for="brandImageInput">Brand Thumbnail / Image</label>
                             <input id="brandImageInput" placeholder="assets/growatt-inverter.png">
                         </div>
 
@@ -1220,11 +1215,29 @@
                 }
             }
 
-            function getBrands() {
-                var data = window.WHASOL || {};
-                return Array.isArray(data.brands) ? data.brands : [];
+           async function getBrands() {
+    var api = window.WHASOL && window.WHASOL.taxonomyApi;
+
+    if (api && typeof api.fetchBrands === "function") {
+        var result = await api.fetchBrands();
+
+        if (result && !result.error) {
+            if (Array.isArray(result)) {
+                return result;
             }
 
+            if (Array.isArray(result.brands)) {
+                return result.brands;
+            }
+
+            if (result.data && Array.isArray(result.data)) {
+                return result.data;
+            }
+        }
+    }
+
+    return [];
+}
             function getRecordId(brand) {
                 if (window.WHASOL && window.WHASOL.adminContent) {
                     return window.WHASOL.adminContent.recordId(brand);
@@ -1317,7 +1330,7 @@
                          '<button type="button" class="action-btn action-edit" title="Edit" onclick="editBrand(\'' + escapeHtml(getRecordId(brand)) + '\')">&#9998;</button>' +
                          (brand.articleLink
                              ? '<a href="' + escapeHtml("../" + String(brand.articleLink).replace(/^\.?\//, "")) + '" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>'
-                             : '<button type="button" class="action-btn" title="View" onclick="alert(\'This brand does not have a public URL.\')">↗</button>') +
+                             : '<a href="../brands-models.html" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>') +
                          '</div></td>' +
                         '</tr>';
                 }).join("");

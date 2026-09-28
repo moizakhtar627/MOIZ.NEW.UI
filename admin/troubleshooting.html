@@ -3,12 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WHA SOL — Troubleshooting</title>
+    <meta name="robots" content="noindex, nofollow">
+    <title>Troubleshooting | WHA SOL Admin</title>
+    <style>
+        :root { --bg:#080f16; --panel:#101c27; --border:#243746; --text:#edf4f7; --muted:#91a4b1; --accent:#8ed8ff; }
+        * { box-sizing:border-box; }
+        body { margin:0; background:var(--bg); color:var(--text); font:14px Arial, sans-serif; }
+        a { color:inherit; text-decoration:none; }
+        .layout { min-height:100vh; display:flex; }
+        .sidebar { width:232px; flex:0 0 232px; padding:24px 14px; background:#0b151f; border-right:1px solid var(--border); }
+        .brand { padding:0 12px 24px; color:var(--accent); font-weight:700; letter-spacing:.12em; }
+        .brand small { color:var(--muted); font-size:10px; }
+        .label { margin:8px 12px 12px; color:var(--muted); font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+        .nav a { display:block; padding:12px; margin:3px 0; border-radius:8px; color:var(--muted); }
+        .nav a:hover, .nav a.active { color:var(--text); background:#182b39; }
+        .main { flex:1; min-width:0; }
+        .topbar { height:72px; display:flex; align-items:center; justify-content:space-between; padding:0 34px; border-bottom:1px solid var(--border); }
+        .topbar strong { font-size:16px; } .topbar span { color:var(--muted); margin-left:10px; }
+        .content { max-width:1400px; padding:42px 42px 70px; }
+        .heading { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:28px; }
+        h1 { margin:0 0 8px; font-size:32px; } .heading p { margin:0; color:var(--muted); }
+        .button { display:inline-block; border:1px solid var(--border); border-radius:8px; padding:12px 16px; background:#172733; color:var(--text); cursor:pointer; }
+        .button.primary { background:var(--accent); color:#07131b; border-color:var(--accent); font-weight:700; }
+        .controls { display:flex; gap:12px; padding:15px; margin-bottom:18px; background:var(--panel); border:1px solid var(--border); border-radius:10px; }
+        input, select { width:100%; height:42px; padding:0 12px; color:var(--text); background:#0b151f; border:1px solid var(--border); border-radius:7px; outline:none; }
+        .search { flex:1; } .filter { width:180px; }
+        .table { overflow:hidden; background:var(--panel); border:1px solid var(--border); border-radius:10px; }
+        table { width:100%; border-collapse:collapse; } th, td { padding:15px 16px; text-align:left; border-bottom:1px solid var(--border); } th { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.06em; } tr:last-child td { border-bottom:0; }
+        .title { font-weight:700; } .muted { color:var(--muted); } .status { color:#83e1aa; } .status.draft { color:#ffd37c; }
+        .actions { display:flex; gap:7px; } .action { padding:7px 10px; border:1px solid var(--border); border-radius:6px; background:transparent; color:var(--text); cursor:pointer; } .action:hover { border-color:var(--accent); color:var(--accent); }
+        .empty { padding:40px; text-align:center; color:var(--muted); }
+        @media (max-width:800px) { .layout { display:block; } .sidebar { width:auto; padding:10px; border-right:0; border-bottom:1px solid var(--border); } .brand { display:none; } .label { display:none; } .nav { display:flex; gap:4px; overflow:auto; } .nav a { white-space:nowrap; } .topbar { padding:0 18px; } .content { padding:28px 18px; } .heading { display:block; } .heading .button { margin-top:18px; } .controls { display:block; } .filter { width:100%; margin-top:10px; } .table { overflow:auto; } table { min-width:760px; } }
+    </style>
 </head>
 <body>
-    <p>Opening Troubleshooting…</p>
-    <script>
-        window.location.replace("./articles.html?contentType=troubleshooting");
-    </script>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">WHA SOL<br><small>ADMIN PANEL</small></div>
+        <div class="label">Workspace</div>
+        <nav class="nav">
+            <a href="./dashboard.html">Dashboard</a>
+            <a href="./troubleshooting.html" class="active">Troubleshooting</a>
+            <a href="./error-codes.html">Error Codes</a>
+            <a href="./brands.html">Brands &amp; Models</a>
+            <a href="./media.html">Media Library</a>
+            <a href="./blogs.html">Blogs</a>
+            <a href="./settings.html">Settings</a>
+        </nav>
+    </aside>
+    <main class="main">
+        <header class="topbar"><div><strong>WHA SOL</strong><span>/ Troubleshooting</span></div><span>Admin</span></header>
+        <section class="content">
+            <div class="heading">
+                <div><h1>Troubleshooting</h1><p>Manage troubleshooting guides stored in Supabase.</p></div>
+                <a class="button primary" href="./troubleshooting-editor.html">+ Create Troubleshooting</a>
+            </div>
+            <div class="controls">
+                <div class="search"><input id="searchInput" type="search" placeholder="Search title, brand, model, category..."></div>
+                <div class="filter"><select id="statusFilter"><option value="all">All Status</option><option value="published">Published</option><option value="draft">Draft</option></select></div>
+            </div>
+            <div class="table"><table><thead><tr><th>Title</th><th>Brand</th><th>Category</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody id="recordsBody"><tr><td colspan="6" class="empty">Loading troubleshooting guides...</td></tr></tbody></table></div>
+        </section>
+    </main>
+</div>
+<script src="../js/data.js"></script>
+<script src="../js/supabase.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/articles-api.js"></script>
+<script>
+(function () {
+    "use strict";
+    var records = [];
+    var body = document.getElementById("recordsBody");
+    var search = document.getElementById("searchInput");
+    var status = document.getElementById("statusFilter");
+    function escapeHtml(value) { return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;"); }
+    function dateLabel(value) { if (!value) return "—"; var date = new Date(value); return isNaN(date.getTime()) ? "—" : date.toLocaleDateString(); }
+    function idFor(article) { return article.id || article.slug || ""; }
+    function render() {
+        var query = (search.value || "").trim().toLowerCase();
+        var wantedStatus = status.value;
+        var rows = records.filter(function (article) {
+            var text = [article.title, article.brand, article.model, article.category, (article.keywords || []).join(" ")].join(" ").toLowerCase();
+            return (!query || text.indexOf(query) !== -1) && (wantedStatus === "all" || article.status === wantedStatus);
+        });
+        if (!rows.length) { body.innerHTML = '<tr><td colspan="6" class="empty">No troubleshooting guides found.</td></tr>'; return; }
+        body.innerHTML = rows.map(function (article) {
+            var id = encodeURIComponent(idFor(article));
+            var edit = './troubleshooting-editor.html?id=' + id;
+            var view = article.status === "published" && article.slug ? '../article.html?slug=' + encodeURIComponent(article.slug) : edit;
+            return '<tr><td><div class="title">' + escapeHtml(article.title || "Untitled") + '</div><div class="muted">' + escapeHtml(article.model || "") + '</div></td>' + '<td>' + escapeHtml(article.brand || "—") + '</td><td>' + escapeHtml(article.categoryLabel || article.category || "General") + '</td>' + '<td><span class="status ' + (article.status === "draft" ? "draft" : "") + '">' + escapeHtml(article.status || "draft") + '</span></td>' + '<td class="muted">' + escapeHtml(dateLabel(article.createdAt || article.date)) + '</td>' + '<td><div class="actions"><a class="action" href="' + edit + '" title="Edit">Edit</a><a class="action" href="' + view + '" target="_blank" rel="noopener" title="View">View</a></div></td></tr>';
+        }).join("");
+    }
+    async function load() {
+        try {
+            if (window.WHASOL && window.WHASOL.auth && window.WHASOL.auth.requireAuth) await window.WHASOL.auth.requireAuth("./login.html");
+            var api = window.WHASOL && window.WHASOL.articlesApi;
+            if (!api) throw new Error("Article API is not ready.");
+            await api.waitForClient();
+            records = await api.fetchAdminArticles("troubleshooting");
+            render();
+        } catch (error) { console.error("WHA SOL: Failed to load troubleshooting guides.", error); body.innerHTML = '<tr><td colspan="6" class="empty">Troubleshooting data is temporarily unavailable.</td></tr>'; }
+    }
+    search.addEventListener("input", render); status.addEventListener("change", render); load();
+}());
+</script>
 </body>
 </html>

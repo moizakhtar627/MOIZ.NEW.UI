@@ -1017,11 +1017,6 @@
                     <span>Troubleshooting</span>
                 </a>
 
-                <a href="./articles.html" class="sidebar-link">
-                    <span class="nav-icon">&#9633;</span>
-                    <span>Blog / Articles</span>
-                </a>
-
                 <a href="./error-codes.html" class="sidebar-link active">
                     <span class="nav-icon">&#9673;</span>
                     <span>Error Codes</span>
@@ -1037,14 +1032,14 @@
                     <span>Media Library</span>
                 </a>
 
-                <a href="./settings.html" class="sidebar-link">
-                    <span class="nav-icon">&#9881;</span>
-                    <span>Settings</span>
-                </a>
-
                 <a href="./blogs.html" class="sidebar-link">
                     <span class="nav-icon">&#9637;</span>
                     <span>Blogs</span>
+                </a>
+
+                <a href="./settings.html" class="sidebar-link">
+                    <span class="nav-icon">&#9881;</span>
+                    <span>Settings</span>
                 </a>
 
             </nav>
@@ -1223,7 +1218,7 @@
                         </div>
 
                         <div>
-                            <label for="errorImageInput">Image path</label>
+                            <label for="errorImageInput">Thumbnail / Image path</label>
                             <input id="errorImageInput" name="image" placeholder="assets/inverter-error.jpg">
                         </div>
 
@@ -1479,7 +1474,7 @@
                         '<button type="button" class="action-btn action-edit" title="Edit" onclick="editErrorCode(\'' + escapeHtml(getRecordId(code)) + '\')">&#9998;</button>' +
                         (code.link
                             ? '<a href="' + escapeHtml("../" + String(code.link).replace(/^\.?\//, "")) + '" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>'
-                            : '<button type="button" class="action-btn" title="View" onclick="alert(\'This error code does not have a public URL.\')">↗</button>') +
+                            : '<a href="../error-codes.html" target="_blank" rel="noopener" class="action-btn" title="View">↗</a>') +
                         '<button type="button" class="action-btn action-delete" title="Delete" onclick="alert(\'Delete functionality coming soon.\')">×</button>' +
                         '</div></td>' +
                         '</tr>';
@@ -1487,15 +1482,24 @@
             }
 
             function editErrorCode(recordId) {
-                /* Error codes live in the public.error_codes table, not in the
-                   articles table. There is no dedicated editor page yet. */
-                alert(
-                    "Editing error codes is not yet available in this interface.\n\n" +
-                    "The record \"" +
-                    (recordId || "this code") +
-                    "\" is a separate content type stored in Supabase under the\n" +
-                    "error_codes table."
-                );
+                var code = ERROR_CODES.filter(function (item) {
+                    return String(getRecordId(item)) === String(recordId);
+                })[0];
+
+                if (!code) {
+                    alert("This error code could not be loaded from Supabase.");
+                    return;
+                }
+
+                openErrorCodeEditor();
+                document.getElementById("errorCodeInput").value = code.code || "";
+                document.getElementById("errorTitleInput").value = code.title || "";
+                document.getElementById("errorBrandInput").value = code.brand || "";
+                document.getElementById("errorModelInput").value = code.model || "";
+                document.getElementById("errorCategoryInput").value = code.category || "Inverter Problems";
+                document.getElementById("errorExplanationInput").value = code.explanation || "";
+                document.getElementById("errorImageInput").value = code.image || "";
+                document.getElementById("errorLinkInput").value = code.link || "";
             }
 
             /* Error codes use taxonomyApi directly and never pass through the

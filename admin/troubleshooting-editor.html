@@ -8,7 +8,9 @@
 <body>
     <p>Opening Troubleshooting Editor…</p>
     <script>
-        window.location.replace("./article-editor.html?contentType=troubleshooting");
+        var params = new URLSearchParams(window.location.search);
+        params.set("contentType", "troubleshooting");
+        window.location.replace("./article-editor.html?" + params.toString());
     </script>
 </body>
 </html>
