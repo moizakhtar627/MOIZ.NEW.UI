@@ -462,7 +462,6 @@
 
     var row = {
       code: code,
-      error_code: code,
       title: String(input.title || ("Error " + code)).trim(),
       brand: brand,
       model: String(input.model || "").trim(),
