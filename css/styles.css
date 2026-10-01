@@ -3845,6 +3845,50 @@ main {
   color: var(--green-deep);
 }
 
+.post-content a {
+  color: var(--green-mid);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.post-content a:hover {
+  opacity: 0.8;
+}
+
+.post-content h1,
+.post-content h4 {
+  color: var(--green-deep);
+  line-height: 1.25;
+}
+
+.post-content blockquote {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-left: 4px solid var(--green-mid);
+  background: var(--green-soft);
+  color: var(--text-soft);
+}
+
+.post-content code,
+.post-content pre {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.post-content code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--green-soft);
+}
+
+.post-content pre {
+  overflow-x: auto;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--green-deep);
+  color: #fff;
+}
+
 .post-callout {
   margin: 32px 0;
   padding: 22px 24px;

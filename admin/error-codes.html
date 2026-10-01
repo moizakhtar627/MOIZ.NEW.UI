@@ -17,6 +17,8 @@
     <script src="../js/auth.js"></script>
     <script src="../js/taxonomy-api.js"></script>
     <script src="../js/seo-planner.js"></script>
+    <script src="../js/content-sanitizer.js"></script>
+    <script src="../js/rich-text-editor.js"></script>
 
     <style>
         /* =========================================================
@@ -1215,7 +1217,7 @@
 
                         <div class="full-width">
                             <label for="errorExplanationInput">Description / Fix</label>
-                            <textarea id="errorExplanationInput" name="explanation" required placeholder="Explain the fault and the recommended solution."></textarea>
+                            <textarea id="errorExplanationInput" name="explanation" data-rich-text-editor placeholder="Explain the fault and the recommended solution."></textarea>
                         </div>
 
                         <div>
@@ -1510,7 +1512,7 @@
                 document.getElementById("errorBrandInput").value = code.brand || "";
                 document.getElementById("errorModelInput").value = code.model || "";
                 document.getElementById("errorCategoryInput").value = code.category || "Inverter Problems";
-                document.getElementById("errorExplanationInput").value = code.explanation || "";
+                if (window.WHASOL.RichTextEditor) window.WHASOL.RichTextEditor.setValue("#errorExplanationInput", code.explanation || "");
                 document.getElementById("errorImageInput").value = code.image || "";
                 document.getElementById("errorLinkInput").value = code.link || "";
             }

@@ -17,6 +17,8 @@
     <script src="../js/auth.js"></script>
     <script src="../js/taxonomy-api.js"></script>
     <script src="../js/seo-planner.js"></script>
+    <script src="../js/content-sanitizer.js"></script>
+    <script src="../js/rich-text-editor.js"></script>
 
     <style>
         /* =========================================================
@@ -1046,7 +1048,7 @@
 
                         <div class="full-width">
                             <label for="brandContentInput">Full Content / Information</label>
-                            <textarea id="brandContentInput" rows="10" placeholder="Write the complete brand or model information, installation notes, common problems, safe checks, and maintenance guidance."></textarea>
+                            <textarea id="brandContentInput" rows="10" data-rich-text-editor placeholder="Write the complete brand or model information, installation notes, common problems, safe checks, and maintenance guidance."></textarea>
                             <div class="help-text">Use Description for a short summary and this field for the complete information.</div>
                         </div>
 
@@ -1360,7 +1362,7 @@
                 document.getElementById("brandImageInput").value = brand.image || "";
                 document.getElementById("brandLogoInput").value = brand.logo || "";
                 document.getElementById("brandDescriptionInput").value = brand.description || "";
-                document.getElementById("brandContentInput").value = brand.content || "";
+                if (window.WHASOL.RichTextEditor) window.WHASOL.RichTextEditor.setValue("#brandContentInput", brand.content || "");
             }
 
             async function deleteBrand(recordId) {

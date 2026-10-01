@@ -10,6 +10,8 @@
 <script src="../js/articles-api.js"></script>
 <script src="../js/taxonomy-api.js"></script>
 <script src="../js/seo-planner.js"></script>
+<script src="../js/content-sanitizer.js"></script>
+<script src="../js/rich-text-editor.js"></script>
     <title>Article Editor | WHA SOL Admin</title>
 
     <link rel="stylesheet" href="../css/styles.css">
@@ -1457,7 +1459,7 @@
 
                         <div class="editor-wrapper">
 
-                            <div class="toolbar">
+                            <div class="toolbar" data-rich-text-legacy>
 
                                 <button type="button" class="tool-btn" onclick="format('bold')" title="Bold">
                                     <strong>B</strong>
@@ -1538,6 +1540,7 @@
                                 id="articleContent"
                                 contenteditable="true"
                                 spellcheck="true"
+                                data-rich-text-editor
                             ></div>
 
                         </div>
@@ -2123,7 +2126,9 @@
         document.getElementById("primaryKeyword").value = (record.keywords || []).join(", ");
         slugInput.value = record.slug || "";
         featuredImageInput.value = record.image || record.featuredImage || "";
-        contentEditor.innerHTML = record.content || record.description || "";
+        contentEditor.innerHTML = window.WHASOL && window.WHASOL.sanitizeHtml
+            ? window.WHASOL.sanitizeHtml(record.content || record.description || "")
+            : (record.content || record.description || "");
 
         /* Sync status badge */
         statusBadge.textContent = statusInput.value === "published" ? "Published" : "Draft";
