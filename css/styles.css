@@ -3779,6 +3779,14 @@ main {
   max-width: 820px;
 }
 
+/* Use the available article width on desktop. The mobile layout keeps its
+   existing readable width and responsive rules below. */
+@media (min-width: 901px) {
+  #articleBody .post-content {
+    max-width: none;
+  }
+}
+
 .post-content figure {
   margin: 34px 0;
   border-radius: var(--radius-lg);

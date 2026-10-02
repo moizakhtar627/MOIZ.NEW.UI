@@ -387,7 +387,7 @@
 
   /* ---------- EmailJS init ---------- */
   if (window.emailjs) {
-    emailjs.init("cT7Qw3j_nlgcMit9t");
+    emailjs.init("C3cmMAaPzBWNsPGNH");
   }
 
   /* ---------- Contact form ---------- */
@@ -433,7 +433,7 @@
 
       if (window.emailjs) {
         emailjs
-          .send("service_dwio7tw", "template_pimfqxo", {
+          .send("service_nhesx4q", "template_z1uctpp", {
             name: (contactForm.name && contactForm.name.value) || "",
             email: (contactForm.email && contactForm.email.value) || "",
             equipment: (contactForm.equipment && contactForm.equipment.value) || "",
