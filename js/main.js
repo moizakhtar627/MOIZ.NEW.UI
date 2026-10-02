@@ -433,7 +433,7 @@
 
       if (window.emailjs) {
         emailjs
-          .send("service_nhesx4q", "template_z1uctpp", {
+          .send("service_wl5ocne", "template_z1uctpp", {
             name: (contactForm.name && contactForm.name.value) || "",
             email: (contactForm.email && contactForm.email.value) || "",
             equipment: (contactForm.equipment && contactForm.equipment.value) || "",
