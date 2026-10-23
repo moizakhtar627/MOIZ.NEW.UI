@@ -146,6 +146,72 @@
      Row mapping
   --------------------------------------------------------------------------- */
 
+  /* Convert keywords between the website's array and Supabase's text column. */
+  function normalizeKeywords(value) {
+    if (Array.isArray(value)) {
+      return value
+        .map(function (item) {
+          return String(item || "").trim();
+        })
+        .filter(Boolean);
+    }
+
+    if (typeof value !== "string" || !value.trim()) {
+      return [];
+    }
+
+    var text = value.trim();
+
+    try {
+      var parsed = JSON.parse(text);
+
+      if (Array.isArray(parsed)) {
+        return normalizeKeywords(parsed);
+      }
+    } catch (error) {
+      /* Handle plain-text keywords below. */
+    }
+
+    return text
+      .split(/[,;]/)
+      .map(function (item) {
+        return item.trim();
+      })
+      .filter(Boolean);
+  }
+
+  /* Database row -> site shape */
+  function toArticle(row) {
+    if (!row) return null;
+
+    var description = row.description || "";
+    var content = row.content || "";
+
+    return {
+      id: row.id,
+      slug: row.slug || "",
+      title: row.title || "",
+      metaTitle: row.meta_title || "",
+      metaDescription: row.meta_description || "",
+      description: description,
+      content: content,
+      cardText: stripHtml(description) || stripHtml(content).slice(0, 220),
+      brand: row.brand || "",
+      model: row.model || "",
+      contentType: row.content_type || CONTENT_TYPES.blog,
+      models: row.model ? [row.model] : [],
+      category: normalizeCategory(row.category),
+      categoryLabel: categoryLabel(row.category),
+      keywords: normalizeKeywords(row.keywords),
+      image: row.image || "",
+      featuredImage: row.image || "",
+      link: "article.html?slug=" + encodeURIComponent(row.slug || ""),
+      status: row.status || "draft",
+      date: row.published_at || row.created_at || "",
+      createdAt: row.created_at || "",
+      updatedAt: row.updated_at || "",
+    };
+  }
   /* Database row -> site shape */
   function toArticle(row) {
     if (!row) return null;
@@ -217,7 +283,7 @@
       meta_description: (article.metaDescription || "").trim(),
       content: article.content || "",
       image: (article.image || article.featuredImage || "").trim(),
-      keywords: Array.isArray(article.keywords) ? article.keywords : [],
+      keywords: JSON.stringify(normalizeKeywords(article.keywords)),
       status: article.status === "published" ? "published" : "draft",
     };
 
